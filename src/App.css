@@ -1,0 +1,54 @@
+.app-layout {
+  min-height: 100vh;
+  padding-left: 90px;
+  /* Space for fixed sidebar on PC */
+}
+
+.main-content {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Base Responsive */
+@media (max-width: 768px) {
+  .app-layout {
+    padding-left: 0;
+    padding-bottom: 70px;
+    /* Space for bottom nav */
+  }
+}
+
+/* Specific layout for the split Order View (Desktop) */
+.order-layout {
+  display: grid;
+  grid-template-columns: 1fr 480px;
+  height: 100vh;
+}
+
+@media (max-width: 1024px) {
+  .order-layout {
+    grid-template-columns: 1fr 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .order-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+}
+
+.unauthorized {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 24px;
+  font-weight: 600;
+  color: #FF4D4F;
+  background: var(--bg-surface);
+  border-radius: 20px;
+  margin: 20px;
+}

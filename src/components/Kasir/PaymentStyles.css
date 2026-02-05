@@ -1,0 +1,123 @@
+.qris-display-container {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid var(--border-light);
+    margin-bottom: 20px;
+}
+
+.qris-logo {
+    height: 25px;
+    margin-bottom: 10px;
+}
+
+.qris-header p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+}
+
+.qr-code-wrapper {
+    background: #fdfdfd;
+    padding: 15px;
+    border-radius: 8px;
+    display: inline-block;
+    border: 1px dashed #ddd;
+    margin-bottom: 15px;
+}
+
+.qr-code-wrapper img {
+    width: 180px;
+    height: 180px;
+    display: block;
+}
+
+.merchant-name {
+    font-weight: 800;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.status-polling {
+    font-size: 11px;
+    color: var(--primary-brand);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 0.4;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.4;
+    }
+}
+
+.payment-methods-label {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: block;
+    color: var(--text-primary);
+}
+
+.payment-methods-grid {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    width: 100%;
+}
+
+.payment-method-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 10px;
+    border: 1px solid var(--border-light);
+    background: var(--bg-surface);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    outline: none;
+    box-shadow: var(--shadow-sm);
+    min-width: 0;
+    /* Prevent flex items from overflowing */
+}
+
+.payment-method-btn:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary-brand);
+    box-shadow: 0 10px 20px -10px rgba(16, 185, 129, 0.4);
+}
+
+.payment-method-btn.active {
+    background: linear-gradient(135deg, var(--primary-brand), #059669);
+    border-color: var(--primary-brand);
+    color: white;
+    box-shadow: 0 12px 25px -5px rgba(16, 185, 129, 0.5);
+    transform: scale(1.02);
+}
+
+.payment-method-btn .method-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.payment-method-btn.active .method-icon {
+    filter: brightness(0) invert(1);
+}

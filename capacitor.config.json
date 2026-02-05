@@ -1,0 +1,5 @@
+{
+  "appId": "com.restaurant.pos",
+  "appName": "restaurant-pos-dashboard",
+  "webDir": "dist"
+}

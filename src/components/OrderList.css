@@ -1,0 +1,121 @@
+.order-list-container {
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: var(--bg-app);
+}
+
+.order-tabs {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.tab-btn {
+    padding: 8px 16px;
+    background: transparent;
+    border-radius: 20px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background-color: #FFF4E5;
+    color: var(--primary-orange);
+}
+
+.orders-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding-right: var(--spacing-sm);
+    /* Avoid scrollbar covering content */
+}
+
+/* Custom scrollbar */
+.orders-scroll-area::-webkit-scrollbar {
+    width: 6px;
+}
+
+.orders-scroll-area::-webkit-scrollbar-thumb {
+    background-color: #ddd;
+    border-radius: 4px;
+}
+
+.order-card {
+    background-color: var(--bg-surface);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    cursor: pointer;
+    border: 1px solid transparent;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+}
+
+.order-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.order-card.selected {
+    border: 1px solid var(--primary-orange);
+    background-color: #FFFDF9;
+    /* Very subtle warm tint */
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-sm);
+    font-size: 0.95rem;
+}
+
+.order-id {
+    color: var(--text-primary);
+}
+
+.order-time {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.card-details {
+    margin-bottom: var(--spacing-md);
+}
+
+.detail-row {
+    margin-bottom: 2px;
+}
+
+.detail-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: flex-end;
+    /* Changed to flex-end to align with image right side, but image has price left and badge right? NO, price is left of badge */
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.status-badge {
+    background-color: var(--status-green);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
