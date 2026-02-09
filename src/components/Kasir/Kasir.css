@@ -97,40 +97,89 @@
 
 .pos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+}
+
+@media (max-width: 480px) {
+    .pos-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 8px;
+    }
 }
 
 .pos-card {
     background: var(--bg-surface);
-    border-radius: 12px;
-    padding: 16px;
+    border-radius: 16px;
+    overflow: hidden;
     text-align: center;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     cursor: pointer;
-    transition: all 0.2s;
-    border: 2px solid var(--border-light);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.pos-card-img {
+    width: 100%;
+    height: 100px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.pos-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.pos-card:hover .pos-card-img img {
+    transform: scale(1.1);
+}
+
+.pos-card-no-img {
+    font-size: 32px;
+    opacity: 0.5;
+}
+
+.pos-card-info {
+    padding: 12px;
+    flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 120px;
 }
 
 .pos-card.active-card {
     border-color: var(--primary-brand);
-    background-color: var(--bg-primary-light);
+    background-color: rgba(16, 185, 129, 0.05);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
 }
 
 .pos-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
 }
 
 .pos-card-info h4 {
-    font-size: 15px;
-    margin-bottom: 8px;
+    font-size: 14px;
+    margin-bottom: 4px;
     font-weight: 600;
     color: var(--text-primary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 38px;
+    line-height: 1.4;
 }
 
 .pos-card-price {

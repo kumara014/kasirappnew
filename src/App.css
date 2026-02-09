@@ -11,12 +11,249 @@
   flex-direction: column;
 }
 
+.mobile-top-bar {
+  display: none;
+}
+
 /* Base Responsive */
 @media (max-width: 768px) {
   .app-layout {
     padding-left: 0;
-    padding-bottom: 70px;
-    /* Space for bottom nav */
+    padding-top: 60px;
+    /* Space for top bar */
+  }
+
+  .mobile-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    height: 60px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border-bottom: 1px solid var(--border-light);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 98;
+  }
+
+  .mobile-top-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mobile-view-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+  }
+
+  .mobile-top-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .notification-bell-wrapper {
+    position: relative;
+    cursor: pointer;
+    color: var(--text-primary);
+    padding: 5px;
+  }
+
+  .notification-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: #FF4D4F;
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bg-surface);
+  }
+
+  .notification-popover {
+    position: fixed;
+    top: 70px;
+    right: 15px;
+    width: 300px;
+    max-height: 400px;
+    background: var(--bg-surface);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-light);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .popover-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .popover-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .popover-header button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+
+  .notification-list {
+    overflow-y: auto;
+    padding: 10px;
+  }
+
+  .notif-item {
+    padding: 12px;
+    border-radius: 10px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    transition: background 0.2s;
+  }
+
+  .notif-item:hover {
+    background: var(--bg-app);
+  }
+
+  .notif-icon.danger {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 77, 79, 0.1);
+    color: #FF4D4F;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .notif-content {
+    flex: 1;
+  }
+
+  .notif-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin: 0 0 2px 0;
+    color: var(--text-primary);
+  }
+
+  .notif-desc {
+    font-size: 12px;
+    margin: 0;
+    color: var(--text-secondary);
+  }
+
+  .empty-notif {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+  }
+
+  .empty-notif p {
+    margin-top: 10px;
+    font-size: 14px;
+    font-style: italic;
+  }
+
+  @keyframes bell-anim {
+
+    0%,
+    100% {
+      transform: rotate(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70% {
+      transform: rotate(10deg);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+      transform: rotate(-10deg);
+    }
+  }
+
+  .mobile-user-btn {
+    color: var(--text-primary);
+    padding: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-settings {
+    top: 65px;
+    right: 15px;
+    left: auto;
+    width: 220px;
+  }
+
+  .settings-list {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .settings-list .popover-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-primary);
+    transition: background 0.2s;
+  }
+
+  .settings-list .popover-divider {
+    height: 1px;
+    background: var(--border-light);
+    margin: 4px 8px;
+  }
+
+  .settings-list .logout-item {
+    color: #FF4D4F;
+  }
+
+  .settings-list .popover-item:active {
+    background: var(--bg-app);
+  }
+
+  .bell-anim {
+    animation: bell-anim 2s infinite ease-in-out;
   }
 }
 

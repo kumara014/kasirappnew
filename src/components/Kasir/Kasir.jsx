@@ -3,8 +3,9 @@ import './Kasir.css';
 import './PaymentStyles.css';
 import { Search, Coffee, Utensils, User, Edit, Plus, Minus, X, Printer, CheckCircle, Wallet, Trash2 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
-import API_BASE_URL, { apiFetch } from '../../config';
+import { apiFetch } from '../../config';
 import { useNotification } from '../../context/NotificationContext';
+import SafeImage from '../Common/SafeImage';
 
 const Kasir = () => {
     const { notify } = useNotification();
@@ -107,7 +108,9 @@ const Kasir = () => {
         // Prepare Data for API
         const transactionData = {
             total_harga: total,
+            diskon: discount,
             uang_bayar: currentPaidAmount,
+            metode_pembayaran: selectedPayment,
             items: cart.map(i => ({
                 id_barang: i.id_barang,
                 qty: i.qty,
@@ -183,6 +186,13 @@ const Kasir = () => {
                                         className={`pos-card ${animatingId === product.id_barang ? 'pulse-animation' : ''} ${qty > 0 ? 'active-card' : ''} ${Number(product.stok) <= 0 ? 'out-of-stock' : ''}`}
                                         onClick={() => (qty === 0 && Number(product.stok) > 0) && addToCart(product)}
                                     >
+                                        <div className="pos-card-img">
+                                            <SafeImage
+                                                src={product.gambar}
+                                                alt={product.nama_barang}
+                                                fallback={<div className="pos-card-no-img">🍽️</div>}
+                                            />
+                                        </div>
                                         {Number(product.stok) <= 0 && <div className="stock-badge-soldout">Stok Habis</div>}
                                         <div className="pos-card-info">
                                             <h4>{product.nama_barang}</h4>

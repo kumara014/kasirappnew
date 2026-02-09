@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './History.css';
 import { Search, Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useData } from '../../context/DataContext';
-import API_BASE_URL from '../../config';
+import { apiFetch } from '../../config';
 
 const History = () => {
     const { ordersData, loadingOrders, refreshOrders } = useData();
@@ -77,7 +77,7 @@ const History = () => {
 
     const handleViewReceipt = (orderId) => {
         const cleanId = String(orderId).replace('#', '');
-        fetch(`${API_BASE_URL}/transaksi/${cleanId}`)
+        apiFetch(`/transaksi/${cleanId}`)
             .then(res => res.json())
             .then(data => {
                 if (data && data.details) {
@@ -200,53 +200,85 @@ const History = () => {
             {/* Receipt Modal */}
             {isModalOpen && selectedOrder && (
                 <div className="modal-overlay">
-                    <div className="modal-content" id="printable-receipt" style={{ width: 380, fontFamily: 'Courier New' }}>
+                    <div className="modal-content" id="printable-receipt" style={{ width: 380, fontFamily: 'Courier New', padding: '20px' }}>
                         <div style={{ textAlign: 'center', marginBottom: 15 }}>
-                            <h4 style={{ margin: 0 }}>Smart Kasir</h4>
+                            <h4 style={{ margin: 0, fontSize: 18 }}>Smart Kasir</h4>
                             <p style={{ fontSize: 12, color: '#666' }}>Receipt Copy</p>
                         </div>
                         <div style={{ borderBottom: '1px dashed #ccc', marginBottom: 10 }}></div>
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 5 }}>
-                            <span>ID: {selectedOrder.id_transaksi}</span>
-                            <span>{new Date(selectedOrder.tanggal_transaksi || selectedOrder.date).toLocaleDateString('id-ID')}</span>
+                            <span>No: #{selectedOrder.id_transaksi}</span>
+                            <span>{new Date(selectedOrder.tanggal_transaksi || selectedOrder.date).toLocaleString('id-ID')}</span>
                         </div>
 
                         <div style={{ borderBottom: '1px dashed #ccc', marginBottom: 10 }}></div>
 
                         <div style={{ marginBottom: 15 }}>
                             {selectedOrder.details && selectedOrder.details.map((item, idx) => (
-                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4 }}>
-                                    <span>{item.barang?.nama_barang} x{item.qty}</span>
-                                    <span>{(item.harga * item.qty).toLocaleString()}</span>
+                                <div key={idx} style={{ marginBottom: 10 }}>
+                                    <div style={{ fontSize: 14, fontWeight: 'bold' }}>{item.barang?.nama_barang}</div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#333', marginTop: 2 }}>
+                                        <span>{item.qty} x {Number(item.harga).toLocaleString()}</span>
+                                        <span>Rp {(item.qty * item.harga).toLocaleString()}</span>
+                                    </div>
                                 </div>
                             ))}
                         </div>
 
                         <div style={{ borderTop: '1px dashed #ccc', paddingTop: 10 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: 14 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4 }}>
+                                <span>Subtotal</span>
+                                <span>Rp {(Number(selectedOrder.total_harga) + Number(selectedOrder.diskon || 0)).toLocaleString()}</span>
+                            </div>
+
+                            {selectedOrder.diskon > 0 && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4, color: '#FF4D4F' }}>
+                                    <span>Diskon</span>
+                                    <span>- Rp {Number(selectedOrder.diskon).toLocaleString()}</span>
+                                </div>
+                            )}
+
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: 16, marginTop: 5, borderTop: '1px solid #eee', paddingTop: 5 }}>
                                 <span>TOTAL</span>
                                 <span>Rp {Number(selectedOrder.total_harga).toLocaleString()}</span>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginTop: 5 }}>
+                        </div>
+
+                        <div style={{ borderTop: '1px dashed #ccc', marginTop: 10, paddingTop: 10, fontSize: 13 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                                 <span>Metode Bayar</span>
-                                <span>-</span>
+                                <span style={{ textTransform: 'uppercase' }}>{selectedOrder.metode_pembayaran || 'Cash'}</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                                <span>Bayar</span>
+                                <span>Rp {Number(selectedOrder.uang_bayar).toLocaleString()}</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
+                                <span>Kembalian</span>
+                                <span>Rp {Number(selectedOrder.kembalian).toLocaleString()}</span>
                             </div>
                         </div>
 
-                        <button
-                            style={{ marginTop: 20, width: '100%', padding: 10, border: 'none', background: '#333', color: '#fff', borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 10 }}
-                            onClick={() => window.print()}
-                        >
-                            <span style={{ fontSize: 18 }}>🖨️</span> Cetak Struk
-                        </button>
+                        <div style={{ borderTop: '1px dashed #ccc', marginTop: 15, paddingTop: 10, textAlign: 'center', fontSize: 12, color: '#888' }}>
+                            <p style={{ margin: 0 }}>Terima kasih atas kunjungan Anda</p>
+                            <p style={{ margin: '4px 0 0 0' }}>Barang yang sudah dibeli tidak dapat ditukar</p>
+                        </div>
 
-                        <button
-                            style={{ width: '100%', padding: 10, border: 'none', background: '#eee', borderRadius: 6, cursor: 'pointer' }}
-                            onClick={() => setIsModalOpen(false)}
-                        >
-                            Close
-                        </button>
+                        <div className="modal-actions" style={{ marginTop: 20, display: 'flex', gap: 10, border: 'none', background: 'none', padding: 0 }}>
+                            <button
+                                style={{ flex: 1, padding: 12, border: 'none', background: '#333', color: '#fff', borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                                onClick={() => window.print()}
+                            >
+                                🖨️ Cetak
+                            </button>
+                            <button
+                                style={{ flex: 1, padding: 12, border: '1px solid #ddd', background: '#fff', color: '#333', borderRadius: 10, cursor: 'pointer' }}
+                                onClick={() => setIsModalOpen(false)}
+                            >
+                                Tutup
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

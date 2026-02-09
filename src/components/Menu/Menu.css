@@ -78,10 +78,10 @@
 .menu-list-container {
     background: var(--bg-surface);
     border-radius: 12px;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     overflow-x: auto;
     padding: 10px;
-    border: 1px solid var(--border-light);
+    border: none;
 }
 
 .menu-table {
@@ -102,6 +102,10 @@
     border-bottom: 1px solid var(--border-light);
     color: var(--text-primary);
     font-size: 14px;
+}
+
+.menu-table tr {
+    transition: background 0.2s;
 }
 
 .menu-table tr:hover {
@@ -175,10 +179,15 @@
     border: 1px solid var(--border-light);
     cursor: pointer;
     font-weight: 500;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .manage-btn:hover {
     background: #e0e0e0;
+}
+
+.manage-btn:active {
+    transform: scale(0.95);
 }
 
 .delete-badge-btn {
@@ -218,7 +227,90 @@
     border-color: var(--primary-brand);
 }
 
-/* Modal Overlay & Content handled globally in index.css */
+/* TABLE IMG STYLES */
+.table-img-container {
+    width: 45px;
+    height: 45px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-light);
+}
+
+.table-img-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.no-img-placeholder {
+    font-size: 20px;
+    opacity: 0.6;
+}
+
+/* IMAGE UPLOAD UI */
+.image-upload-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.image-preview-container {
+    position: relative;
+    width: 100%;
+    height: 150px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px dashed var(--border-light);
+    background: #f9f9f9;
+}
+
+.image-preview-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.remove-img-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(234, 84, 85, 0.8);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.file-upload-label {
+    display: inline-block;
+    padding: 10px;
+    background: #e3f2fd;
+    color: #2196f3;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.file-upload-label:hover {
+    background: #bbdefb;
+}
+
+.modal-content {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
 
 @media (max-width: 768px) {
     .menu-container {
@@ -247,12 +339,6 @@
         padding: 12px;
     }
 
-    .menu-table th:nth-child(3),
-    .menu-table td:nth-child(3) {
-        display: none;
-        /* Hide category on mobile to save space */
-    }
-
     .menu-table th,
     .menu-table td {
         padding: 12px 8px;
@@ -263,4 +349,51 @@
         width: 90vw;
         padding: 20px;
     }
+
+    .modal-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 25px;
+    }
+
+    .modal-actions button {
+        flex: 1;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid var(--border-light);
+        background: var(--bg-app);
+        color: var(--text-primary);
+    }
+
+    .modal-actions button.save-btn {
+        background: var(--primary-brand);
+        color: white;
+        border: none;
+    }
+}
+
+/* Global Modal Actions fallback if not media query */
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    justify-content: flex-end;
+}
+
+.modal-actions button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border-light);
+    background: var(--bg-app);
+    color: var(--text-primary);
+}
+
+.modal-actions button.save-btn {
+    background: var(--primary-brand);
+    color: white;
+    border: none;
 }

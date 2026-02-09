@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import API_BASE_URL, { apiFetch } from '../config';
+import { apiFetch } from '../config';
 
 const DataContext = createContext();
 

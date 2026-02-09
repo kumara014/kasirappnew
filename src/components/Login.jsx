@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User, Lock, LogIn } from 'lucide-react';
-import API_BASE_URL, { apiFetch } from '../config';
+import { apiFetch } from '../config';
 import { useNotification } from '../context/NotificationContext';
 import './Login.css';
 

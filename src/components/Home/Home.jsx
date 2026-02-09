@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css';
 import { DollarSign, ShoppingBag, Users, ShoppingCart, Search, ArrowUp, ArrowDown } from 'lucide-react';
-import API_BASE_URL from '../../config';
+import { apiFetch } from '../../config';
 
 const Home = () => {
     const [summary, setSummary] = useState({
@@ -14,7 +14,7 @@ const Home = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch(`${API_BASE_URL}/dashboard`)
+        apiFetch('/dashboard')
             .then(res => res.json())
             .then(data => {
                 setSummary(data);

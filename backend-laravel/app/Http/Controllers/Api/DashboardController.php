@@ -32,10 +32,10 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // Get Out of Stock Items
+        // Get Out of Stock / Low Stock Items
         $out_of_stock = DB::table('barang')
             ->select('nama_barang as name', 'stok as stock')
-            ->where('stok', '<=', 0)
+            ->where('stok', '<', 5)
             ->limit(5)
             ->get();
 

@@ -23,6 +23,9 @@ class CreateTransaksiTable extends Migration
             $table->decimal('kembalian', 15, 2);
             $table->timestamp('tanggal_transaksi')->useCurrent();
             $table->timestamps();
+
+            // Foreign keys
+            $table->foreign('id_user')->references('id_user')->on('users')->onDelete('cascade');
         });
     }
 

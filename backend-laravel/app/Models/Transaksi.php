@@ -14,21 +14,22 @@ class Transaksi extends Model
 
     protected $fillable = [
         'id_user',
-        'table_no', // Keeping for legacy support if needed, but ERD doesn't show it. Migration has it removed? Check migration.
-        // Migration Transaksi: id_user, total_item, total_harga, uang_bayar, kembalian, tanggal_transaksi.
-        // I removed table_no from migration.
         'total_item',
         'total_harga',
+        'diskon',
         'uang_bayar',
         'kembalian',
+        'metode_pembayaran',
         'tanggal_transaksi'
     ];
 
-    public function details() {
+    public function details()
+    {
         return $this->hasMany(TransaksiDetail::class, 'id_transaksi');
     }
 
-    public function user() {
+    public function user()
+    {
         return $this->belongsTo(User::class, 'id_user');
     }
 }

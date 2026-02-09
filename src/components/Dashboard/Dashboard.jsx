@@ -1,10 +1,9 @@
 import React from 'react';
 import './Dashboard.css';
-import { DollarSign, ShoppingBag, Users, ShoppingCart, Search, ArrowUp, ArrowDown, Grid } from 'lucide-react';
+import { DollarSign, ShoppingBag, Users, ShoppingCart, Search, ArrowUp, ArrowDown, Grid, Menu, Clock, PieChart } from 'lucide-react';
 import { useData } from '../../context/DataContext';
-import API_BASE_URL from '../../config';
 
-const Dashboard = () => {
+const Dashboard = ({ onNavigate }) => {
     const { dashboardData, loadingDashboard, refreshDashboard } = useData();
 
     // Still fetch in background on mount to keep data fresh, 
@@ -48,10 +47,38 @@ const Dashboard = () => {
         <div className="dashboard-container">
             <header className="dashboard-header">
                 <div>
-                    <h1>Dashboard</h1>
                     <p className="date-text">{todayDate}</p>
                 </div>
             </header>
+
+            <section className="shortcuts-section">
+                <div className="shortcut-grid">
+                    <button className="shortcut-card" onClick={() => onNavigate('menu')}>
+                        <div className="shortcut-icon" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                            <Menu size={24} color="white" />
+                        </div>
+                        <span>Kelola Barang</span>
+                    </button>
+                    <button className="shortcut-card" onClick={() => onNavigate('order')}>
+                        <div className="shortcut-icon" style={{ background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)' }}>
+                            <ShoppingCart size={24} color="white" />
+                        </div>
+                        <span>Kasir</span>
+                    </button>
+                    <button className="shortcut-card" onClick={() => onNavigate('history')}>
+                        <div className="shortcut-icon" style={{ background: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)' }}>
+                            <Clock size={24} color="white" />
+                        </div>
+                        <span>Riwayat</span>
+                    </button>
+                    <button className="shortcut-card" onClick={() => onNavigate('report')}>
+                        <div className="shortcut-icon" style={{ background: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)' }}>
+                            <PieChart size={24} color="white" />
+                        </div>
+                        <span>Laporan</span>
+                    </button>
+                </div>
+            </section>
 
             <div className="stats-grid">
                 <StatCard
@@ -130,25 +157,6 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            <div className="bottom-section">
-                <div className="out-of-stock-section">
-                    <div className="section-header">
-                        <h3>Notifikasi Stok</h3>
-                    </div>
-                    <div className="dish-list">
-                        {summary.out_of_stock.length === 0 ? <p className="empty-msg">Full stock!</p> :
-                            summary.out_of_stock.map((item, idx) => (
-                                <DishItem
-                                    key={idx}
-                                    name={item.name}
-                                    stock={item.stock}
-                                    isStockAlert
-                                />
-                            ))
-                        }
-                    </div>
-                </div>
-            </div>
         </div>
     );
 };

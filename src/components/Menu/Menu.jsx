@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import './Menu.css';
 import { Search } from 'lucide-react';
 import { useData } from '../../context/DataContext';
-import API_BASE_URL, { apiFetch } from '../../config';
+import { apiFetch } from '../../config';
 import { useNotification } from '../../context/NotificationContext';
+import SafeImage from '../Common/SafeImage';
 
 const CATEGORIES = ['All', 'Makanan', 'Minuman'];
 
@@ -21,7 +22,9 @@ const Menu = () => {
     const [searchQuery, setSearchQuery] = useState('');
 
     // New Item State (reused for Edit)
-    const [newItem, setNewItem] = useState({ id_barang: null, nama_barang: '', harga: '', stok: 0 });
+    const [newItem, setNewItem] = useState({ id_barang: null, nama_barang: '', harga: '', stok: 0, category: 'Makanan', gambar: null });
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
 
     React.useEffect(() => {
         refreshProducts(true); // silent refresh
@@ -32,24 +35,37 @@ const Menu = () => {
 
     const handleSaveItem = () => {
         const isEdit = !!newItem.id_barang;
-        const method = isEdit ? 'PUT' : 'POST';
         const url = isEdit
-            ? `${API_BASE_URL}/barang/${newItem.id_barang}`
-            : `${API_BASE_URL}/barang`;
+            ? `/barang/${newItem.id_barang}`
+            : `/barang`;
+
+        const formData = new FormData();
+        formData.append('nama_barang', newItem.nama_barang);
+        formData.append('harga', newItem.harga);
+        formData.append('stok', newItem.stok);
+        formData.append('category', newItem.category);
+        if (selectedFile) {
+            formData.append('gambar', selectedFile);
+        }
+        if (isEdit) {
+            formData.append('_method', 'PUT');
+        }
 
         apiFetch(url, {
-            method: method,
-            body: JSON.stringify(newItem)
+            method: 'POST',
+            body: formData
         })
             .then(res => res.json())
             .then(data => {
                 if (data.id_barang || data.nama_barang) {
                     notify(isEdit ? 'Barang berhasil diupdate!' : 'Barang berhasil ditambahkan!', 'success');
                     setIsModalOpen(false);
-                    setNewItem({ id_barang: null, nama_barang: '', harga: '', stok: 0 });
+                    setNewItem({ id_barang: null, nama_barang: '', harga: '', stok: 0, category: 'Makanan', gambar: null });
+                    setSelectedFile(null);
+                    setImagePreview(null);
                     refreshProducts(true);
                 } else {
-                    notify(`Gagal menyimpan produk`, 'error');
+                    notify(`Gagal menyimpan produk: ${data.message || 'Error'}`, 'error');
                 }
             })
             .catch(err => notify('Gagal menyimpan: ' + err, 'error'));
@@ -62,7 +78,7 @@ const Menu = () => {
             // Delete each product individually using DELETE method
             await Promise.all(
                 selectedIds.map(id =>
-                    apiFetch(`${API_BASE_URL}/barang/${id}`, { method: 'DELETE' })
+                    apiFetch(`/barang/${id}`, { method: 'DELETE' })
                 )
             );
 
@@ -85,12 +101,28 @@ const Menu = () => {
 
     const openEditModal = (item) => {
         setNewItem({ ...item });
+        setSelectedFile(null);
+        setImagePreview(item.gambar); // Just pass the path
         setIsModalOpen(true);
     };
 
     const openAddModal = () => {
-        setNewItem({ id_barang: null, nama_barang: '', harga: '', stok: 0 });
+        setNewItem({ id_barang: null, nama_barang: '', harga: '', stok: 0, category: 'Makanan', gambar: null });
+        setSelectedFile(null);
+        setImagePreview(null);
         setIsModalOpen(true);
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     // Updated Filtering Logic
@@ -102,7 +134,6 @@ const Menu = () => {
     return (
         <div className="menu-container">
             <div className="menu-header">
-                <h2>List Barang</h2>
 
                 <div className="header-actions-row">
                     {isSelectionMode ? (
@@ -143,6 +174,7 @@ const Menu = () => {
                     <thead>
                         <tr>
                             {isSelectionMode && <th>Select</th>}
+                            <th>Gambar</th>
                             <th>Nama Barang</th>
                             <th>Harga</th>
                             <th>Stok</th>
@@ -172,6 +204,15 @@ const Menu = () => {
                                                 </div>
                                             </td>
                                         )}
+                                        <td>
+                                            <div className="table-img-container">
+                                                <SafeImage
+                                                    src={item.gambar}
+                                                    alt={item.nama_barang}
+                                                    fallback={<div className="no-img-placeholder">🍽️</div>}
+                                                />
+                                            </div>
+                                        </td>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                                                 <span style={{ fontWeight: 600 }}>{item.nama_barang}</span>
@@ -224,6 +265,26 @@ const Menu = () => {
                                     type="number" placeholder="0"
                                     value={newItem.stok} onChange={e => setNewItem({ ...newItem, stok: e.target.value })}
                                 />
+                            </div>
+                        </div>
+
+                        <div className="input-group">
+                            <label>Gambar Produk</label>
+                            <div className="image-upload-wrapper">
+                                {imagePreview && (
+                                    <div className="image-preview-container">
+                                        <SafeImage
+                                            src={imagePreview}
+                                            alt="Preview"
+                                            fallback={<div className="no-img-placeholder">🍽️</div>}
+                                        />
+                                        <button className="remove-img-btn" onClick={() => { setSelectedFile(null); setImagePreview(null); }}>×</button>
+                                    </div>
+                                )}
+                                <label className="file-upload-label">
+                                    {imagePreview ? 'Ganti Gambar' : 'Pilih Gambar'}
+                                    <input type="file" accept="image/*" onChange={handleFileChange} hidden />
+                                </label>
                             </div>
                         </div>
 

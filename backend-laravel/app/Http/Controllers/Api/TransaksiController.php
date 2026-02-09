@@ -24,7 +24,7 @@ class TransaksiController extends Controller
             return DB::transaction(function () use ($request) {
                 // Determine `total_item` from items array
                 $totalItem = 0;
-                foreach($request->items as $i) {
+                foreach ($request->items as $i) {
                     $totalItem += $i['qty'];
                 }
 
@@ -34,8 +34,10 @@ class TransaksiController extends Controller
                     'id_user' => $request->user() ? $request->user()->id_user : null,
                     'total_item' => $totalItem,
                     'total_harga' => $request->total_harga,
+                    'diskon' => $request->diskon ?? 0,
                     'uang_bayar' => $request->uang_bayar,
                     'kembalian' => $kembalian,
+                    'metode_pembayaran' => $request->metode_pembayaran ?? 'Cash',
                     // tanggal_transaksi defaults to CURRENT_TIMESTAMP
                 ]);
 
@@ -48,7 +50,7 @@ class TransaksiController extends Controller
                     }
 
                     $barang->decrement('stok', $item['qty']);
-                    
+
                     // Log mutation
                     StokMutasi::create([
                         'id_barang' => $barang->id_barang,

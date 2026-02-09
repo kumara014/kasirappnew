@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Report.css';
 import { FileText, ShoppingBag, ArrowUp, DollarSign, TrendingUp, Printer } from 'lucide-react';
-import API_BASE_URL, { apiFetch } from '../../config';
+import { apiFetch } from '../../config';
 
 const Report = () => {
     const [summaryData, setSummaryData] = useState({ revenue: 0, orders: 0, trend: [] });
