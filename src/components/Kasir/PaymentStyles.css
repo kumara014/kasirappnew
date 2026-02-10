@@ -101,14 +101,14 @@
 .payment-method-btn:hover {
     transform: translateY(-3px);
     border-color: var(--primary-brand);
-    box-shadow: 0 10px 20px -10px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 10px 20px -10px rgba(115, 170, 190, 0.4);
 }
 
 .payment-method-btn.active {
-    background: linear-gradient(135deg, var(--primary-brand), #059669);
+    background: linear-gradient(135deg, var(--primary-brand), #5E8B9B);
     border-color: var(--primary-brand);
     color: white;
-    box-shadow: 0 12px 25px -5px rgba(16, 185, 129, 0.5);
+    box-shadow: 0 12px 25px -5px rgba(115, 170, 190, 0.5);
     transform: scale(1.02);
 }
 

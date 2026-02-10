@@ -20,7 +20,6 @@ class BarangController extends Controller
             'nama_barang' => 'required',
             'harga' => 'required|numeric',
             'stok' => 'required|integer',
-            'kode_barang' => 'nullable|string|unique:barang,kode_barang',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ]);
 
@@ -52,8 +51,6 @@ class BarangController extends Controller
             'nama_barang' => 'sometimes|required|string|max:255',
             'harga' => 'sometimes|required|numeric|min:0',
             'stok' => 'sometimes|required|integer|min:0',
-            'kode_barang' => 'sometimes|nullable|string|unique:barang,kode_barang,' . $id . ',id_barang',
-            'category' => 'sometimes|nullable|string',
             'gambar' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ]);
 
@@ -93,6 +90,14 @@ class BarangController extends Controller
     {
         Barang::findOrFail($id)->delete();
         return response()->json(['message' => 'Barang deleted']);
+    }
+
+    public function mutations()
+    {
+        $mutations = StokMutasi::with('barang')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        return response()->json($mutations);
     }
 
     public function showImage($path)

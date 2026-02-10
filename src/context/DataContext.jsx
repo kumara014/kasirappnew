@@ -65,7 +65,7 @@ export const DataProvider = ({ children }) => {
         refreshOrders();
     }, [refreshDashboard, refreshProducts, refreshOrders]);
 
-    const value = {
+    const value = React.useMemo(() => ({
         dashboardData,
         productsData,
         ordersData,
@@ -77,7 +77,11 @@ export const DataProvider = ({ children }) => {
         refreshOrders,
         setProductsData,
         setOrdersData
-    };
+    }), [
+        dashboardData, productsData, ordersData,
+        loadingDashboard, loadingProducts, loadingOrders,
+        refreshDashboard, refreshProducts, refreshOrders
+    ]);
 
     return (
         <DataContext.Provider value={value}>

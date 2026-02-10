@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import Sidebar from './components/Sidebar';
-import Menu from './components/Menu/Menu';
-import Dashboard from './components/Dashboard/Dashboard';
-import History from './components/History/History';
-import Report from './components/Report/Report';
-import Kasir from './components/Kasir/Kasir';
+const Menu = lazy(() => import('./components/Menu/Menu'));
+const Dashboard = lazy(() => import('./components/Dashboard/Dashboard'));
+const History = lazy(() => import('./components/History/History'));
+const Report = lazy(() => import('./components/Report/Report'));
+const StokMutasi = lazy(() => import('./components/StokMutasi/StokMutasi'));
+const Settings = lazy(() => import('./components/Settings/Settings'));
+import { apiFetch } from './config';
+const Kasir = lazy(() => import('./components/Kasir/Kasir'));
 import Login from './components/Login';
+const CustomerService = lazy(() => import('./components/CustomerService/CustomerService'));
 import './App.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DataProvider, useData } from './context/DataContext';
@@ -19,7 +23,15 @@ const AppContent = ({
   showNotifications, setShowNotifications,
   showSettings, setShowSettings
 }) => {
-  const { dashboardData } = useData();
+  const {
+    dashboardData,
+    refreshDashboard,
+    refreshProducts,
+    refreshOrders,
+    refreshStockOnly
+  } = useData();
+
+
   const outOfStockItems = dashboardData?.out_of_stock || [];
 
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -60,10 +72,13 @@ const AppContent = ({
               </div>
               <h1 className="mobile-view-title">
                 {currentView === 'dashboard' && 'Beranda'}
-                {currentView === 'menu' && 'Kelola Barang'}
+                {currentView === 'menu' && (user?.role === 'kasir' ? null : 'Kelola Barang')}
                 {currentView === 'order' && 'Kasir'}
-                {currentView === 'history' && 'Riwayat'}
+                {currentView === 'history' && (user?.role === 'kasir' ? null : 'Riwayat')}
                 {currentView === 'report' && 'Laporan Penjualan'}
+                {currentView === 'stok-mutasi' && 'Stok Mutasi'}
+                {currentView === 'settings' && 'Pengaturan'}
+                {currentView === 'cs' && 'Customer Service'}
               </h1>
             </div>
 
@@ -73,9 +88,6 @@ const AppContent = ({
                 {outOfStockItems.length > 0 && (
                   <span className="notification-badge">{outOfStockItems.length}</span>
                 )}
-              </div>
-              <div className="mobile-user-btn" onClick={() => setShowSettings(!showSettings)}>
-                <User size={22} />
               </div>
             </div>
 
@@ -113,41 +125,6 @@ const AppContent = ({
                 </motion.div>
               )}
             </AnimatePresence>
-
-            {/* Mobile Settings Popover */}
-            <AnimatePresence>
-              {showSettings && (
-                <motion.div
-                  className="notification-popover mobile-settings"
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                >
-                  <div className="popover-header">
-                    <h3>Lainnya</h3>
-                    <button onClick={() => setShowSettings(false)}><X size={18} /></button>
-                  </div>
-                  <div className="settings-list">
-                    <div className="popover-item" onClick={toggleFullscreen}>
-                      {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
-                      <span>{isFullscreen ? 'Normal' : 'Layar Penuh'}</span>
-                    </div>
-                    <div className="popover-item" onClick={toggleTheme}>
-                      {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-                      <span>{theme === 'light' ? 'Mode Gelap' : 'Mode Terang'}</span>
-                    </div>
-                    <div className="popover-divider" />
-                    <div className="popover-item logout-item" onClick={() => {
-                      setShowSettings(false);
-                      setShowLogoutConfirm(true);
-                    }}>
-                      <LogOut size={18} />
-                      <span>Log Out</span>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
 
           <Sidebar
@@ -171,11 +148,21 @@ const AppContent = ({
                 transition={{ duration: 0.2, ease: "easeOut" }}
                 style={{ height: '100%' }}
               >
-                {currentView === 'dashboard' && <Dashboard onNavigate={setCurrentView} />}
-                {currentView === 'menu' && <Menu />}
-                {currentView === 'order' && <Kasir />}
-                {currentView === 'history' && <History />}
-                {currentView === 'report' && <Report />}
+                <Suspense fallback={
+                  <div className="view-loading-skeleton" style={{ padding: '40px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div style={{ height: '40px', width: '200px', background: 'var(--bg-app)', borderRadius: '8px', animation: 'pulse 1.5s infinite' }}></div>
+                    <div style={{ flex: 1, background: 'var(--bg-app)', borderRadius: '12px', animation: 'pulse 1.5s infinite' }}></div>
+                  </div>
+                }>
+                  {currentView === 'dashboard' && <Dashboard onNavigate={setCurrentView} />}
+                  {currentView === 'menu' && <Menu />}
+                  {currentView === 'order' && <Kasir />}
+                  {currentView === 'history' && <History />}
+                  {currentView === 'report' && <Report />}
+                  {currentView === 'stok-mutasi' && <StokMutasi />}
+                  {currentView === 'settings' && <Settings user={user} theme={theme} onToggleTheme={toggleTheme} />}
+                  {currentView === 'cs' && <CustomerService />}
+                </Suspense>
               </motion.div>
             </AnimatePresence>
           </main>
@@ -248,13 +235,40 @@ const App = () => {
       if (metaThemeColor) metaThemeColor.setAttribute('content', '#0A0A0A');
     } else {
       document.body.classList.remove('dark-theme');
-      if (metaThemeColor) metaThemeColor.setAttribute('content', '#10B981');
+      if (metaThemeColor) metaThemeColor.setAttribute('content', '#73AABE');
     }
   }, [theme]);
+
+  useEffect(() => {
+    // Permission-based protection
+    if (user && user.role !== 'admin') {
+      const hasPermission = (view) => {
+        if (!user.permissions || user.permissions.length === 0) return true;
+        return user.permissions.includes(view);
+      };
+
+      const restrictedViews = ['menu', 'history', 'report', 'stok-mutasi'];
+      if (restrictedViews.includes(currentView) && !hasPermission(currentView)) {
+        setCurrentView('dashboard');
+      }
+    }
+  }, [user, currentView, setCurrentView]);
 
   const handleLoginSuccess = (userData) => {
     setUser(userData);
     localStorage.setItem('pos_user', JSON.stringify(userData));
+
+    // Redirect to dashboard on login if restricted
+    if (userData.role !== 'admin') {
+      const hasPermission = (view) => {
+        if (!userData.permissions || userData.permissions.length === 0) return true;
+        return userData.permissions.includes(view);
+      };
+      const restrictedViews = ['menu', 'history', 'report', 'stok-mutasi'];
+      if (restrictedViews.includes(currentView) && !hasPermission(currentView)) {
+        setCurrentView('dashboard');
+      }
+    }
   };
 
   const confirmLogout = () => {

@@ -14,7 +14,9 @@ const Dashboard = ({ onNavigate }) => {
 
     const summary = dashboardData || {
         omzet_today: 0,
+        total_revenue: 0,
         sell_today: 0,
+        items_sold_today: 0,
         trending: [],
         out_of_stock: [],
         chart_data: []
@@ -83,7 +85,7 @@ const Dashboard = ({ onNavigate }) => {
             <div className="stats-grid">
                 <StatCard
                     icon={<DollarSign size={24} />}
-                    label="Omzet Hari Ini"
+                    label="Pendapatan Hari Ini"
                     value={`Rp ${summary.omzet_today.toLocaleString()}`}
                     trend="+12%"
                     color="var(--primary-brand)"
@@ -91,17 +93,17 @@ const Dashboard = ({ onNavigate }) => {
                 />
                 <StatCard
                     icon={<ShoppingBag size={24} />}
-                    label="Total Order"
+                    label="Transaksi Hari Ini"
                     value={summary.sell_today}
                     trend="+5%"
                     color="var(--primary-brand)"
                     bgColor="var(--bg-primary-light)"
                 />
                 <StatCard
-                    icon={<Users size={24} />}
-                    label="Total Pendapatan"
-                    value={`Rp ${Number(summary.omzet_today || 0).toLocaleString()}`}
-                    trend="+2%"
+                    icon={<ShoppingCart size={24} />}
+                    label="Total Produk Terjual Hari Ini"
+                    value={Number(summary.items_sold_today || 0).toLocaleString()}
+                    trend="+15%"
                     color="var(--primary-brand)"
                     bgColor="var(--bg-primary-light)"
                 />
@@ -138,23 +140,6 @@ const Dashboard = ({ onNavigate }) => {
                         )}
                     </div>
                 </div>
-
-                <div className="chart-card pie-chart-card">
-                    <div className="chart-header">
-                        <h3>Ringkasan Pendapatan</h3>
-                    </div>
-                    <div className="pie-container">
-                        <div className="pie-visual">
-                            <div className="pie-center-text">
-                                <h3>Rp {summary.omzet_today.toLocaleString()}</h3>
-                                <p>Today</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="pie-legend">
-                        <div className="legend-item"><span className="dot" style={{ background: 'var(--primary-brand)' }}></span> Omzet</div>
-                    </div>
-                </div>
             </div>
 
         </div>
@@ -167,7 +152,7 @@ const StatCard = ({ icon, label, value, trend, color, bgColor, disabled }) => (
             <div className="stat-icon-wrapper" style={{ color: color, backgroundColor: bgColor }}>
                 {icon}
             </div>
-            <span className="trend-badge" style={{ color: '#28C76F' }}>{trend} <ArrowUp size={12} /></span>
+            <span className="trend-badge" style={{ color: '#73AABE' }}>{trend} <ArrowUp size={12} /></span>
         </div>
         <div className="stat-content">
             <h2>{value}</h2>

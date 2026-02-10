@@ -8,6 +8,16 @@ import SafeImage from '../Common/SafeImage';
 
 const CATEGORIES = ['All', 'Makanan', 'Minuman'];
 
+const formatNumber = (val) => {
+    if (!val && val !== 0) return '';
+    let str = val.toString().replace(/,/g, '');
+    return str.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
+const parseNumber = (val) => {
+    return val.replace(/,/g, '');
+};
+
 // Mock fallback
 const MOCK_MENU_ITEMS = [
 ];
@@ -17,12 +27,10 @@ const Menu = () => {
     const { productsData, loadingProducts, refreshProducts, setProductsData } = useData();
     const [activeCategory, setActiveCategory] = useState('All');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedIds, setSelectedIds] = useState([]);
-    const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
     // New Item State (reused for Edit)
-    const [newItem, setNewItem] = useState({ id_barang: null, nama_barang: '', harga: '', stok: 0, category: 'Makanan', gambar: null });
+    const [newItem, setNewItem] = useState({ id_barang: null, nama_barang: '', harga: '', stok: 0, gambar: null });
     const [selectedFile, setSelectedFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
 
@@ -43,7 +51,6 @@ const Menu = () => {
         formData.append('nama_barang', newItem.nama_barang);
         formData.append('harga', newItem.harga);
         formData.append('stok', newItem.stok);
-        formData.append('category', newItem.category);
         if (selectedFile) {
             formData.append('gambar', selectedFile);
         }
@@ -55,12 +62,18 @@ const Menu = () => {
             method: 'POST',
             body: formData
         })
-            .then(res => res.json())
+            .then(async res => {
+                const data = await res.json().catch(() => ({ message: 'Format respons tidak valid (Bukan JSON)' }));
+                if (!res.ok) {
+                    throw new Error(data.message || `Server error: ${res.status}`);
+                }
+                return data;
+            })
             .then(data => {
-                if (data.id_barang || data.nama_barang) {
+                if (data.id_barang || data.nama_barang || data.message?.includes('berhasil')) {
                     notify(isEdit ? 'Barang berhasil diupdate!' : 'Barang berhasil ditambahkan!', 'success');
                     setIsModalOpen(false);
-                    setNewItem({ id_barang: null, nama_barang: '', harga: '', stok: 0, category: 'Makanan', gambar: null });
+                    setNewItem({ id_barang: null, nama_barang: '', harga: '', stok: 0, gambar: null });
                     setSelectedFile(null);
                     setImagePreview(null);
                     refreshProducts(true);
@@ -68,36 +81,23 @@ const Menu = () => {
                     notify(`Gagal menyimpan produk: ${data.message || 'Error'}`, 'error');
                 }
             })
-            .catch(err => notify('Gagal menyimpan: ' + err, 'error'));
+            .catch(err => notify('Gagal menyimpan: ' + err.message, 'error'));
     };
 
-    const handleDeleteSelected = async () => {
-        if (!confirm(`Yakin ingin menghapus ${selectedIds.length} item?`)) return;
+    const handleDeleteItem = async (id) => {
+        if (!confirm(`Yakin ingin menghapus item ini?`)) return;
 
         try {
-            // Delete each product individually using DELETE method
-            await Promise.all(
-                selectedIds.map(id =>
-                    apiFetch(`/barang/${id}`, { method: 'DELETE' })
-                )
-            );
+            const res = await apiFetch(`/barang/${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error('Gagal menghapus produk');
 
             notify('Berhasil menghapus produk!', 'success');
-            setSelectedIds([]);
-            setIsSelectionMode(false);
             refreshProducts(true);
         } catch (err) {
             notify('Gagal menghapus produk', 'error');
         }
     };
 
-    const toggleSelection = (id) => {
-        if (selectedIds.includes(id)) {
-            setSelectedIds(selectedIds.filter(itemId => itemId !== id));
-        } else {
-            setSelectedIds([...selectedIds, id]);
-        }
-    };
 
     const openEditModal = (item) => {
         setNewItem({ ...item });
@@ -107,7 +107,7 @@ const Menu = () => {
     };
 
     const openAddModal = () => {
-        setNewItem({ id_barang: null, nama_barang: '', harga: '', stok: 0, category: 'Makanan', gambar: null });
+        setNewItem({ id_barang: null, nama_barang: '', harga: '', stok: 0, gambar: null });
         setSelectedFile(null);
         setImagePreview(null);
         setIsModalOpen(true);
@@ -136,36 +136,19 @@ const Menu = () => {
             <div className="menu-header">
 
                 <div className="header-actions-row">
-                    {isSelectionMode ? (
-                        <>
-                            <button className="delete-badge-btn" onClick={handleDeleteSelected} disabled={selectedIds.length === 0}>
-                                Hapus ({selectedIds.length})
-                            </button>
-                            <button className="cancel-btn" onClick={() => { setIsSelectionMode(false); setSelectedIds([]); }}>
-                                Batal
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <div className="search-bar">
-                                <Search size={20} color="#888" />
-                                <input
-                                    type="text"
-                                    placeholder="Cari Barang..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </div>
-                            {/* Category Tabs Removed as per request */}
-                            <div style={{ flex: 1 }}></div>
-                            <button className="manage-btn" onClick={openAddModal} style={{ background: 'var(--primary-brand)', color: 'white', border: 'none' }}>
-                                + Tambah Barang
-                            </button>
-                            <button className="manage-btn" onClick={() => setIsSelectionMode(true)}>
-                                Hapus
-                            </button>
-                        </>
-                    )}
+                    <div className="search-bar">
+                        <Search size={20} color="#888" />
+                        <input
+                            type="text"
+                            placeholder="Cari Barang..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <div style={{ flex: 1 }}></div>
+                    <button className="manage-btn" onClick={openAddModal} style={{ background: 'var(--primary-brand)', color: 'white', border: 'none' }}>
+                        + Tambah Barang
+                    </button>
                 </div>
             </div>
 
@@ -173,37 +156,24 @@ const Menu = () => {
                 <table className="menu-table">
                     <thead>
                         <tr>
-                            {isSelectionMode && <th>Select</th>}
                             <th>Gambar</th>
                             <th>Nama Barang</th>
                             <th>Harga</th>
                             <th>Stok</th>
-                            {!isSelectionMode && <th>Action</th>}
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading ? (
                             [1, 2, 3, 4, 5].map(i => (
                                 <tr key={i}>
-                                    {isSelectionMode && <td><div className="skeleton skeleton-circle"></div></td>}
-                                    <td><div className="skeleton skeleton-text" style={{ width: '80%' }}></div></td>
-                                    <td><div className="skeleton skeleton-text" style={{ width: '60%' }}></div></td>
-                                    <td><div className="skeleton skeleton-text" style={{ width: '40%' }}></div></td>
-                                    <td><div className="skeleton skeleton-text" style={{ width: '30%' }}></div></td>
                                     {!isSelectionMode && <td><div className="skeleton skeleton-circle"></div></td>}
                                 </tr>
                             ))
                         ) : (
                             filteredItems.length === 0 ? <tr><td colSpan="6">Tidak ada barang</td></tr> :
                                 filteredItems.map(item => (
-                                    <tr key={item.id_barang} className={selectedIds.includes(item.id_barang) ? 'selected-row' : ''} onClick={() => isSelectionMode ? toggleSelection(item.id_barang) : null}>
-                                        {isSelectionMode && (
-                                            <td>
-                                                <div className={`selection-checkbox ${selectedIds.includes(item.id_barang) ? 'checked' : ''}`}>
-                                                    {selectedIds.includes(item.id_barang) && '✓'}
-                                                </div>
-                                            </td>
-                                        )}
+                                    <tr key={item.id_barang}>
                                         <td>
                                             <div className="table-img-container">
                                                 <SafeImage
@@ -220,17 +190,20 @@ const Menu = () => {
                                         </td>
                                         <td>Rp {Number(item.harga).toLocaleString()}</td>
                                         <td>
-                                            <span style={{ fontWeight: 'bold', color: Number(item.stok) > 0 ? '#28C76F' : '#EA5455' }}>
+                                            <span style={{ fontWeight: 'bold', color: Number(item.stok) > 0 ? '#73AABE' : '#EA5455' }}>
                                                 {item.stok || 0}
                                             </span>
                                         </td>
-                                        {!isSelectionMode && (
-                                            <td>
-                                                <button className="icon-btn edit" onClick={(e) => { e.stopPropagation(); openEditModal(item); }}>
+                                        <td>
+                                            <div style={{ display: 'flex', gap: 8 }}>
+                                                <button className="icon-btn edit" onClick={() => openEditModal(item)}>
                                                     ✎
                                                 </button>
-                                            </td>
-                                        )}
+                                                <button className="icon-btn delete" onClick={() => handleDeleteItem(item.id_barang)}>
+                                                    🗑️
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
                                 ))
                         )}
@@ -255,8 +228,14 @@ const Menu = () => {
                             <div className="input-group" style={{ flex: 1 }}>
                                 <label>Harga (Rp)</label>
                                 <input
-                                    type="number" placeholder="0"
-                                    value={newItem.harga} onChange={e => setNewItem({ ...newItem, harga: e.target.value })}
+                                    type="text" placeholder="0"
+                                    value={formatNumber(newItem.harga)}
+                                    onChange={e => {
+                                        const rawValue = parseNumber(e.target.value);
+                                        if (/^\d*$/.test(rawValue)) {
+                                            setNewItem({ ...newItem, harga: rawValue });
+                                        }
+                                    }}
                                 />
                             </div>
                             <div className="input-group" style={{ flex: 1 }}>
@@ -286,16 +265,6 @@ const Menu = () => {
                                     <input type="file" accept="image/*" onChange={handleFileChange} hidden />
                                 </label>
                             </div>
-                        </div>
-
-                        <div className="input-group">
-                            <label>Kategori</label>
-                            <select
-                                value={newItem.category} onChange={e => setNewItem({ ...newItem, category: e.target.value })}
-                            >
-                                <option value="Makanan">Makanan</option>
-                                <option value="Minuman">Minuman</option>
-                            </select>
                         </div>
 
                         <div className="modal-actions">

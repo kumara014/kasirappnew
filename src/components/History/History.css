@@ -117,13 +117,13 @@
 }
 
 .status-badge.debit {
-    background: #e0f2f1;
-    color: #26a69a;
+    background: #EBF4F7;
+    color: #73AABE;
 }
 
 .status-badge.cash {
-    background: #e8f5e9;
-    color: #66bb6a;
+    background: #EBF4F7;
+    color: #73AABE;
 }
 
 .status-badge.ewallet {

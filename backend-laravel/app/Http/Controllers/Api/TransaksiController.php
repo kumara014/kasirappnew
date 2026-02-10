@@ -31,18 +31,15 @@ class TransaksiController extends Controller
                 $kembalian = $request->uang_bayar - $request->total_harga;
 
                 $transaksi = Transaksi::create([
-                    'id_user' => $request->user() ? $request->user()->id_user : null,
                     'total_item' => $totalItem,
                     'total_harga' => $request->total_harga,
-                    'diskon' => $request->diskon ?? 0,
                     'uang_bayar' => $request->uang_bayar,
                     'kembalian' => $kembalian,
                     'metode_pembayaran' => $request->metode_pembayaran ?? 'Cash',
-                    // tanggal_transaksi defaults to CURRENT_TIMESTAMP
                 ]);
 
+                $details = [];
                 foreach ($request->items as $item) {
-                    // Check and Subtract Stock
                     $barang = Barang::findOrFail($item['id_barang']);
 
                     if ($barang->stok < $item['qty']) {
@@ -51,7 +48,6 @@ class TransaksiController extends Controller
 
                     $barang->decrement('stok', $item['qty']);
 
-                    // Log mutation
                     StokMutasi::create([
                         'id_barang' => $barang->id_barang,
                         'jenis' => 'keluar',
@@ -59,14 +55,21 @@ class TransaksiController extends Controller
                         'keterangan' => 'Penjualan Transaksi #' . $transaksi->id_transaksi
                     ]);
 
-                    TransaksiDetail::create([
+                    $details[] = [
                         'id_transaksi' => $transaksi->id_transaksi,
                         'id_barang' => $item['id_barang'],
-                        'harga' => $item['harga'], // Snapshot price
+                        'harga' => $item['harga'],
                         'qty' => $item['qty'],
                         'subtotal' => $item['harga'] * $item['qty'],
-                    ]);
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
                 }
+
+                TransaksiDetail::insert($details);
+
+                // Invalidate dashboard cache
+                \Cache::forget('dashboard_summary');
 
                 return response()->json([
                     'message' => 'Transaksi berhasil disimpan.',

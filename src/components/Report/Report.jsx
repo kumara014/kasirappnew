@@ -4,7 +4,14 @@ import { FileText, ShoppingBag, ArrowUp, DollarSign, TrendingUp, Printer } from 
 import { apiFetch } from '../../config';
 
 const Report = () => {
-    const [summaryData, setSummaryData] = useState({ revenue: 0, orders: 0, trend: [] });
+    const [summaryData, setSummaryData] = useState({
+        revenue: 0,
+        orders: 0,
+        omzet_today: 0,
+        orders_today: 0,
+        total_products: 0,
+        trend: []
+    });
     const [itemSalesData, setItemSalesData] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -52,13 +59,13 @@ const Report = () => {
                 </div>
 
                 {/* Section 1: Sales Summary Stats */}
-                <div className="report-stats-row">
+                <div className="report-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '30px' }}>
                     <div className="report-stat-card">
                         <div className="report-stat-info">
-                            <h3>Total Penjualan</h3>
-                            <h1>Rp {Number(summaryData.revenue || 0).toLocaleString()}</h1>
+                            <h3>Total Pendapatan Hari ini</h3>
+                            <h1>Rp {Number(summaryData.omzet_today || 0).toLocaleString()}</h1>
                             <span style={{ color: 'var(--primary-brand)', fontSize: '13px', fontWeight: '600' }}>
-                                All Time
+                                Today
                             </span>
                         </div>
                         <div className="stat-icon" style={{ background: 'var(--bg-primary-light)', color: 'var(--primary-brand)' }}>
@@ -68,14 +75,66 @@ const Report = () => {
 
                     <div className="report-stat-card">
                         <div className="report-stat-info">
-                            <h3>Total Orders</h3>
-                            <h1>{summaryData.orders || 0}</h1>
+                            <h3>Transaksi Hari Ini</h3>
+                            <h1>{summaryData.orders_today || 0}</h1>
+                            <span style={{ color: 'var(--primary-brand)', fontSize: '13px', fontWeight: '600' }}>
+                                Today
+                            </span>
+                        </div>
+                        <div className="stat-icon" style={{ background: 'var(--bg-primary-light)', color: 'var(--primary-brand)' }}>
+                            <ShoppingBag size={24} />
+                        </div>
+                    </div>
+
+                    <div className="report-stat-card">
+                        <div className="report-stat-info">
+                            <h3>Total Transaksi (All Time)</h3>
+                            <h1>{Number(summaryData.orders || 0).toLocaleString()}</h1>
+                            <span style={{ color: 'var(--primary-brand)', fontSize: '13px', fontWeight: '600' }}>
+                                Cumulative
+                            </span>
+                        </div>
+                        <div className="stat-icon" style={{ background: 'var(--bg-primary-light)', color: 'var(--primary-brand)' }}>
+                            <ShoppingBag size={24} />
+                        </div>
+                    </div>
+
+                    <div className="report-stat-card">
+                        <div className="report-stat-info">
+                            <h3>Total Produk Terjual</h3>
+                            <h1>{Number(summaryData.total_items_sold || 0).toLocaleString()}</h1>
                             <span style={{ color: 'var(--primary-brand)', fontSize: '13px', fontWeight: '600' }}>
                                 All Time
                             </span>
                         </div>
                         <div className="stat-icon" style={{ background: 'var(--bg-primary-light)', color: 'var(--primary-brand)' }}>
                             <ShoppingBag size={24} />
+                        </div>
+                    </div>
+
+                    <div className="report-stat-card">
+                        <div className="report-stat-info">
+                            <h3>Total Pendapatan (All Time)</h3>
+                            <h1>Rp {Number(summaryData.revenue || 0).toLocaleString()}</h1>
+                            <span style={{ color: 'var(--primary-brand)', fontSize: '13px', fontWeight: '600' }}>
+                                Cumulative
+                            </span>
+                        </div>
+                        <div className="stat-icon" style={{ background: 'var(--bg-primary-light)', color: 'var(--primary-brand)' }}>
+                            <DollarSign size={24} />
+                        </div>
+                    </div>
+
+                    <div className="report-stat-card">
+                        <div className="report-stat-info">
+                            <h3>Total Barang</h3>
+                            <h1>{summaryData.total_products || 0}</h1>
+                            <span style={{ color: 'var(--primary-brand)', fontSize: '13px', fontWeight: '600' }}>
+                                Inventory
+                            </span>
+                        </div>
+                        <div className="stat-icon" style={{ background: 'var(--bg-primary-light)', color: 'var(--primary-brand)' }}>
+                            <FileText size={24} />
                         </div>
                     </div>
                 </div>

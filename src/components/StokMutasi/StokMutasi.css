@@ -1,0 +1,137 @@
+.mutation-container {
+    padding: 24px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.mutation-content {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.mutation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-title h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.refresh-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--bg-primary-light);
+    color: var(--primary-brand);
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.refresh-btn:hover {
+    background: #e0f2f7;
+}
+
+.mutation-table-container {
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.mutation-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.mutation-table th {
+    background: #f9fafb;
+    padding: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.mutation-table td {
+    padding: 16px;
+    font-size: 14px;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.mutation-table tr:last-child td {
+    border-bottom: none;
+}
+
+.product-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+.type-badge.masuk {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.type-badge.keluar {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.amount-cell {
+    font-weight: 700;
+}
+
+.amount-cell.masuk {
+    color: #059669;
+}
+
+.amount-cell.keluar {
+    color: #dc2626;
+}
+
+.date-cell {
+    color: #666;
+}
+
+.desc-cell {
+    color: #666;
+    font-style: italic;
+}
+
+.text-center {
+    text-align: center;
+    padding: 40px !important;
+    color: #888;
+}

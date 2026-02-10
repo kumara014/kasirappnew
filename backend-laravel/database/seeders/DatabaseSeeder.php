@@ -24,11 +24,11 @@ class DatabaseSeeder extends Seeder
 
         // Seed Barang
         $items = [
-            ['nama_barang' => 'Nasi Goreng', 'harga' => 15000, 'stok' => 100, 'kode_barang' => 'BRG001'],
-            ['nama_barang' => 'Ayam Penyet', 'harga' => 18000, 'stok' => 50, 'kode_barang' => 'BRG002'],
-            ['nama_barang' => 'Es Teh Manis', 'harga' => 5000, 'stok' => 200, 'kode_barang' => 'BRG003'],
-            ['nama_barang' => 'Kopi Hitam', 'harga' => 8000, 'stok' => 150, 'kode_barang' => 'BRG004'],
-            ['nama_barang' => 'Kentang Goreng', 'harga' => 12000, 'stok' => 80, 'kode_barang' => 'BRG005'],
+            ['nama_barang' => 'Nasi Goreng', 'harga' => 15000, 'stok' => 100],
+            ['nama_barang' => 'Ayam Penyet', 'harga' => 18000, 'stok' => 50],
+            ['nama_barang' => 'Es Teh Manis', 'harga' => 5000, 'stok' => 200],
+            ['nama_barang' => 'Kopi Hitam', 'harga' => 8000, 'stok' => 150],
+            ['nama_barang' => 'Kentang Goreng', 'harga' => 12000, 'stok' => 80],
         ];
 
         foreach ($items as $item) {

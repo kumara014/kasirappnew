@@ -13,8 +13,24 @@ class ReportController extends Controller
         // Get Total Revenue
         $revenue = DB::table('transaksi')->sum('total_harga') ?? 0;
 
-        // Get Total Orders
+        // Get Total Orders (All Time)
         $total_orders = DB::table('transaksi')->count() ?? 0;
+
+        // Get Omzet Today
+        $omzet_today = DB::table('transaksi')
+            ->whereDate('tanggal_transaksi', today())
+            ->sum('total_harga') ?? 0;
+
+        // Get Total Transaksi Hari Ini
+        $orders_today = DB::table('transaksi')
+            ->whereDate('tanggal_transaksi', today())
+            ->count() ?? 0;
+
+        // Get Total Products
+        $total_products = DB::table('barang')->count() ?? 0;
+
+        // Get Total Items Sold (All Time)
+        $total_items_sold = DB::table('transaksi_detail')->sum('qty') ?? 0;
 
         // Get Last 30 Days Trend (Ensuring 30 data points)
         $trend = [];
@@ -41,6 +57,10 @@ class ReportController extends Controller
         return response()->json([
             "revenue" => $revenue,
             "orders" => $total_orders,
+            "omzet_today" => $omzet_today,
+            "orders_today" => $orders_today,
+            "total_products" => $total_products,
+            "total_items_sold" => (int) $total_items_sold,
             "trend" => array_values($trend)
         ]);
     }

@@ -3,60 +3,64 @@
   --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
   --font-heading: 'Lexend', sans-serif;
 
-  /* Color Palette - Emerald Royale Identity */
-  --primary-brand: #10B981;
-  /* Emerald */
-  --bg-app: #F5F6FA;
+  /* Color Palette - Blue Theme Identity */
+  --primary-brand: #73AABE;
+  --primary-dark: #5e8da0;
+  --primary-light: #9dc4d3;
+  --accent-orange: #FF8A65;
+
+  --bg-app: #F8F9FD;
   --bg-surface: #FFFFFF;
-  --text-primary: #1A1A1A;
-  --text-secondary: #A0A0A0;
-  --status-green: #10B981;
-  --border-light: #E0E0E0;
-  --bg-primary-light: #ECFDF5;
-  /* Soft Emerald */
+  --text-primary: #1A202C;
+  --text-secondary: #718096;
+  --status-green: #48BB78;
+  --status-red: #F56565;
+  --border-light: #EDF2F7;
+  --bg-primary-light: #EBF4F7;
 
   /* Spacing */
   --spacing-xs: 0.5rem;
-  /* 8px */
   --spacing-sm: 0.75rem;
-  /* 12px */
   --spacing-md: 1rem;
-  /* 16px */
   --spacing-lg: 1.5rem;
-  /* 24px */
   --spacing-xl: 2rem;
-  /* 32px */
+  --spacing-2xl: 3rem;
 
   /* Border Radius */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 16px rgba(115, 170, 190, 0.08);
+  --shadow-lg: 0 16px 32px rgba(115, 170, 190, 0.12);
 
   --transition-speed: 0.3s;
+
   /* Glassmorphism Presets */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.3);
-  --glass-blur: blur(12px);
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-blur: blur(16px);
 }
 
 .dark-theme {
-  --bg-app: #0A0A0A;
-  --bg-surface: #141414;
-  --text-primary: #FFFFFF;
-  --text-secondary: #A0A0A0;
-  --text-tertiary: #606060;
-  --border-light: rgba(255, 255, 255, 0.08);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.5);
-  --bg-primary-light: rgba(16, 185, 129, 0.15);
+  --bg-app: #0A0A0B;
+  --bg-surface: #121214;
+  --text-primary: #F7FAFC;
+  --text-secondary: #A0AEC0;
+  --text-tertiary: #4A5568;
+  --border-light: rgba(255, 255, 255, 0.06);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 12px 24px rgba(0, 0, 0, 0.4);
+  --bg-primary-light: rgba(115, 170, 190, 0.1);
 
   /* Dark Glass */
-  --glass-bg: rgba(20, 20, 20, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.05);
+  --glass-bg: rgba(18, 18, 20, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.04);
 }
 
 * {
@@ -77,8 +81,8 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(16, 185, 129, 0.2);
-  /* Soft Emerald */
+  background: rgba(115, 170, 190, 0.2);
+  /* Soft Blue */
   border-radius: 10px;
   transition: background 0.3s;
 }
@@ -91,7 +95,7 @@
 /* Firefox Support */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(16, 185, 129, 0.3) transparent;
+  scrollbar-color: rgba(115, 170, 190, 0.3) transparent;
 }
 
 html {
@@ -131,13 +135,61 @@ ul {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  /* Highest level */
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.premium-card {
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-md);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.premium-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-brand);
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
 }
 
 /* Hide scrollbar on mobile to prevent visual glitches */

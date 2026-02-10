@@ -59,15 +59,15 @@
 
 .category.nav-item.active {
     color: var(--primary-brand);
-    background-color: rgba(16, 185, 129, 0.15);
-    /* Light emerald background in light mode, subtle in dark */
-    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+    background-color: rgba(115, 170, 190, 0.15);
+    /* Light blue background in light mode, subtle in dark */
+    box-shadow: 0 4px 10px rgba(115, 170, 190, 0.2);
 }
 
 .category-btn.active {
     background: var(--primary-brand);
     color: #fff;
-    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 10px rgba(115, 170, 190, 0.3);
 }
 
 .category-btn:hover:not(.active) {
@@ -113,7 +113,7 @@
 }
 
 .selected-row {
-    background: rgba(16, 185, 129, 0.1) !important;
+    background: rgba(115, 170, 190, 0.1) !important;
 }
 
 .category-badge {
@@ -133,6 +133,20 @@
     border: none;
     border-radius: 6px;
     cursor: pointer;
+}
+
+.icon-btn.delete {
+    padding: 6px;
+    background: #ffebee;
+    color: #ef5350;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.icon-btn.delete:hover {
+    background: #ffcdd2;
 }
 
 /* Modal Inputs */

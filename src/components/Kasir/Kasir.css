@@ -85,7 +85,7 @@
     background: var(--primary-brand) !important;
     border-color: var(--primary-brand);
     color: #fff !important;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 12px rgba(115, 170, 190, 0.3);
 }
 
 .pos-grid-container {
@@ -159,8 +159,8 @@
 
 .pos-card.active-card {
     border-color: var(--primary-brand);
-    background-color: rgba(16, 185, 129, 0.05);
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
+    background-color: rgba(115, 170, 190, 0.05);
+    box-shadow: 0 4px 15px rgba(115, 170, 190, 0.15);
 }
 
 .pos-card:hover {
@@ -183,7 +183,7 @@
 }
 
 .pos-card-price {
-    color: var(--primary-brand);
+    color: var(--text-primary);
     font-weight: 700;
     font-size: 15px;
     margin-bottom: 4px;
@@ -306,7 +306,7 @@
     background: var(--primary-brand);
     color: white;
     border-color: var(--primary-brand);
-    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.2);
+    box-shadow: 0 4px 8px rgba(115, 170, 190, 0.2);
 }
 
 .summary-discount {
@@ -490,7 +490,7 @@
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background: #28C76F;
+    background: var(--primary-brand);
     color: white;
     border: none;
     border-radius: 8px;
@@ -576,7 +576,7 @@
 
 .pay-btn {
     width: 100%;
-    background: var(--primary-brand);
+    background: #28C76F;
     color: white;
     padding: 18px;
     border: none;
@@ -584,13 +584,13 @@
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 8px 20px rgba(40, 199, 111, 0.3);
     transition: all 0.3s ease;
 }
 
 .pay-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 10px 25px rgba(40, 199, 111, 0.4);
 }
 
 @media (max-width: 768px) {

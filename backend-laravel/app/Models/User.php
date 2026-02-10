@@ -25,6 +25,10 @@ class User extends Authenticatable
         'password',
         'role',
         'email',
+        'nama_usaha',
+        'tipe_bisnis',
+        'no_hp',
+        'permissions',
     ];
 
     /**
@@ -44,5 +48,6 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'permissions' => 'array',
     ];
 }

@@ -25,7 +25,9 @@ export const apiFetch = (endpoint, options = {}) => {
     // Auto-detect FormData to omit Content-Type (Fetch will set it with boundary)
     const isFormData = options.body instanceof FormData;
 
-    const defaultHeaders = {};
+    const defaultHeaders = {
+        'Accept': 'application/json'
+    };
 
     // ALWAYS send the ngrok bypass header if the target URL is an ngrok URL
     // irrespective of whether we are 'local' or not.

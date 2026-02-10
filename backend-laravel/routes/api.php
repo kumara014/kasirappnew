@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ReportController;
 
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
 
 // Barang Routes
 Route::get('/barang', [BarangController::class, 'index']);
@@ -33,6 +34,13 @@ Route::get('/transaksi/{id}', [TransaksiController::class, 'show']);
 Route::get('/dashboard', [DashboardController::class, 'summary']);
 Route::get('/reports/sales', [ReportController::class, 'sales']);
 Route::get('/reports/items', [ReportController::class, 'items']);
+Route::get('/stok-mutasi', [BarangController::class, 'mutations']);
+
+// User management
+Route::get('/users', [App\Http\Controllers\Api\UserController::class, 'index']);
+Route::post('/users', [App\Http\Controllers\Api\UserController::class, 'store']);
+Route::put('/users/{id}', [App\Http\Controllers\Api\UserController::class, 'update']);
+Route::delete('/users/{id}', [App\Http\Controllers\Api\UserController::class, 'destroy']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

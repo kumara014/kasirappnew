@@ -9,6 +9,7 @@ const History = () => {
     const [selectedOrder, setSelectedOrder] = useState(null); // For Receipt Modal
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     // Calendar State
     const [currentDate, setCurrentDate] = useState(new Date()); // For viewing month
@@ -21,15 +22,20 @@ const History = () => {
     const orders = ordersData;
 
     // Filter Logic
-    const filteredOrders = selectedDate
-        ? orders.filter(order => {
+    const filteredOrders = orders.filter(order => {
+        // Date Filter
+        const matchesDate = !selectedDate || (() => {
             const orderDate = new Date(order.tanggal_transaksi || order.date);
-            // Compare YYYY-MM-DD
             return orderDate.getDate() === selectedDate.getDate() &&
                 orderDate.getMonth() === selectedDate.getMonth() &&
                 orderDate.getFullYear() === selectedDate.getFullYear();
-        })
-        : orders;
+        })();
+
+        // Search Filter (Order ID)
+        const matchesSearch = !searchQuery || String(order.id_transaksi).includes(searchQuery);
+
+        return matchesDate && matchesSearch;
+    });
 
     // Calendar Helpers
     const getDaysInMonth = (date) => {
@@ -104,7 +110,12 @@ const History = () => {
                 <div className="history-header">
                     <div className="history-search-bar">
                         <Search size={18} color="#888" />
-                        <input type="text" placeholder="Search Order Id" />
+                        <input
+                            type="text"
+                            placeholder="Search Order Id"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
                     </div>
 
                     {/* Date Filter Button & Popup */}
@@ -182,7 +193,7 @@ const History = () => {
                                     <tr key={index}>
                                         <td style={{ fontWeight: 'bold' }}>{row.id_transaksi}</td>
                                         <td>{row.tanggal_transaksi ? new Date(row.tanggal_transaksi).toLocaleString('id-ID') : 'No Date'}</td>
-                                        <td style={{ color: '#28C76F', fontWeight: 'bold' }}>
+                                        <td style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>
                                             Rp {Number(row.total_harga).toLocaleString()}
                                         </td>
                                         <td>
@@ -229,15 +240,8 @@ const History = () => {
                         <div style={{ borderTop: '1px dashed #ccc', paddingTop: 10 }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4 }}>
                                 <span>Subtotal</span>
-                                <span>Rp {(Number(selectedOrder.total_harga) + Number(selectedOrder.diskon || 0)).toLocaleString()}</span>
+                                <span>Rp {Number(selectedOrder.total_harga).toLocaleString()}</span>
                             </div>
-
-                            {selectedOrder.diskon > 0 && (
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4, color: '#FF4D4F' }}>
-                                    <span>Diskon</span>
-                                    <span>- Rp {Number(selectedOrder.diskon).toLocaleString()}</span>
-                                </div>
-                            )}
 
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: 16, marginTop: 5, borderTop: '1px solid #eee', paddingTop: 5 }}>
                                 <span>TOTAL</span>

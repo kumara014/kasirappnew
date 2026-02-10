@@ -40,7 +40,7 @@ export const NotificationProvider = ({ children }) => {
 
 const Toast = ({ toast, onClose }) => {
     const icons = {
-        success: <CheckCircle size={20} color="#28C76F" />,
+        success: <CheckCircle size={20} color="#73AABE" />,
         error: <AlertCircle size={20} color="#EA5455" />,
         info: <Info size={20} color="#FF8C00" />
     };

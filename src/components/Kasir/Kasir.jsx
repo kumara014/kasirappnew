@@ -7,6 +7,16 @@ import { apiFetch } from '../../config';
 import { useNotification } from '../../context/NotificationContext';
 import SafeImage from '../Common/SafeImage';
 
+const formatNumber = (val) => {
+    if (!val && val !== 0) return '';
+    let str = val.toString().replace(/,/g, '');
+    return str.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
+const parseNumber = (val) => {
+    return val.toString().replace(/,/g, '');
+};
+
 const Kasir = () => {
     const { notify } = useNotification();
     const { productsData, loadingProducts, refreshProducts, refreshDashboard, refreshOrders } = useData();
@@ -15,7 +25,6 @@ const Kasir = () => {
     const [cart, setCart] = useState([]);
     const [selectedPayment, setSelectedPayment] = useState('Cash');
     const [animatingId, setAnimatingId] = useState(null);
-    const [discount, setDiscount] = useState(0);
 
     // Payment Logic State
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -64,7 +73,6 @@ const Kasir = () => {
         if (cart.length === 0) return;
         if (window.confirm("Hapus semua item di keranjang?")) {
             setCart([]);
-            setDiscount(0);
             notify("Keranjang dikosongkan", "info");
         }
     };
@@ -85,7 +93,7 @@ const Kasir = () => {
 
     // Calculation
     const subtotal = cart.reduce((acc, item) => acc + (item.harga * item.qty), 0);
-    const total = Math.max(0, subtotal - discount);
+    const total = subtotal;
 
     // Payment Handlers
     const handlePayButton = () => {
@@ -108,7 +116,6 @@ const Kasir = () => {
         // Prepare Data for API
         const transactionData = {
             total_harga: total,
-            diskon: discount,
             uang_bayar: currentPaidAmount,
             metode_pembayaran: selectedPayment,
             items: cart.map(i => ({
@@ -123,7 +130,13 @@ const Kasir = () => {
             method: 'POST',
             body: JSON.stringify(transactionData)
         })
-            .then(res => res.json())
+            .then(async res => {
+                const data = await res.json().catch(() => ({ message: 'Format respons tidak valid (Bukan JSON)' }));
+                if (!res.ok) {
+                    throw new Error(data.message || `Server error: ${res.status}`);
+                }
+                return data;
+            })
             .then(data => {
                 if (data.message === "Transaksi berhasil disimpan.") {
                     setChangeAmount(currentPaidAmount - total);
@@ -134,10 +147,10 @@ const Kasir = () => {
                     refreshOrders(true);
                     notify("Transaksi Berhasil!", "success");
                 } else {
-                    notify(`Gagal: ${data.message} (${data.error || 'Check DB'})`, "error");
+                    notify(`Gagal: ${data.message}`, "error");
                 }
             })
-            .catch(err => notify("Error Sistem: Cek koneksi backend " + err, "error"));
+            .catch(err => notify("Error: " + err.message, "error"));
     };
 
     const handleNewTransaction = () => {
@@ -145,7 +158,6 @@ const Kasir = () => {
         setIsPaymentModalOpen(false);
         setPaidAmount('');
         setChangeAmount(0);
-        setDiscount(0); // RESET DISCOUNT
     };
 
     return (
@@ -269,18 +281,6 @@ const Kasir = () => {
                 </div>
 
                 <div className="pos-cart-footer">
-                    <div className="promo-section">
-                        <label className="promo-label">Promo & Diskon</label>
-                        <div className="promo-chips">
-                            <div className={`promo-chip ${discount === 0 ? 'active' : ''}`} onClick={() => setDiscount(0)}>Normal</div>
-                            <div className={`promo-chip ${discount === subtotal * 0.05 ? 'active' : ''}`} onClick={() => setDiscount(subtotal * 0.05)}>5%</div>
-                            <div className={`promo-chip ${discount === subtotal * 0.10 ? 'active' : ''}`} onClick={() => setDiscount(subtotal * 0.10)}>10%</div>
-                            <div className="promo-chip" onClick={() => {
-                                const val = prompt("Masukkan jumlah diskon (Rp):");
-                                if (val !== null) setDiscount(Number(val));
-                            }}>Lainnya</div>
-                        </div>
-                    </div>
 
                     <label className="payment-methods-label">Metode Pembayaran</label>
                     <div className="payment-methods-grid">
@@ -300,13 +300,6 @@ const Kasir = () => {
                         <span>Subtotal ({cart.reduce((a, c) => a + c.qty, 0)} Items)</span>
                         <span>Rp {subtotal.toLocaleString()}</span>
                     </div>
-
-                    {discount > 0 && (
-                        <div className="cart-summary-row summary-discount">
-                            <span>Diskon</span>
-                            <span>- Rp {discount.toLocaleString()}</span>
-                        </div>
-                    )}
 
                     <div className="cart-total-row">
                         <span>Total Tagihan</span>
@@ -356,20 +349,25 @@ const Kasir = () => {
                                         <div className="input-group">
                                             <label>Uang Tunai (Cash)</label>
                                             <input
-                                                type="number"
+                                                type="text"
                                                 placeholder="Masukkan jumlah uang..."
-                                                value={paidAmount}
-                                                onChange={e => setPaidAmount(e.target.value)}
+                                                value={formatNumber(paidAmount)}
+                                                onChange={e => {
+                                                    const rawValue = parseNumber(e.target.value);
+                                                    if (/^\d*$/.test(rawValue)) {
+                                                        setPaidAmount(rawValue);
+                                                    }
+                                                }}
                                                 autoFocus
                                             />
                                         </div>
 
                                         <div className="quick-amounts">
-                                            <button onClick={() => setPaidAmount(total)}>Uang Pas</button>
-                                            <button onClick={() => setPaidAmount(10000)}>10K</button>
-                                            <button onClick={() => setPaidAmount(20000)}>20K</button>
-                                            <button onClick={() => setPaidAmount(50000)}>50K</button>
-                                            <button onClick={() => setPaidAmount(100000)}>100K</button>
+                                            <button onClick={() => setPaidAmount(total.toString())}>Uang Pas</button>
+                                            <button onClick={() => setPaidAmount("10000")}>10K</button>
+                                            <button onClick={() => setPaidAmount("20000")}>20K</button>
+                                            <button onClick={() => setPaidAmount("50000")}>50K</button>
+                                            <button onClick={() => setPaidAmount("100000")}>100K</button>
                                         </div>
                                     </>
                                 )}

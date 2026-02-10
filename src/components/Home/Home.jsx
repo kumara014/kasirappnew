@@ -61,8 +61,8 @@ const Home = () => {
                     label="Total Sell Today (Kasir)"
                     value={summary.sell_today}
                     trend="+5%"
-                    color="#28C76F"
-                    bgColor="#E5F8ED"
+                    color="#73AABE"
+                    bgColor="#EBF4F7"
                 />
                 <StatCard
                     icon={<Users size={24} />}
@@ -161,7 +161,7 @@ const StatCard = ({ icon, label, value, trend, color, bgColor }) => (
             <div className="stat-icon-wrapper" style={{ color: color, backgroundColor: bgColor }}>
                 {icon}
             </div>
-            <span className="trend-badge" style={{ color: '#28C76F' }}>{trend} <ArrowUp size={12} /></span>
+            <span className="trend-badge" style={{ color: '#73AABE' }}>{trend} <ArrowUp size={12} /></span>
         </div>
         <div className="stat-content">
             <h2>{value}</h2>
