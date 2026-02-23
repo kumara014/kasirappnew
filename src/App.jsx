@@ -1,12 +1,11 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import Sidebar from './components/Sidebar';
-const Menu = lazy(() => import('./components/Menu/Menu'));
+const Menu = lazy(() => import('./components/Barang/Barang'));
 const Dashboard = lazy(() => import('./components/Dashboard/Dashboard'));
-const History = lazy(() => import('./components/History/History'));
-const Report = lazy(() => import('./components/Report/Report'));
+const History = lazy(() => import('./components/Riwayat/Riwayat'));
+const Report = lazy(() => import('./components/Laporan/Laporan'));
 const StokMutasi = lazy(() => import('./components/StokMutasi/StokMutasi'));
 const Settings = lazy(() => import('./components/Settings/Settings'));
-import { apiFetch } from './config';
 const Kasir = lazy(() => import('./components/Kasir/Kasir'));
 import Login from './components/Login';
 const CustomerService = lazy(() => import('./components/CustomerService/CustomerService'));
@@ -14,7 +13,10 @@ import './App.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DataProvider, useData } from './context/DataContext';
 import { NotificationProvider } from './context/NotificationContext';
-import { Bell, Info, X, User, LogOut, Sun, Moon, Maximize, Minimize } from 'lucide-react';
+import ErrorBoundary from './components/Common/ErrorBoundary';
+import { Bell, X, Menu as MenuIcon } from 'lucide-react';
+
+const TEAL = "#4A9BAD";
 
 const AppContent = ({
   user, theme, currentView, setCurrentView, isSidebarOpen, setIsSidebarOpen,
@@ -24,71 +26,58 @@ const AppContent = ({
   showSettings, setShowSettings
 }) => {
   const {
-    dashboardData,
-    refreshDashboard,
-    refreshProducts,
-    refreshOrders,
-    refreshStockOnly
+    dashboardData, lowStockItems
   } = useData();
 
-
-  const outOfStockItems = dashboardData?.out_of_stock || [];
-
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(err => {
-        console.error(`Error: ${err.message}`);
-      });
-    } else {
-      if (document.exitFullscreen) document.exitFullscreen();
-    }
-  };
+  // Use the global lowStockItems calculation for consistency
+  const notifications = lowStockItems || [];
 
   return (
-    <div className="app-main-wrapper" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="app-main-wrapper" style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#F5F7F8' }}>
+      <style>{`
+        .mobile-top-bar-teal {
+          background: ${TEAL};
+          padding: 12px 20px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          position: relative;
+          z-index: 1001;
+          color: #fff;
+        }
+        .hamburger-teal { 
+          background: rgba(255,255,255,0.15); border: none; cursor: pointer; 
+          width: 36px; height: 36px; border-radius: 10px; 
+          display: flex; align-items: center; justify-content: center;
+        }
+        .store-logo-header { font-size: 16px; font-weight: 800; color: #fff; letter-spacing: -0.5px; position: absolute; left: 50%; transform: translateX(-50%); }
+        .store-logo-header span { opacity: 0.65; }
+        .top-bar-btn { width: 34px; height: 34px; border-radius: 9px; background: rgba(255,255,255,0.15); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; position: relative; }
+        .notif-dot { position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%; background: #FF4757; border: 2px solid ${TEAL}; }
+      `}</style>
+
       {!user ? (
         <Login onLoginSuccess={handleLoginSuccess} />
       ) : (
-        <div className="app-layout" style={{ display: 'flex', height: '100%', position: 'relative' }}>
-          {/* Top Bar for Mobile */}
-          <div className="mobile-top-bar">
-            <div className="mobile-top-left">
-              <div className="mobile-menu-btn" onClick={() => setIsSidebarOpen(true)}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="3" y1="12" x2="21" y2="12"></line>
-                  <line x1="3" y1="6" x2="21" y2="6"></line>
-                  <line x1="3" y1="18" x2="21" y2="18"></line>
-                </svg>
-              </div>
-              <h1 className="mobile-view-title">
-                {currentView === 'dashboard' && 'Beranda'}
-                {currentView === 'menu' && (user?.role === 'kasir' ? null : 'Kelola Barang')}
-                {currentView === 'order' && 'Kasir'}
-                {currentView === 'history' && (user?.role === 'kasir' ? null : 'Riwayat')}
-                {currentView === 'report' && 'Laporan Penjualan'}
-                {currentView === 'stok-mutasi' && 'Stok Mutasi'}
-                {currentView === 'settings' && 'Pengaturan'}
-                {currentView === 'cs' && 'Customer Service'}
-              </h1>
-            </div>
+        <div className="app-layout" style={{ display: 'flex', height: '100%', position: 'relative', overflow: 'hidden' }}>
 
+          {/* Top Bar - Hidden when Kasir (order) is active on mobile to prevent header overlap */}
+          <div className="mobile-top-bar-teal" style={{
+            display: (currentView === 'order' && window.innerWidth <= 1024) ? 'none' : 'flex'
+          }}>
+            <motion.button
+              className="hamburger-teal"
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <MenuIcon size={20} />
+            </motion.button>
+            <div className="store-logo-header">Pointly<span> POS</span></div>
             <div className="mobile-top-right">
-              <div className="notification-bell-wrapper" onClick={() => setShowNotifications(!showNotifications)}>
-                <Bell size={22} className={outOfStockItems.length > 0 ? 'bell-anim' : ''} />
-                {outOfStockItems.length > 0 && (
-                  <span className="notification-badge">{outOfStockItems.length}</span>
-                )}
-              </div>
+              <button className="top-bar-btn" onClick={() => setShowNotifications(!showNotifications)}>
+                <Bell size={20} />
+                {notifications.length > 0 && <div className="notif-dot" />}
+              </button>
             </div>
 
             {/* Notification Popover */}
@@ -99,24 +88,29 @@ const AppContent = ({
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  style={{
+                    position: 'absolute', top: '100%', right: '20px',
+                    width: '300px', background: '#fff', borderRadius: '18px',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.15)', padding: '16px',
+                    marginTop: '10px', color: '#333'
+                  }}
                 >
-                  <div className="popover-header">
-                    <h3>Notifikasi</h3>
-                    <button onClick={() => setShowNotifications(false)}><X size={18} /></button>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                    <h3 style={{ fontSize: '15px', fontWeight: '800' }}>Notifikasi</h3>
+                    <button onClick={() => setShowNotifications(false)} style={{ background: 'none', border: 'none', color: '#999' }}><X size={18} /></button>
                   </div>
-                  <div className="notification-list">
-                    {outOfStockItems.length === 0 ? (
-                      <div className="empty-notif">
-                        <Info size={32} />
-                        <p>Semua stok aman</p>
+                  <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                    {notifications.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '20px' }}>
+                        <p style={{ color: '#aaa', fontSize: '13px' }}>Semua stok aman</p>
                       </div>
                     ) : (
-                      outOfStockItems.map((item, idx) => (
-                        <div key={idx} className="notif-item">
-                          <div className="notif-icon danger">!</div>
-                          <div className="notif-content">
-                            <p className="notif-title">Stok Menipis!</p>
-                            <p className="notif-desc"><strong>{item.name}</strong> sisa {item.stock} unit</p>
+                      notifications.map((item, idx) => (
+                        <div key={idx} style={{ display: 'flex', gap: '12px', padding: '10px', background: '#F9FAFB', borderRadius: '12px', marginBottom: '8px' }}>
+                          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#FEE2E2', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>!</div>
+                          <div>
+                            <p style={{ fontSize: '13px', fontWeight: '700' }}>Stok Menipis!</p>
+                            <p style={{ fontSize: '12px', color: '#666' }}>{item.nama_barang} sisa {item.stok}</p>
                           </div>
                         </div>
                       ))
@@ -137,7 +131,8 @@ const AppContent = ({
             isOpen={isSidebarOpen}
             onClose={() => setIsSidebarOpen(false)}
           />
-          <main className="main-content" style={{ flex: 1, overflowY: 'auto' }}>
+
+          <main className="main-content" style={{ flex: 1, overflowY: 'auto', position: 'relative' }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentView}
@@ -150,18 +145,20 @@ const AppContent = ({
               >
                 <Suspense fallback={
                   <div className="view-loading-skeleton" style={{ padding: '40px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    <div style={{ height: '40px', width: '200px', background: 'var(--bg-app)', borderRadius: '8px', animation: 'pulse 1.5s infinite' }}></div>
-                    <div style={{ flex: 1, background: 'var(--bg-app)', borderRadius: '12px', animation: 'pulse 1.5s infinite' }}></div>
+                    <div style={{ height: '40px', width: '200px', background: '#e5e7eb', borderRadius: '8px', animation: 'pulse 1.5s infinite' }}></div>
+                    <div style={{ flex: 1, background: '#e5e7eb', borderRadius: '12px', animation: 'pulse 1.5s infinite' }}></div>
                   </div>
                 }>
-                  {currentView === 'dashboard' && <Dashboard onNavigate={setCurrentView} />}
-                  {currentView === 'menu' && <Menu />}
-                  {currentView === 'order' && <Kasir />}
-                  {currentView === 'history' && <History />}
-                  {currentView === 'report' && <Report />}
-                  {currentView === 'stok-mutasi' && <StokMutasi />}
-                  {currentView === 'settings' && <Settings user={user} theme={theme} onToggleTheme={toggleTheme} />}
-                  {currentView === 'cs' && <CustomerService />}
+                  <ErrorBoundary key={currentView}>
+                    {currentView === 'dashboard' && <Dashboard onNavigate={setCurrentView} />}
+                    {currentView === 'menu' && <Menu />}
+                    {currentView === 'order' && <Kasir onToggleSidebar={() => setIsSidebarOpen(true)} />}
+                    {currentView === 'history' && <History />}
+                    {currentView === 'report' && <Report />}
+                    {currentView === 'stok-mutasi' && <StokMutasi />}
+                    {currentView === 'settings' && <Settings user={user} theme={theme} onToggleTheme={toggleTheme} />}
+                    {currentView === 'cs' && <CustomerService />}
+                  </ErrorBoundary>
                 </Suspense>
               </motion.div>
             </AnimatePresence>
@@ -170,30 +167,30 @@ const AppContent = ({
           {/* Global Logout Selection UI */}
           <AnimatePresence>
             {showLogoutConfirm && (
-              <div className="modal-overlay" style={{ zIndex: 9999 }}>
+              <div className="modal-overlay" style={{ zIndex: 10000 }}>
                 <motion.div
                   className="modal-content"
-                  style={{ width: 320, textAlign: 'center', padding: '30px' }}
+                  style={{ width: 320, textAlign: 'center', padding: '30px', background: '#fff', borderRadius: '24px' }}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                 >
-                  <h3 style={{ margin: '0 0 15px 0' }}>Keluar Aplikasi?</h3>
-                  <p style={{ color: 'var(--text-secondary)', marginBottom: 25, fontSize: 14 }}>
+                  <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', fontWeight: '800' }}>Keluar Aplikasi?</h3>
+                  <p style={{ color: '#666', marginBottom: 25, fontSize: 14 }}>
                     Anda akan diarahkan kembali ke halaman login.
                   </p>
                   <div style={{ display: 'flex', gap: 12 }}>
                     <button
                       onClick={() => setShowLogoutConfirm(false)}
-                      style={{ flex: 1, padding: 12, borderRadius: 10, background: 'var(--bg-app)', color: 'var(--text-primary)', fontWeight: 600 }}
+                      style={{ flex: 1, padding: 12, borderRadius: 14, background: '#F3F4F6', color: '#555', fontWeight: 600 }}
                     >
                       Kembali
                     </button>
                     <button
                       onClick={confirmLogout}
-                      style={{ flex: 1, padding: 12, borderRadius: 10, background: '#FF4D4F', color: 'white', fontWeight: 600 }}
+                      style={{ flex: 1, padding: 12, borderRadius: 14, background: '#FF4757', color: 'white', fontWeight: 600 }}
                     >
-                      Ya, Logout
+                      Ya, Keluar
                     </button>
                   </div>
                 </motion.div>
@@ -208,8 +205,14 @@ const AppContent = ({
 
 const App = () => {
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('pos_user');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('pos_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      console.error("Failed to parse user from localStorage:", e);
+      localStorage.removeItem('pos_user');
+      return null;
+    }
   });
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('pos_theme') || 'light';
@@ -232,43 +235,16 @@ const App = () => {
     const metaThemeColor = document.getElementById('theme-color-meta');
     if (theme === 'dark') {
       document.body.classList.add('dark-theme');
-      if (metaThemeColor) metaThemeColor.setAttribute('content', '#0A0A0A');
+      if (metaThemeColor) metaThemeColor.setAttribute('content', '#4A9BAD');
     } else {
       document.body.classList.remove('dark-theme');
-      if (metaThemeColor) metaThemeColor.setAttribute('content', '#73AABE');
+      if (metaThemeColor) metaThemeColor.setAttribute('content', '#4A9BAD');
     }
   }, [theme]);
-
-  useEffect(() => {
-    // Permission-based protection
-    if (user && user.role !== 'admin') {
-      const hasPermission = (view) => {
-        if (!user.permissions || user.permissions.length === 0) return true;
-        return user.permissions.includes(view);
-      };
-
-      const restrictedViews = ['menu', 'history', 'report', 'stok-mutasi'];
-      if (restrictedViews.includes(currentView) && !hasPermission(currentView)) {
-        setCurrentView('dashboard');
-      }
-    }
-  }, [user, currentView, setCurrentView]);
 
   const handleLoginSuccess = (userData) => {
     setUser(userData);
     localStorage.setItem('pos_user', JSON.stringify(userData));
-
-    // Redirect to dashboard on login if restricted
-    if (userData.role !== 'admin') {
-      const hasPermission = (view) => {
-        if (!userData.permissions || userData.permissions.length === 0) return true;
-        return userData.permissions.includes(view);
-      };
-      const restrictedViews = ['menu', 'history', 'report', 'stok-mutasi'];
-      if (restrictedViews.includes(currentView) && !hasPermission(currentView)) {
-        setCurrentView('dashboard');
-      }
-    }
   };
 
   const confirmLogout = () => {

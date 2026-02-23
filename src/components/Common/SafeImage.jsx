@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../../config';
 
-const SafeImage = ({ src, alt, className, fallback = '🍽️' }) => {
+const SafeImage = ({ src, alt, className, style, fallback = '🍽️' }) => {
     const [imageUrl, setImageUrl] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -66,14 +66,14 @@ const SafeImage = ({ src, alt, className, fallback = '🍽️' }) => {
     }, [src]);
 
     if (loading) {
-        return <div className={`${className} loading-shimmer`}></div>;
+        return <div className={`${className} loading-shimmer`} style={style}></div>;
     }
 
     if (!imageUrl) {
-        return <div className={className}>{fallback}</div>;
+        return <div className={className} style={style}>{fallback}</div>;
     }
 
-    return <img src={imageUrl} alt={alt} className={className} />;
+    return <img src={imageUrl} alt={alt} className={className} style={style} />;
 };
 
 export default SafeImage;

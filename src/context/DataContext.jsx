@@ -58,6 +58,10 @@ export const DataProvider = ({ children }) => {
         }
     }, []);
 
+    const lowStockItems = React.useMemo(() => {
+        return productsData.filter(p => Number(p.stok) <= (p.stok_minimum || 5));
+    }, [productsData]);
+
     // Initial fetch
     useEffect(() => {
         refreshDashboard();
@@ -69,6 +73,7 @@ export const DataProvider = ({ children }) => {
         dashboardData,
         productsData,
         ordersData,
+        lowStockItems,
         loadingDashboard,
         loadingProducts,
         loadingOrders,
@@ -78,7 +83,7 @@ export const DataProvider = ({ children }) => {
         setProductsData,
         setOrdersData
     }), [
-        dashboardData, productsData, ordersData,
+        dashboardData, productsData, ordersData, lowStockItems,
         loadingDashboard, loadingProducts, loadingOrders,
         refreshDashboard, refreshProducts, refreshOrders
     ]);

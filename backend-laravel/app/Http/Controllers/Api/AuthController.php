@@ -16,10 +16,11 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        $user = User::where('username', $request->username)
-                    ->orWhere('no_hp', $request->username)
-                    ->orWhere('nama_usaha', $request->username)
-                    ->first();
+        $user = User::where('email', $request->username)
+            ->orWhere('username', $request->username)
+            ->orWhere('no_hp', $request->username)
+            ->orWhere('nama_usaha', $request->username)
+            ->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
@@ -38,7 +39,9 @@ class AuthController extends Controller
                 'role' => $user->role,
                 'nama_usaha' => $user->nama_usaha,
                 'tipe_bisnis' => $user->tipe_bisnis,
+                'email' => $user->email,
                 'no_hp' => $user->no_hp,
+                'permissions' => $user->permissions ?? ['dashboard', 'menu', 'order', 'history', 'report', 'stok-mutasi', 'settings'],
             ]
         ]);
     }
@@ -49,7 +52,8 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'nama_usaha' => 'required|string|max:255',
             'tipe_bisnis' => 'required|string|max:255',
-            'no_hp' => 'required|string|unique:users,no_hp',
+            'email' => 'required|email|unique:users,email',
+            'no_hp' => 'nullable|string',
             'password' => 'required|string|min:6',
         ]);
 
@@ -57,10 +61,12 @@ class AuthController extends Controller
             'name' => $request->name,
             'nama_usaha' => $request->nama_usaha,
             'tipe_bisnis' => $request->tipe_bisnis,
+            'email' => $request->email,
             'no_hp' => $request->no_hp,
-            'username' => $request->no_hp, // Use phone as username
+            'username' => $request->email, // Use email as username
             'password' => Hash::make($request->password),
             'role' => 'admin', // Registered users are admins of their own shop
+            'permissions' => ['dashboard', 'menu', 'order', 'history', 'report', 'stok-mutasi', 'settings'], // Default admin permissions
         ]);
 
         return response()->json([

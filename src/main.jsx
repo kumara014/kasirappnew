@@ -4,11 +4,12 @@ import './index.css'
 import App from './App.jsx'
 
 import { NotificationProvider } from './context/NotificationContext.jsx'
+import ErrorBoundary from './components/Common/ErrorBoundary.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <NotificationProvider>
+    <ErrorBoundary>
       <App />
-    </NotificationProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

@@ -13,13 +13,13 @@ class RemoveUserAndDiscountFromTransaksi extends Migration
      */
     public function up()
     {
-        // Use raw SQL to be sure
-        try {
-            DB::statement('ALTER TABLE transaksi DROP FOREIGN KEY IF EXISTS transaksi_id_user_foreign');
-        } catch (\Exception $e) {}
-
         Schema::table('transaksi', function (Blueprint $table) {
             if (Schema::hasColumn('transaksi', 'id_user')) {
+                try {
+                    $table->dropForeign(['id_user']);
+                } catch (\Exception $e) {
+                    // Foreign key might not exist or have a different name
+                }
                 $table->dropColumn('id_user');
             }
             if (Schema::hasColumn('transaksi', 'diskon')) {
@@ -38,7 +38,7 @@ class RemoveUserAndDiscountFromTransaksi extends Migration
         Schema::table('transaksi', function (Blueprint $table) {
             $table->unsignedBigInteger('id_user')->nullable()->after('id_transaksi');
             $table->decimal('diskon', 15, 2)->default(0)->after('total_harga');
-            
+
             $table->foreign('id_user')->references('id_user')->on('users')->onDelete('cascade');
         });
     }

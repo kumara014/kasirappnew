@@ -25,6 +25,11 @@ Route::put('/barang/{id}', [BarangController::class, 'update']);
 Route::delete('/barang/{id}', [BarangController::class, 'destroy']);
 Route::get('/storage/{path}', [BarangController::class, 'showImage'])->where('path', '.*');
 
+// Kategori Routes
+Route::get('/categories', [App\Http\Controllers\Api\KategoriController::class, 'index']);
+Route::post('/categories', [App\Http\Controllers\Api\KategoriController::class, 'store']);
+Route::delete('/categories/{id}', [App\Http\Controllers\Api\KategoriController::class, 'destroy']);
+
 // Transaksi Routes
 Route::post('/transaksi', [TransaksiController::class, 'store']);
 Route::get('/transaksi', [TransaksiController::class, 'index']);
@@ -35,6 +40,7 @@ Route::get('/dashboard', [DashboardController::class, 'summary']);
 Route::get('/reports/sales', [ReportController::class, 'sales']);
 Route::get('/reports/items', [ReportController::class, 'items']);
 Route::get('/stok-mutasi', [BarangController::class, 'mutations']);
+Route::post('/stok-mutasi', [BarangController::class, 'storeMutation']);
 
 // User management
 Route::get('/users', [App\Http\Controllers\Api\UserController::class, 'index']);

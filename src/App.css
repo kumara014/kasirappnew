@@ -1,7 +1,7 @@
 .app-layout {
   min-height: 100vh;
-  padding-left: 90px;
-  /* Space for fixed sidebar on PC */
+  display: flex;
+  flex-direction: column;
 }
 
 .main-content {
@@ -16,11 +16,9 @@
 }
 
 /* Base Responsive */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .app-layout {
     padding-left: 0;
-    padding-top: 60px;
-    /* Space for top bar */
   }
 
   .mobile-top-bar {
@@ -270,7 +268,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .order-layout {
     grid-template-columns: 1fr;
     height: auto;

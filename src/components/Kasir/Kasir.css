@@ -1,16 +1,18 @@
 .kasir-layout {
-    display: grid;
-    grid-template-columns: 1fr 480px;
+    display: block;
     height: 100vh;
     overflow: hidden;
     background-color: var(--bg-app);
+    position: relative;
 }
 
 .pos-product-section {
     padding: var(--spacing-lg);
     display: flex;
     flex-direction: column;
-    overflow-y: hidden;
+    height: 100%;
+    padding-bottom: 80px;
+    /* Space for the sticking bottom bar */
 }
 
 .pos-header {
@@ -97,20 +99,20 @@
 
 .pos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px;
 }
 
 @media (max-width: 480px) {
     .pos-grid {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
         gap: 8px;
     }
 }
 
 .pos-card {
     background: var(--bg-surface);
-    border-radius: 16px;
+    border-radius: 12px;
     overflow: hidden;
     text-align: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -124,7 +126,7 @@
 
 .pos-card-img {
     width: 100%;
-    height: 100px;
+    height: 80px;
     background: #f8f9fa;
     display: flex;
     align-items: center;
@@ -150,7 +152,7 @@
 }
 
 .pos-card-info {
-    padding: 12px;
+    padding: 8px;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -169,8 +171,8 @@
 }
 
 .pos-card-info h4 {
-    font-size: 14px;
-    margin-bottom: 4px;
+    font-size: 13px;
+    margin-bottom: 2px;
     font-weight: 600;
     color: var(--text-primary);
     display: -webkit-box;
@@ -178,15 +180,15 @@
     line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    height: 38px;
-    line-height: 1.4;
+    height: 36px;
+    line-height: 1.3;
 }
 
 .pos-card-price {
     color: var(--text-primary);
     font-weight: 700;
-    font-size: 15px;
-    margin-bottom: 4px;
+    font-size: 14px;
+    margin-bottom: 2px;
 }
 
 .pos-card-stock {
@@ -225,11 +227,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    margin-top: 12px;
+    gap: 8px;
+    margin-top: 8px;
     background: var(--bg-app);
-    padding: 6px;
-    border-radius: 8px;
+    padding: 4px;
+    border-radius: 6px;
     border: 1px solid var(--border-light);
 }
 
@@ -332,9 +334,55 @@
     animation: pulse 0.3s ease-in-out;
 }
 
+/* Payment Modal Overlay - Centered */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
 .payment-modal {
     width: 400px;
     max-width: 90vw;
+    background: #fff;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow-y: auto;
+    max-height: 90vh;
+    animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleUp {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 .total-display {
@@ -417,37 +465,44 @@
 }
 
 .receipt-paper {
-    background: var(--bg-surface);
-    width: 100%;
-    padding: 20px;
-    border: 1px solid var(--border-light);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    background: #fff;
+    width: 320px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     font-family: 'Courier New', Courier, monospace;
-    font-size: 12px;
+    font-size: 13px;
+    color: #333;
+    position: relative;
+    border: none;
 }
 
-.receipt-header {
-    text-align: center;
-    margin-bottom: 10px;
+.receipt-paper::before,
+.receipt-paper::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background-size: 20px 10px;
+    background-repeat: repeat-x;
+}
+
+.receipt-paper::after {
+    bottom: -10px;
+    background-image: linear-gradient(-45deg, transparent 5px, #fff 5px), linear-gradient(45deg, transparent 5px, #fff 5px);
 }
 
 .receipt-header h4 {
     margin: 0 0 5px 0;
-    font-size: 16px;
-    text-transform: uppercase;
-}
-
-.receipt-header p {
-    margin: 2px 0;
-    color: var(--text-secondary);
+    font-size: 20px;
+    letter-spacing: 1px;
+    font-weight: 900;
 }
 
 .receipt-divider {
-    text-align: center;
-    color: var(--border-light);
-    margin: 5px 0;
-    overflow: hidden;
-    white-space: nowrap;
+    border-top: 1px dashed #ccc;
+    margin: 15px 0;
 }
 
 .receipt-item {
@@ -500,10 +555,114 @@
 
 .pos-cart-section {
     background: var(--bg-surface) !important;
-    border-left: 1px solid var(--border-light);
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: 90vh;
+    width: 480px;
+    max-width: 100vw;
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cart-popout-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.close-cart-btn {
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+.tagih-bottom-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 50;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-light);
+    padding: 12px 20px;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.tagih-btn {
+    width: 100%;
+    background: var(--primary-brand);
+    border: none;
+    border-radius: 12px;
+    padding: 14px 20px;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(115, 170, 190, 0.3);
+    transition: all 0.3s ease;
+}
+
+.tagih-btn:disabled {
+    background: #ccc;
+    box-shadow: none;
+    cursor: default;
+}
+
+.tagih-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(115, 170, 190, 0.5);
+}
+
+.tagih-btn-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tagih-count {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.tagih-text {
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.tagih-total {
+    font-size: 18px;
+    font-weight: 800;
 }
 
 .pos-cart-header {
@@ -570,13 +729,22 @@
     margin-top: 15px;
     margin-bottom: 25px;
     font-size: 24px;
+    font-weight: 800;
+    color: var(--primary-brand);
+}
+
+.discount-row:hover {
+    background: rgba(255, 77, 79, 0.05);
+    border-radius: 6px;
+}
+
+.discount-row span:last-child {
     font-weight: 700;
-    color: var(--text-primary);
 }
 
 .pay-btn {
     width: 100%;
-    background: #28C76F;
+    background: #73AABE;
     color: white;
     padding: 18px;
     border: none;
@@ -584,33 +752,23 @@
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 8px 20px rgba(40, 199, 111, 0.3);
+    box-shadow: 0 2px 2px #333;
     transition: all 0.3s ease;
 }
 
 .pay-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(40, 199, 111, 0.4);
+    box-shadow: 0 2px 10px #333;
 }
 
 @media (max-width: 768px) {
-    .kasir-layout {
-        grid-template-columns: 1fr;
-        height: auto;
-        padding-bottom: 100px;
-        /* Extra space for bottom nav */
-    }
-
     .pos-cart-section {
-        border-left: none;
-        border-top: 1px solid var(--border-light);
-        height: auto;
-        min-height: 400px;
+        width: 100%;
+        height: 95vh;
     }
 
-    .pos-product-section {
-        overflow-y: visible;
-        height: auto;
-        padding: 15px;
+    .tagih-bottom-bar {
+        bottom: 80px;
+        /* Adjust for footer navbar if exists */
     }
 }

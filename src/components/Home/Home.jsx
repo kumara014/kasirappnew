@@ -37,7 +37,7 @@ const Home = () => {
         <div className="home-container">
             <header className="dashboard-header">
                 <div className="home-logo-section">
-                    <div className="logo-circle-large">S</div>
+                    <img src="/logo pointly.png" alt="Logo" className="logo-img-large" />
                     <h1>Smart Kasir</h1>
                     <p>Sistem Kasir Pintar untuk Solusi Usaha Anda</p>
                 </div>
@@ -90,7 +90,7 @@ const Home = () => {
                         <h3>Daily Sales Trend</h3>
                     </div>
                     <div style={{ height: 250, background: '#f9f9f9', borderRadius: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px dashed #ddd' }}>
-                        {summary.chart_data.length > 0 ? (
+                        {summary?.chart_data?.length > 0 ? (
                             <div style={{ width: '100%', padding: 20 }}>
                                 {summary.chart_data.slice(-5).map((d, i) => (
                                     <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5, fontSize: 12 }}>
@@ -130,7 +130,7 @@ const Home = () => {
                         <h3>Trending Items</h3>
                     </div>
                     <div className="dish-list">
-                        {summary.trending.length === 0 ? <p>No trending items yet</p> :
+                        {summary?.trending?.length === 0 ? <p>No trending items yet</p> :
                             summary.trending.map((item, idx) => (
                                 <DishItem key={idx} name={item.name} order={item.total_sold} image="🍲" />
                             ))
@@ -143,7 +143,7 @@ const Home = () => {
                         <h3>Out of Stock</h3>
                     </div>
                     <div className="dish-list">
-                        {summary.out_of_stock.length === 0 ? <p>All items in stock</p> :
+                        {summary?.out_of_stock?.length === 0 ? <p>All items in stock</p> :
                             summary.out_of_stock.map((item, idx) => (
                                 <DishItem key={idx} name={item.name} order="Out" image="❌" disabled />
                             ))

@@ -11,7 +11,12 @@ class BarangController extends Controller
 {
     public function index()
     {
-        return response()->json(Barang::all());
+        $products = \DB::table('barang')
+            ->leftJoin('kategoris', 'barang.id_kategori', '=', 'kategoris.id_kategori')
+            ->select('barang.*', 'kategoris.nama_kategori')
+            ->get();
+
+        return response()->json($products);
     }
 
     public function store(Request $request)
@@ -20,6 +25,7 @@ class BarangController extends Controller
             'nama_barang' => 'required',
             'harga' => 'required|numeric',
             'stok' => 'required|integer',
+            'id_kategori' => 'nullable|exists:kategoris,id_kategori',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ]);
 
@@ -51,6 +57,7 @@ class BarangController extends Controller
             'nama_barang' => 'sometimes|required|string|max:255',
             'harga' => 'sometimes|required|numeric|min:0',
             'stok' => 'sometimes|required|integer|min:0',
+            'id_kategori' => 'sometimes|nullable|exists:kategoris,id_kategori',
             'gambar' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ]);
 
@@ -98,6 +105,44 @@ class BarangController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
         return response()->json($mutations);
+    }
+
+    public function storeMutation(Request $request)
+    {
+        $request->validate([
+            'id_barang' => 'required|exists:barang,id_barang',
+            'jenis' => 'required|in:masuk,keluar,rusak,koreksi,penjualan',
+            'jumlah' => 'required|numeric',
+            'keterangan' => 'nullable|string'
+        ]);
+
+        $barang = Barang::findOrFail($request->id_barang);
+        $jumlah = (float) $request->jumlah;
+
+        if ($request->jenis === 'masuk') {
+            $barang->stok += $jumlah;
+        } elseif (in_array($request->jenis, ['keluar', 'rusak', 'penjualan'])) {
+            $barang->stok -= $jumlah;
+        } elseif ($request->jenis === 'koreksi') {
+            // In koreksi, jumlah usually represents the NEW stock level
+            // but we store the difference or just set it
+            $barang->stok = $jumlah;
+        }
+
+        $barang->save();
+
+        $mutation = StokMutasi::create([
+            'id_barang' => $request->id_barang,
+            'jenis' => $request->jenis,
+            'jumlah' => $jumlah,
+            'keterangan' => $request->keterangan ?? '-'
+        ]);
+
+        return response()->json([
+            'message' => 'Mutasi stok berhasil disimpan',
+            'data' => $mutation,
+            'new_stock' => $barang->stok
+        ]);
     }
 
     public function showImage($path)
