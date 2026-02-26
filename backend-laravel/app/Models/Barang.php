@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Barang extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\Multitenantable;
 
     protected $table = 'barang';
     protected $primaryKey = 'id_barang';
@@ -16,8 +16,10 @@ class Barang extends Model
         'nama_barang',
         'harga',
         'stok',
+        'stok_minimum',
         'gambar',
         'id_kategori',
+        'user_id',
     ];
 
     public function kategori()

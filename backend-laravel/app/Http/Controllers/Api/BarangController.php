@@ -11,12 +11,7 @@ class BarangController extends Controller
 {
     public function index()
     {
-        $products = \DB::table('barang')
-            ->leftJoin('kategoris', 'barang.id_kategori', '=', 'kategoris.id_kategori')
-            ->select('barang.*', 'kategoris.nama_kategori')
-            ->get();
-
-        return response()->json($products);
+        return Barang::with('kategori')->latest()->paginate(15);
     }
 
     public function store(Request $request)
@@ -25,11 +20,18 @@ class BarangController extends Controller
             'nama_barang' => 'required',
             'harga' => 'required|numeric',
             'stok' => 'required|integer',
-            'id_kategori' => 'nullable|exists:kategoris,id_kategori',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+            'stok_minimum' => 'nullable|integer|min:0',
+            'id_kategori' => [
+                'nullable',
+                \Illuminate\Validation\Rule::exists('kategoris', 'id_kategori')->where(function ($query) {
+                    $query->where('user_id', auth()->user()->getOwnerId());
+                }),
+            ],
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240'
         ]);
 
         $data = $request->all();
+        $data['user_id'] = auth()->user()->getOwnerId();
 
         if ($request->hasFile('gambar')) {
             $path = $request->file('gambar')->store('barang', 'public');
@@ -57,8 +59,15 @@ class BarangController extends Controller
             'nama_barang' => 'sometimes|required|string|max:255',
             'harga' => 'sometimes|required|numeric|min:0',
             'stok' => 'sometimes|required|integer|min:0',
-            'id_kategori' => 'sometimes|nullable|exists:kategoris,id_kategori',
-            'gambar' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+            'stok_minimum' => 'sometimes|nullable|integer|min:0',
+            'id_kategori' => [
+                'sometimes',
+                'nullable',
+                \Illuminate\Validation\Rule::exists('kategoris', 'id_kategori')->where(function ($query) {
+                    $query->where('user_id', auth()->user()->getOwnerId());
+                }),
+            ],
+            'gambar' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240'
         ]);
 
         $barang = Barang::findOrFail($id);

@@ -4,6 +4,7 @@
     overflow: hidden;
     background-color: var(--bg-app);
     position: relative;
+    color: var(--text-primary);
 }
 
 .pos-product-section {
@@ -87,7 +88,7 @@
     background: var(--primary-brand) !important;
     border-color: var(--primary-brand);
     color: #fff !important;
-    box-shadow: 0 4px 12px rgba(115, 170, 190, 0.3);
+    box-shadow: 0 4px 12px rgba(74, 155, 173, 0.3);
 }
 
 .pos-grid-container {
@@ -115,7 +116,7 @@
     border-radius: 12px;
     overflow: hidden;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--shadow-sm);
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid var(--border-light);
@@ -127,7 +128,7 @@
 .pos-card-img {
     width: 100%;
     height: 80px;
-    background: #f8f9fa;
+    background: var(--bg-app-alt);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -149,6 +150,7 @@
 .pos-card-no-img {
     font-size: 32px;
     opacity: 0.5;
+    color: var(--text-tertiary);
 }
 
 .pos-card-info {
@@ -161,13 +163,13 @@
 
 .pos-card.active-card {
     border-color: var(--primary-brand);
-    background-color: rgba(115, 170, 190, 0.05);
-    box-shadow: 0 4px 15px rgba(115, 170, 190, 0.15);
+    background-color: var(--primary-light);
+    box-shadow: 0 4px 15px rgba(74, 155, 173, 0.15);
 }
 
 .pos-card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-md);
 }
 
 .pos-card-info h4 {
@@ -185,7 +187,7 @@
 }
 
 .pos-card-price {
-    color: var(--text-primary);
+    color: var(--primary-brand);
     font-weight: 700;
     font-size: 14px;
     margin-bottom: 2px;
@@ -193,7 +195,7 @@
 
 .pos-card-stock {
     font-size: 11px;
-    color: var(--text-secondary);
+    color: var(--text-tertiary);
     opacity: 0.8;
 }
 
@@ -214,7 +216,7 @@
     position: absolute;
     top: 10px;
     right: 10px;
-    background: #FF6B6B;
+    background: var(--status-red);
     color: white;
     font-size: 9px;
     padding: 2px 6px;
@@ -229,7 +231,7 @@
     justify-content: center;
     gap: 8px;
     margin-top: 8px;
-    background: var(--bg-app);
+    background: var(--bg-app-alt);
     padding: 4px;
     border-radius: 6px;
     border: 1px solid var(--border-light);
@@ -244,7 +246,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-sm);
     transition: all 0.2s;
 }
 
@@ -267,6 +269,7 @@
     font-weight: 700;
     font-size: 15px;
     min-width: 20px;
+    color: var(--text-primary);
 }
 
 .promo-section {
@@ -308,11 +311,11 @@
     background: var(--primary-brand);
     color: white;
     border-color: var(--primary-brand);
-    box-shadow: 0 4px 8px rgba(115, 170, 190, 0.2);
+    box-shadow: 0 4px 8px rgba(74, 155, 173, 0.2);
 }
 
 .summary-discount {
-    color: #EA5455 !important;
+    color: var(--status-red) !important;
     font-weight: 600;
 }
 

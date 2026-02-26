@@ -46,7 +46,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 10px 30px rgba(115, 170, 190, 0.4);
+    box-shadow: 0 10px 30px var(--status-blue-light);
     animation: blobMorph 10s infinite alternate ease-in-out;
 }
 
@@ -64,7 +64,7 @@
     font-size: 2.5rem;
     font-weight: 800;
     margin: 0;
-    background: linear-gradient(135deg, var(--primary-brand), #4a90a4);
+    background: linear-gradient(135deg, var(--primary-brand), var(--primary-dark));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;

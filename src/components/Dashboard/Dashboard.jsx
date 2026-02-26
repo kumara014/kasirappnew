@@ -24,7 +24,14 @@ const TEAL_DARK = "#357585";
 const formatRp = (n) => "Rp" + new Intl.NumberFormat("id-ID").format(n || 0);
 
 export default function Dashboard({ onNavigate }) {
-    const { dashboardData, ordersData, loadingDashboard } = useData();
+    const { dashboardData, ordersData, loadingDashboard, user } = useData();
+
+    const hasPermission = (perm) => {
+        if (!user) return false;
+        if (user.role === 'admin') return true;
+        if (!user.permissions || (user.permissions || []).length === 0) return true;
+        return user.permissions.includes(perm);
+    };
 
     const summary = dashboardData || {
         omzet_today: 0,
@@ -65,7 +72,7 @@ export default function Dashboard({ onNavigate }) {
         : [];
 
     return (
-        <div className="dashboard-root" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#F5F7F8", minHeight: "100%", position: "relative" }}>
+        <div className="dashboard-root" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "var(--bg-app)", minHeight: "100%", position: "relative" }}>
             <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         
@@ -77,7 +84,7 @@ export default function Dashboard({ onNavigate }) {
 
         /* Header */
         .dash-header {
-          background: ${TEAL};
+          background: var(--primary-brand);
           padding: 40px 20px 80px;
           position: relative; overflow: hidden;
           color: #fff;
@@ -92,61 +99,61 @@ export default function Dashboard({ onNavigate }) {
         /* Stats */
         .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: -50px 16px 0; position: relative; z-index: 5; }
         .stat-card { 
-            background: #fff; 
+            background: var(--bg-surface); 
             border-radius: 20px; 
             padding: 16px 12px; 
-            box-shadow: 0 10px 25px rgba(74,155,173,0.12), 0 2px 5px rgba(0,0,0,0.04); 
-            border: 1px solid #fff;
+            box-shadow: var(--shadow-md); 
+            border: 1px solid var(--border-light);
             transition: transform 0.2s;
         }
         .stat-card:active { transform: scale(0.98); }
-        .stat-icon { font-size: 24px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 12px; background: ${TEAL_LIGHT}; color: ${TEAL}; }
-        .stat-val { font-size: 14px; font-weight: 800; color: #111; letter-spacing: -0.3px; line-height: 1.2; word-break: break-all; }
-        .stat-label { font-size: 11px; color: #888; font-weight: 600; margin-top: 4px; }
+        .stat-icon { font-size: 24px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 12px; background: var(--primary-light); color: var(--primary-brand); }
+        .stat-val { font-size: 14px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px; line-height: 1.2; word-break: break-all; }
+        .stat-label { font-size: 11px; color: var(--text-tertiary); font-weight: 600; margin-top: 4px; }
         .stat-badge { display: inline-flex; align-items: center; font-size: 10px; font-weight: 700; margin-top: 8px; padding: 3px 8px; border-radius: 8px; }
-        .stat-badge.up { background: #E8F7EF; color: #2ECC71; }
-        .stat-badge.down { background: #FFF0F1; color: #FF4757; }
+        .stat-badge.up { background: var(--status-green-light); color: var(--status-green); }
+        .stat-badge.down { background: var(--status-red-light); color: var(--status-red); }
 
         /* Section */
         .section { padding: 24px 16px 0; }
         .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-        .section-title { font-size: 16px; font-weight: 800; color: #111; letter-spacing: -0.3px; }
-        .see-all { font-size: 13px; font-weight: 600; color: ${TEAL}; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .section-title { font-size: 16px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px; }
+        .see-all { font-size: 13px; font-weight: 600; color: var(--primary-brand); cursor: pointer; display: flex; align-items: center; gap: 4px; }
 
         /* Quick actions */
         .actions-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .action-btn { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 10px; background: #fff; border-radius: 18px; border: 1.5px solid #F0F2F4; cursor: pointer; transition: all 0.2s; }
-        .action-btn:active { transform: scale(0.92); background: #fdfdfd; }
+        .action-btn { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 10px; background: var(--bg-surface); border-radius: 18px; border: 1.5px solid var(--border-light); cursor: pointer; transition: all 0.2s; }
+        .action-btn:active { transform: scale(0.92); background: var(--bg-app-alt); }
         .action-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; transition: transform 0.2s; }
         .action-btn:hover .action-icon { transform: translateY(-2px); }
-        .action-label { font-size: 12px; font-weight: 700; text-align: center; color: #555; }
+        .action-label { font-size: 12px; font-weight: 700; text-align: center; color: var(--text-secondary); }
 
         /* Chart */
-        .chart-card { background: #fff; border-radius: 20px; padding: 20px; border: 1.5px solid #F0F2F4; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+        .chart-card { background: var(--bg-surface); border-radius: 20px; padding: 20px; border: 1.5px solid var(--border-light); box-shadow: var(--shadow-sm); }
         .chart-summary { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
-        .chart-total { font-size: 24px; font-weight: 800; color: #111; letter-spacing: -0.5px; }
-        .chart-period { font-size: 12px; color: #aaa; margin-top: 2px; font-weight: 500; }
+        .chart-total { font-size: 24px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px; }
+        .chart-period { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; font-weight: 500; }
         .chart-bars { display: flex; align-items: flex-end; gap: 10px; height: 100px; padding-top: 10px; }
         .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
         .bar { border-radius: 8px 8px 4px 4px; width: 100%; min-height: 6px; transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-        .bar-label { font-size: 11px; font-weight: 700; color: #bbb; }
-        .bar-label.today { color: ${TEAL}; }
+        .bar-label { font-size: 11px; font-weight: 700; color: var(--text-tertiary); }
+        .bar-label.today { color: var(--primary-brand); }
 
         /* Transactions */
-        .trx-item { background: #fff; border-radius: 18px; padding: 14px 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; border: 1.5px solid #F0F2F4; transition: transform 0.1s; }
+        .trx-item { background: var(--bg-surface); border-radius: 18px; padding: 14px 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; border: 1.5px solid var(--border-light); transition: transform 0.1s; }
         .trx-item:active { transform: scale(0.98); }
-        .trx-icon { width: 46px; height: 46px; border-radius: 14px; background: ${TEAL_LIGHT}; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; color: ${TEAL}; }
+        .trx-icon { width: 46px; height: 46px; border-radius: 14px; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; color: var(--primary-brand); }
         .trx-info { flex: 1; min-width: 0; }
-        .trx-invoice { font-size: 14px; font-weight: 700; color: #111; }
-        .trx-meta { font-size: 12px; color: #888; margin-top: 3px; font-weight: 500; }
-        .method-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 8px; background: #F0F2F4; color: #666; text-transform: uppercase; }
+        .trx-invoice { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+        .trx-meta { font-size: 12px; color: var(--text-secondary); margin-top: 3px; font-weight: 500; }
+        .method-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 8px; background: var(--bg-app-alt); color: var(--text-secondary); text-transform: uppercase; }
         .trx-right { text-align: right; flex-shrink: 0; }
-        .trx-total { font-size: 15px; font-weight: 800; color: #111; }
-        .trx-time { font-size: 11px; color: #aaa; margin-top: 3px; font-weight: 500; }
+        .trx-total { font-size: 15px; font-weight: 800; color: var(--text-primary); }
+        .trx-time { font-size: 11px; color: var(--text-tertiary); margin-top: 3px; font-weight: 500; }
 
         /* FAB */
-        .fab { position: fixed; bottom: 24px; right: 24px; width: 60px; height: 60px; border-radius: 20px; background: ${TEAL}; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 8px 25px ${TEAL}55; z-index: 35; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .fab:active { transform: scale(0.9); box-shadow: 0 4px 10px ${TEAL}33; }
+        .fab { position: fixed; bottom: 24px; right: 24px; width: 60px; height: 60px; border-radius: 20px; background: var(--primary-brand); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 8px 25px rgba(74, 155, 173, 0.35); z-index: 35; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .fab:active { transform: scale(0.9); box-shadow: 0 4px 10px rgba(74, 155, 173, 0.2); }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .dashboard-content > * { animation: fadeIn 0.4s ease-out both; }
@@ -194,11 +201,11 @@ export default function Dashboard({ onNavigate }) {
                     </div>
                     <div className="actions-grid">
                         {[
-                            { id: 'order', icon: <ShoppingCart />, label: "Kasir", bg: TEAL_LIGHT, color: TEAL },
-                            { id: 'menu', icon: <Grid />, label: "Produk", bg: "#FFF3E8", color: "#F08030" },
-                            { id: 'report', icon: <PieChart />, label: "Laporan", bg: "#EEF0FF", color: "#6C63FF" },
-                            { id: 'history', icon: <Clock />, label: "Riwayat", bg: "#FFF0F4", color: "#FF4B7B" },
-                        ].map((a) => (
+                            { id: 'order', icon: <ShoppingCart />, label: "Kasir", bg: 'var(--primary-light)', color: 'var(--primary-brand)', permission: 'Kasir' },
+                            { id: 'menu', icon: <Grid />, label: "Produk", bg: 'var(--status-orange-light)', color: 'var(--status-orange)', permission: 'Kelola Produk' },
+                            { id: 'report', icon: <PieChart />, label: "Laporan", bg: 'var(--status-blue-light)', color: 'var(--status-blue)', permission: 'Laporan' },
+                            { id: 'history', icon: <Clock />, label: "Riwayat", bg: 'var(--status-red-light)', color: 'var(--status-red)', permission: 'Riwayat' },
+                        ].filter(a => hasPermission(a.permission)).map((a) => (
                             <div key={a.id} className="action-btn" onClick={() => { haptic.tap(); onNavigate(a.id); }}>
                                 <div className="action-icon" style={{ background: a.bg, color: a.color }}>{a.icon}</div>
                                 <div className="action-label">{a.label}</div>
@@ -220,14 +227,14 @@ export default function Dashboard({ onNavigate }) {
                                 <div className="chart-period">Total 7 hari terakhir</div>
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
-                                <div style={{ width: 10, height: 10, borderRadius: 3, background: TEAL }} />
-                                <span style={{ color: "#aaa", fontWeight: 600 }}>Hari ini</span>
+                                <div style={{ width: 10, height: 10, borderRadius: 3, background: 'var(--primary-brand)' }} />
+                                <span style={{ color: "var(--text-tertiary)", fontWeight: 600 }}>Hari ini</span>
                             </div>
                         </div>
                         <div className="chart-bars">
                             {weekData.map((d, i) => (
                                 <div key={i} className="bar-wrap">
-                                    <div className="bar" style={{ height: `${(d.val / maxVal) * 100}%`, background: d.today ? TEAL : "#E8F4F6" }} />
+                                    <div className="bar" style={{ height: `${(d.val / maxVal) * 100}%`, background: d.today ? 'var(--primary-brand)' : 'var(--bg-app-alt)' }} />
                                     <div className={`bar-label${d.today ? " today" : ""}`}>{d.day}</div>
                                 </div>
                             ))}
@@ -257,7 +264,7 @@ export default function Dashboard({ onNavigate }) {
                             </div>
                         );
                     }) : (
-                        <div style={{ textAlign: 'center', padding: '40px 0', color: '#aaa', fontSize: '14px' }}>
+                        <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-tertiary)', fontSize: '14px' }}>
                             Belum ada transaksi hari ini
                         </div>
                     )}

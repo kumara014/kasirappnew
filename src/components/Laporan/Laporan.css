@@ -204,6 +204,123 @@
     border-collapse: collapse;
 }
 
+/* Laporan CSS */
+.laporan-container {
+    background: var(--bg-app);
+    color: var(--text-primary);
+}
+
+.topbar {
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.topbar-title {
+    color: var(--text-primary);
+}
+
+.content {
+    background: var(--bg-app);
+}
+
+/* KPI Cards */
+.kpi-card-omzet {
+    background: var(--primary-brand);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(74, 155, 173, 0.2);
+}
+
+.kpi-card-stat {
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border-light);
+}
+
+.kpi-label {
+    color: var(--text-tertiary);
+}
+
+.kpi-val {
+    color: var(--text-primary);
+}
+
+/* Charts */
+.chart-box {
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border-light);
+}
+
+.chart-title {
+    color: var(--text-primary);
+}
+
+.chart-subtitle {
+    color: var(--text-tertiary);
+}
+
+/* Donut Chart Text */
+.donut-text-main {
+    fill: var(--text-primary);
+}
+
+.donut-text-sub {
+    fill: var(--text-tertiary);
+}
+
+/* List Items */
+.list-item {
+    border-bottom: 1px solid var(--border-light);
+}
+
+.list-item-title {
+    color: var(--text-primary);
+}
+
+.list-item-subtitle {
+    color: var(--text-tertiary);
+}
+
+.list-item-val {
+    color: var(--text-primary);
+}
+
+.list-item-subval {
+    color: var(--primary-brand);
+}
+
+/* Progress Bars */
+.progress-bg {
+    background: var(--border-light);
+}
+
+/* Quick Stats */
+.quick-stats-row {
+    border-bottom: 1px solid var(--border-light);
+}
+
+.quick-stats-label {
+    color: var(--text-secondary);
+}
+
+.quick-stats-val {
+    color: var(--text-primary);
+}
+
+/* Tabs */
+.tab-btn {
+    color: var(--text-tertiary);
+    border-bottom: 2.5px solid transparent;
+}
+
+.tab-btn.active {
+    color: var(--primary-brand);
+    border-bottom-color: var(--primary-brand);
+}
+
+.loader {
+    border: 4px solid var(--border-light);
+    border-top: 4px solid var(--primary-brand);
+}
+
 .report-table th {
     text-align: left;
     padding: 15px;

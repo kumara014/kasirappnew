@@ -21,7 +21,7 @@ const CategoryManager = ({ onClose, onUpdate }) => {
         try {
             const res = await apiFetch('/categories');
             const data = await res.json();
-            setCategories(data);
+            setCategories(Array.isArray(data) ? data : []);
         } catch (error) {
             notify('Gagal memuat kategori', 'error');
         } finally {
@@ -41,7 +41,10 @@ const CategoryManager = ({ onClose, onUpdate }) => {
                 body: JSON.stringify({ nama_kategori: newCategory })
             });
 
-            if (!res.ok) throw new Error('Gagal menambah kategori');
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.message || 'Gagal menambah kategori');
+            }
 
             haptic.success();
             notify('Kategori berhasil ditambahkan', 'success');
@@ -132,7 +135,7 @@ const CategoryManager = ({ onClose, onUpdate }) => {
                                             </td>
                                         </tr>
                                     ))}
-                                    {categories.length === 0 && (
+                                    {(categories || []).length === 0 && (
                                         <tr><td colSpan="2" style={{ textAlign: 'center' }}>Belum ada kategori</td></tr>
                                     )}
                                 </tbody>

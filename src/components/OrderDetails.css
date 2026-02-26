@@ -5,7 +5,7 @@
     display: flex;
     flex-direction: column;
     border-left: 1px solid var(--border-light);
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.02);
+    box-shadow: var(--shadow-sm);
 }
 
 .details-header {
@@ -41,7 +41,7 @@
 }
 
 .items-list::-webkit-scrollbar-thumb {
-    background-color: #eee;
+    background-color: var(--border-strong);
 }
 
 .order-item {
@@ -53,7 +53,7 @@
 .item-image {
     width: 50px;
     height: 50px;
-    background-color: var(--bg-primary-light);
+    background-color: var(--primary-light);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -155,7 +155,7 @@
 }
 
 .method-btn.active {
-    background-color: var(--bg-primary-light);
+    background-color: var(--primary-light);
     border-color: var(--primary-brand);
     color: var(--primary-brand);
 }
@@ -168,11 +168,11 @@
     border-radius: var(--radius-lg);
     font-size: 1rem;
     font-weight: 600;
-    box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+    box-shadow: 0 4px 12px var(--status-orange-light);
     transition: transform 0.2s;
 }
 
 .pay-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(255, 140, 0, 0.4);
+    box-shadow: 0 6px 16px var(--status-orange-light);
 }

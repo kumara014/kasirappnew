@@ -4,19 +4,31 @@
   --font-heading: 'Lexend', sans-serif;
 
   /* Color Palette - Blue Theme Identity */
-  --primary-brand: #73AABE;
-  --primary-dark: #5e8da0;
-  --primary-light: #9dc4d3;
+  --primary-brand: #4A9BAD;
+  --primary-dark: #357585;
+  --primary-light: #EAF5F7;
   --accent-orange: #FF8A65;
 
   --bg-app: #F8F9FD;
+  --bg-app-alt: #F1F3F5;
   --bg-surface: #FFFFFF;
-  --text-primary: #1A202C;
-  --text-secondary: #718096;
-  --status-green: #48BB78;
-  --status-red: #F56565;
-  --border-light: #EDF2F7;
-  --bg-primary-light: #EBF4F7;
+  --bg-surface-alt: #FAFBFC;
+
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --text-tertiary: #9CA3AF;
+
+  --status-green: #10B981;
+  --status-green-light: rgba(16, 185, 129, 0.12);
+  --status-red: #EF4444;
+  --status-red-light: rgba(239, 68, 68, 0.12);
+  --status-orange: #F59E0B;
+  --status-orange-light: rgba(245, 158, 11, 0.12);
+  --status-blue: #6366F1;
+  --status-blue-light: rgba(99, 102, 241, 0.12);
+
+  --border-light: #F0F2F4;
+  --border-strong: #E5E7EB;
 
   /* Spacing */
   --spacing-xs: 0.5rem;
@@ -24,10 +36,8 @@
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
-  --spacing-2xl: 3rem;
 
   /* Border Radius */
-  --radius-xs: 6px;
   --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 18px;
@@ -36,10 +46,10 @@
 
   /* Shadows */
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 8px 16px rgba(115, 170, 190, 0.08);
-  --shadow-lg: 0 16px 32px rgba(115, 170, 190, 0.12);
+  --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.1);
 
-  --transition-speed: 0.3s;
+  --transition-speed: 0.2s;
 
   /* Glassmorphism Presets */
   --glass-bg: rgba(255, 255, 255, 0.75);
@@ -48,19 +58,23 @@
 }
 
 .dark-theme {
-  --bg-app: #0A0A0B;
-  --bg-surface: #121214;
-  --text-primary: #F7FAFC;
-  --text-secondary: #A0AEC0;
-  --text-tertiary: #4A5568;
-  --border-light: rgba(255, 255, 255, 0.06);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 12px 24px rgba(0, 0, 0, 0.4);
-  --bg-primary-light: rgba(115, 170, 190, 0.1);
+  --bg-app: #0F172A;
+  --bg-app-alt: #1E293B;
+  --bg-surface: #1E293B;
+  --bg-surface-alt: #334155;
 
-  /* Dark Glass */
-  --glass-bg: rgba(18, 18, 20, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.04);
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-tertiary: #64748B;
+
+  --border-light: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.12);
+
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 12px 24px rgba(0, 0, 0, 0.5);
+
+  --glass-bg: rgba(15, 23, 42, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.05);
 }
 
 * {
@@ -324,4 +338,24 @@ ul {
     animation: none !important;
     opacity: 1 !important;
   }
+
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.loading-shimmer {
+  background: linear-gradient(90deg,
+      var(--bg-app-alt) 25%,
+      var(--border-light) 50%,
+      var(--bg-app-alt) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
 }

@@ -10,7 +10,7 @@ return new class extends Migration {
         if (!Schema::hasColumn('kategoris', 'user_id')) {
             Schema::table('kategoris', function (Blueprint $table) {
                 $table->unsignedBigInteger('user_id')->nullable()->after('id_kategori');
-                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+                $table->foreign('user_id')->references('id_user')->on('users')->onDelete('cascade');
             });
         }
     }

@@ -90,7 +90,7 @@
     font-size: 24px;
     font-weight: 800;
     margin: 0 auto 15px;
-    box-shadow: 0 4px 15px rgba(115, 170, 190, 0.3);
+    box-shadow: 0 4px 15px var(--status-blue-light);
 }
 
 .login-header h2 {
@@ -112,14 +112,14 @@
 }
 
 .login-error-msg {
-    background: #FFEBEB;
-    color: #FF6B6B;
+    background: var(--status-red-light);
+    color: var(--status-red);
     padding: 10px;
     border-radius: 8px;
     font-size: 13px;
     font-weight: 500;
     text-align: center;
-    border: 1px solid #FFD1D1;
+    border: 1px solid var(--status-red);
 }
 
 .login-input-group {
@@ -141,18 +141,18 @@
 .login-input-group select {
     padding: 14px;
     border-radius: 12px;
-    border: 1.5px solid #eee;
+    border: 1.5px solid var(--border-light);
     outline: none;
     transition: all 0.3s;
     font-size: 15px;
     width: 100%;
     box-sizing: border-box;
-    background: var(--bg-primary-light);
+    background: var(--bg-app-alt);
 }
 
 .login-input-group input:focus {
     border-color: var(--primary-brand);
-    box-shadow: 0 0 0 4px rgba(115, 170, 190, 0.1);
+    box-shadow: 0 0 0 4px var(--primary-light);
 }
 
 .login-submit-btn {
@@ -173,9 +173,9 @@
 }
 
 .login-submit-btn:hover {
-    background: #6299AB;
+    background: var(--primary-dark);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(115, 170, 190, 0.3);
+    box-shadow: 0 6px 20px var(--status-blue-light);
 }
 
 .login-submit-btn:disabled {
@@ -187,7 +187,7 @@
     text-align: center;
     margin-top: 30px;
     padding-top: 20px;
-    border-top: 1px solid #f0f0f0;
+    border-top: 1px solid var(--border-light);
 }
 
 .login-footer p {

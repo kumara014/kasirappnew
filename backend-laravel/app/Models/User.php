@@ -27,8 +27,8 @@ class User extends Authenticatable
         'email',
         'nama_usaha',
         'tipe_bisnis',
-        'no_hp',
         'permissions',
+        'owner_id',
     ];
 
     /**
@@ -50,4 +50,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'permissions' => 'array',
     ];
+
+    public function getOwnerId()
+    {
+        return $this->owner_id ?: $this->id_user;
+    }
 }

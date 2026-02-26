@@ -22,8 +22,8 @@
 }
 
 .tab-btn.active {
-    background-color: #FFF4E5;
-    color: var(--primary-orange);
+    background-color: var(--status-orange-light);
+    color: var(--status-orange);
 }
 
 .orders-scroll-area {
@@ -42,7 +42,7 @@
 }
 
 .orders-scroll-area::-webkit-scrollbar-thumb {
-    background-color: #ddd;
+    background-color: var(--border-strong);
     border-radius: 4px;
 }
 
@@ -62,9 +62,8 @@
 }
 
 .order-card.selected {
-    border: 1px solid var(--primary-orange);
-    background-color: #FFFDF9;
-    /* Very subtle warm tint */
+    border: 1px solid var(--primary-brand);
+    background-color: var(--primary-light);
 }
 
 .card-header {

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisasi Flowchart Pointly POS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4A9BAD;
+            --primary-dark: #357585;
+            --primary-light: #EAF5F7;
+            --bg: #0F172A;
+            --surface: #1E293B;
+            --text-main: #F1F5F9;
+            --text-dim: #94A3B8;
+            --accent: #38BDF8;
+            --success: #22C55E;
+            --danger: #EF4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px 20px;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 80px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            max-width: 600px;
+        }
+
+        .flow-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 60px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .node {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 24px 32px;
+            width: 280px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+        }
+
+        .node:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px -10px rgba(74, 155, 173, 0.3);
+        }
+
+        .node.auth {
+            border-left: 6px solid var(--accent);
+        }
+
+        .node.core {
+            border-left: 6px solid var(--primary);
+        }
+
+        .node.transaction {
+            border-left: 6px solid var(--success);
+        }
+
+        .node.setting {
+            border-left: 6px solid var(--text-dim);
+        }
+
+        .node-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .node-title {
+            font-weight: 800;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+            letter-spacing: -0.5px;
+        }
+
+        .node-desc {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            line-height: 1.4;
+        }
+
+        .connector {
+            position: absolute;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary), transparent);
+            z-index: 1;
+            height: 60px;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .connector::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid var(--primary-dark);
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            width: 100%;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .node {
+            animation: fadeInUp 0.6s ease-out backwards;
+        }
+
+        .node:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+
+        .node:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+
+        .node:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        .badge {
+            position: absolute;
+            top: -12px;
+            right: 12px;
+            background: var(--primary);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .glow {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: var(--primary);
+            filter: blur(150px);
+            opacity: 0.1;
+            border-radius: 50%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glow-1 {
+            top: 10%;
+            left: -10%;
+        }
+
+        .glow-2 {
+            bottom: 10%;
+            right: -10%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <div class="header">
+        <h1>App Flow Visualization</h1>
+        <p>Alur kerja cerdas dari Pointly POS. Dari manajemen stok hingga transaksi kasir yang mulus.</p>
+    </div>
+
+    <div class="flow-container">
+        <!-- Entry -->
+        <div class="node auth">
+            <span class="node-icon">🔐</span>
+            <div class="node-title">Autentikasi</div>
+            <p class="node-desc">Login Admin/Kasir & Registrasi Usaha Baru</p>
+            <div class="connector"></div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="node core">
+            <span class="badge">Main Hub</span>
+            <span class="node-icon">📊</span>
+            <div class="node-title">Dashboard Overview</div>
+            <p class="node-desc">Statistik Penjualan & Notifikasi Stok Kritis</p>
+            <div class="connector"></div>
+        </div>
+
+        <!-- Middle Actions -->
+        <div class="grid-layout">
+            <div class="node transaction" style="width: auto;">
+                <span class="node-icon">🛒</span>
+                <div class="node-title">Proses POS</div>
+                <p class="node-desc">Pilih Produk -> Keranjang -> Bayar -> Cetak Struk</p>
+            </div>
+            <div class="node core" style="width: auto;">
+                <span class="node-icon">📦</span>
+                <div class="node-title">Kelola Inventori</div>
+                <p class="node-desc">Manajemen Produk, Kategori & Mutasi Stok</p>
+            </div>
+        </div>
+
+        <div class="node core" style="margin-top: 40px;">
+            <div class="connector" style="top: -100px; height: 100px;"></div>
+            <span class="node-icon">📈</span>
+            <div class="node-title">Laporan & Riwayat</div>
+            <p class="node-desc">Analisis Tren Penjualan & Rekap Transaksi</p>
+            <div class="connector"></div>
+        </div>
+
+        <div class="node setting">
+            <span class="node-icon">⚙️</span>
+            <div class="node-title">Pengaturan & Karyawan</div>
+            <p class="node-desc">Atur Profil Toko & Hak Akses Karyawan</p>
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -31,10 +31,10 @@ class ErrorBoundary extends React.Component {
                     padding: '20px',
                     textAlign: 'center',
                     fontFamily: 'system-ui, sans-serif',
-                    background: '#f8f9fd'
+                    background: 'var(--bg-app)'
                 }}>
-                    <h1 style={{ color: '#ff4d4f', marginBottom: '10px' }}>Waduh! Sepertinya ada masalah.</h1>
-                    <p style={{ color: '#718096', marginBottom: '20px', maxWidth: '400px' }}>
+                    <h1 style={{ color: 'var(--status-red)', marginBottom: '10px' }}>Waduh! Sepertinya ada masalah.</h1>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '20px', maxWidth: '400px' }}>
                         Aplikasi mengalami kesalahan sistem. Anda bisa mencoba menyegarkan halaman atau melaunching ulang data.
                     </p>
                     <div style={{ display: 'flex', gap: '10px' }}>
@@ -43,7 +43,7 @@ class ErrorBoundary extends React.Component {
                             style={{
                                 padding: '10px 20px',
                                 borderRadius: '8px',
-                                background: '#73AABE',
+                                background: 'var(--primary-brand)',
                                 color: 'white',
                                 border: 'none',
                                 cursor: 'pointer',
@@ -57,7 +57,7 @@ class ErrorBoundary extends React.Component {
                             style={{
                                 padding: '10px 20px',
                                 borderRadius: '8px',
-                                background: '#ff4d4f',
+                                background: 'var(--status-red)',
                                 color: 'white',
                                 border: 'none',
                                 cursor: 'pointer',
@@ -71,13 +71,14 @@ class ErrorBoundary extends React.Component {
                         <pre style={{
                             marginTop: '20px',
                             padding: '15px',
-                            background: '#fff',
-                            border: '1px solid #edf2f7',
+                            background: 'var(--bg-surface)',
+                            border: '1px solid var(--border-light)',
                             borderRadius: '8px',
                             fontSize: '12px',
                             textAlign: 'left',
                             maxWidth: '90vw',
-                            overflow: 'auto'
+                            overflow: 'auto',
+                            color: 'var(--text-primary)'
                         }}>
                             {this.state.error && this.state.error.toString()}
                         </pre>

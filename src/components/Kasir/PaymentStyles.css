@@ -1,10 +1,11 @@
 .qris-display-container {
-    background: white;
+    background: var(--bg-surface);
     border-radius: 12px;
     padding: 20px;
     text-align: center;
     border: 1px solid var(--border-light);
     margin-bottom: 20px;
+    color: var(--text-primary);
 }
 
 .qris-logo {
@@ -19,11 +20,11 @@
 }
 
 .qr-code-wrapper {
-    background: #fdfdfd;
+    background: white;
     padding: 15px;
     border-radius: 8px;
     display: inline-block;
-    border: 1px dashed #ddd;
+    border: 1px dashed var(--border-strong);
     margin-bottom: 15px;
 }
 
@@ -36,7 +37,7 @@
 .merchant-name {
     font-weight: 800;
     font-size: 14px;
-    color: #333;
+    color: var(--text-primary);
     margin-bottom: 4px;
 }
 
@@ -95,20 +96,19 @@
     outline: none;
     box-shadow: var(--shadow-sm);
     min-width: 0;
-    /* Prevent flex items from overflowing */
 }
 
 .payment-method-btn:hover {
     transform: translateY(-3px);
     border-color: var(--primary-brand);
-    box-shadow: 0 10px 20px -10px rgba(115, 170, 190, 0.4);
+    box-shadow: 0 10px 20px -10px rgba(74, 155, 173, 0.4);
 }
 
 .payment-method-btn.active {
-    background: linear-gradient(135deg, var(--primary-brand), #5E8B9B);
+    background: linear-gradient(135deg, var(--primary-brand), var(--primary-dark));
     border-color: var(--primary-brand);
     color: white;
-    box-shadow: 0 12px 25px -5px rgba(115, 170, 190, 0.5);
+    box-shadow: 0 12px 25px -5px rgba(74, 155, 173, 0.5);
     transform: scale(1.02);
 }
 

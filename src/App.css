@@ -68,7 +68,7 @@
     position: absolute;
     top: -2px;
     right: -2px;
-    background: #FF4D4F;
+    background: var(--status-red);
     color: white;
     font-size: 10px;
     font-weight: 800;
@@ -139,8 +139,8 @@
   .notif-icon.danger {
     width: 36px;
     height: 36px;
-    background: rgba(255, 77, 79, 0.1);
-    color: #FF4D4F;
+    background: var(--status-red-light);
+    color: var(--status-red);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -243,7 +243,7 @@
   }
 
   .settings-list .logout-item {
-    color: #FF4D4F;
+    color: var(--status-red);
   }
 
   .settings-list .popover-item:active {
@@ -282,7 +282,7 @@
   height: 100%;
   font-size: 24px;
   font-weight: 600;
-  color: #FF4D4F;
+  color: var(--status-red);
   background: var(--bg-surface);
   border-radius: 20px;
   margin: 20px;

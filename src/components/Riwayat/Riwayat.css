@@ -81,7 +81,7 @@
 
 .view-receipt-btn {
     padding: 6px 12px;
-    background: var(--bg-primary-light, #FFF4E6);
+    background: var(--bg-primary-light);
     color: var(--primary-orange);
     border: 1px solid var(--primary-orange);
     border-radius: 6px;
@@ -93,7 +93,7 @@
 
 .view-receipt-btn:hover {
     background: var(--primary-brand);
-    color: white;
+    color: var(--text-white);
 }
 
 .history-table td {
@@ -117,18 +117,18 @@
 }
 
 .status-badge.debit {
-    background: #EBF4F7;
-    color: #73AABE;
+    background: var(--bg-info-light);
+    color: var(--text-info);
 }
 
 .status-badge.cash {
-    background: #EBF4F7;
-    color: #73AABE;
+    background: var(--bg-info-light);
+    color: var(--text-info);
 }
 
 .status-badge.ewallet {
-    background: #e3f2fd;
-    color: #42a5f5;
+    background: var(--bg-primary-light);
+    color: var(--text-primary-blue);
 }
 
 /* Sidebar removed */
@@ -144,7 +144,7 @@
     width: 340px;
     background: var(--bg-surface);
     border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-lg);
     padding: 24px;
     z-index: 1000;
     border: 1px solid var(--border-light);
@@ -190,7 +190,7 @@
 
 .calendar-day.active {
     background: var(--primary-brand);
-    color: #fff;
+    color: var(--text-white);
 }
 
 .calendar-day.empty {

@@ -2,13 +2,15 @@
     padding: 24px;
     height: 100%;
     overflow-y: auto;
+    background: var(--bg-app);
 }
 
 .mutation-content {
-    background: white;
+    background: var(--bg-surface);
     border-radius: 16px;
     padding: 24px;
     box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
 }
 
 .mutation-header {
@@ -36,7 +38,7 @@
     align-items: center;
     gap: 8px;
     padding: 8px 16px;
-    background: var(--bg-primary-light);
+    background: var(--primary-light);
     color: var(--primary-brand);
     border: none;
     border-radius: 12px;
@@ -46,13 +48,14 @@
 }
 
 .refresh-btn:hover {
-    background: #e0f2f7;
+    background: var(--border-light);
 }
 
 .mutation-table-container {
     border: 1px solid var(--border-light);
     border-radius: 12px;
     overflow: hidden;
+    background: var(--bg-surface);
 }
 
 .mutation-table {
@@ -62,11 +65,11 @@
 }
 
 .mutation-table th {
-    background: #f9fafb;
+    background: var(--bg-app-alt);
     padding: 16px;
     font-size: 13px;
     font-weight: 600;
-    color: #666;
+    color: var(--text-secondary);
     border-bottom: 1px solid var(--border-light);
 }
 
@@ -86,6 +89,7 @@
     align-items: center;
     gap: 8px;
     font-weight: 600;
+    color: var(--text-primary);
 }
 
 .type-badge {
@@ -100,13 +104,13 @@
 }
 
 .type-badge.masuk {
-    background: #ecfdf5;
-    color: #059669;
+    background: var(--status-green-light);
+    color: var(--status-green);
 }
 
 .type-badge.keluar {
-    background: #fef2f2;
-    color: #dc2626;
+    background: var(--status-red-light);
+    color: var(--status-red);
 }
 
 .amount-cell {
@@ -114,24 +118,24 @@
 }
 
 .amount-cell.masuk {
-    color: #059669;
+    color: var(--status-green);
 }
 
 .amount-cell.keluar {
-    color: #dc2626;
+    color: var(--status-red);
 }
 
 .date-cell {
-    color: #666;
+    color: var(--text-tertiary);
 }
 
 .desc-cell {
-    color: #666;
+    color: var(--text-tertiary);
     font-style: italic;
 }
 
 .text-center {
     text-align: center;
     padding: 40px !important;
-    color: #888;
+    color: var(--text-tertiary);
 }

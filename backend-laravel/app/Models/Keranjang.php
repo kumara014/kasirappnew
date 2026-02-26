@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Keranjang extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\Multitenantable;
+
+    const TENANT_COLUMN = 'id_user';
 
     protected $table = 'keranjang';
     protected $primaryKey = 'id_keranjang';
@@ -19,11 +21,13 @@ class Keranjang extends Model
         'subtotal'
     ];
 
-    public function barang() {
+    public function barang()
+    {
         return $this->belongsTo(Barang::class, 'id_barang');
     }
 
-    public function user() {
+    public function user()
+    {
         return $this->belongsTo(User::class, 'id_user');
     }
 }

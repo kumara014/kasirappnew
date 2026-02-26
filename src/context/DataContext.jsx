@@ -3,6 +3,12 @@ import { apiFetch } from '../config';
 
 const DataContext = createContext();
 
+const handleUnauthorized = () => {
+    localStorage.removeItem('pos_user');
+    localStorage.removeItem('pos_token');
+    window.location.reload();
+};
+
 export const useData = () => {
     const context = useContext(DataContext);
     if (!context) {
@@ -11,7 +17,7 @@ export const useData = () => {
     return context;
 };
 
-export const DataProvider = ({ children }) => {
+export const DataProvider = ({ children, user }) => {
     const [dashboardData, setDashboardData] = useState(null);
     const [productsData, setProductsData] = useState([]);
     const [ordersData, setOrdersData] = useState([]);
@@ -19,10 +25,15 @@ export const DataProvider = ({ children }) => {
     const [loadingProducts, setLoadingProducts] = useState(false);
     const [loadingOrders, setLoadingOrders] = useState(false);
 
+    const [productsPagination, setProductsPagination] = useState(null);
+    const [ordersPagination, setOrdersPagination] = useState(null);
+
     const refreshDashboard = useCallback(async (silent = false) => {
+        if (!localStorage.getItem('pos_token')) return;
         if (!silent) setLoadingDashboard(true);
         try {
             const res = await apiFetch('/dashboard');
+            if (res.status === 401 || res.status === 403) { handleUnauthorized(); return; }
             const data = await res.json();
             setDashboardData(data);
         } catch (err) {
@@ -33,11 +44,19 @@ export const DataProvider = ({ children }) => {
     }, []);
 
     const refreshProducts = useCallback(async (silent = false) => {
+        if (!localStorage.getItem('pos_token')) return;
         if (!silent) setLoadingProducts(true);
         try {
             const res = await apiFetch('/barang');
+            if (res.status === 401 || res.status === 403) { handleUnauthorized(); return; }
             const data = await res.json();
-            setProductsData(Array.isArray(data) ? data : []);
+            // Laravel pagination returns data in .data
+            setProductsData(Array.isArray(data.data) ? data.data : []);
+            setProductsPagination({
+                current_page: data.current_page,
+                last_page: data.last_page,
+                next_page_url: data.next_page_url
+            });
         } catch (err) {
             console.error("Error fetching products:", err);
         } finally {
@@ -45,12 +64,41 @@ export const DataProvider = ({ children }) => {
         }
     }, []);
 
+    const fetchMoreProducts = useCallback(async () => {
+        if (!productsPagination?.next_page_url || loadingProducts) return;
+        setLoadingProducts(true);
+        try {
+            // Extract the query part or use the full URL if apiFetch handles it
+            const url = productsPagination.next_page_url.split('/api')[1];
+            const res = await apiFetch(url);
+            if (res.status === 401 || res.status === 403) { handleUnauthorized(); return; }
+            const data = await res.json();
+            setProductsData(prev => [...prev, ...(data.data || [])]);
+            setProductsPagination({
+                current_page: data.current_page,
+                last_page: data.last_page,
+                next_page_url: data.next_page_url
+            });
+        } catch (err) {
+            console.error("Error fetching more products:", err);
+        } finally {
+            setLoadingProducts(false);
+        }
+    }, [productsPagination, loadingProducts]);
+
     const refreshOrders = useCallback(async (silent = false) => {
+        if (!localStorage.getItem('pos_token')) return;
         if (!silent) setLoadingOrders(true);
         try {
             const res = await apiFetch('/transaksi');
+            if (res.status === 401 || res.status === 403) { handleUnauthorized(); return; }
             const data = await res.json();
-            setOrdersData(Array.isArray(data) ? data : []);
+            setOrdersData(Array.isArray(data.data) ? data.data : []);
+            setOrdersPagination({
+                current_page: data.current_page,
+                last_page: data.last_page,
+                next_page_url: data.next_page_url
+            });
         } catch (err) {
             console.error("Error fetching orders:", err);
         } finally {
@@ -58,21 +106,80 @@ export const DataProvider = ({ children }) => {
         }
     }, []);
 
+    const fetchMoreOrders = useCallback(async () => {
+        if (!ordersPagination?.next_page_url || loadingOrders) return;
+        setLoadingOrders(true);
+        try {
+            const url = ordersPagination.next_page_url.split('/api')[1];
+            const res = await apiFetch(url);
+            if (res.status === 401 || res.status === 403) { handleUnauthorized(); return; }
+            const data = await res.json();
+            setOrdersData(prev => [...prev, ...(data.data || [])]);
+            setOrdersPagination({
+                current_page: data.current_page,
+                last_page: data.last_page,
+                next_page_url: data.next_page_url
+            });
+        } catch (err) {
+            console.error("Error fetching more orders:", err);
+        } finally {
+            setLoadingOrders(false);
+        }
+    }, [ordersPagination, loadingOrders]);
+
+    const performRestock = useCallback(async (productId, qty) => {
+        try {
+            const res = await apiFetch('/stok-mutasi', {
+                method: 'POST',
+                body: JSON.stringify({
+                    id_barang: productId,
+                    jenis: 'masuk',
+                    jumlah: qty,
+                    keterangan: 'Restok lewat notifikasi'
+                })
+            });
+            if (res.ok) {
+                // Refresh local data
+                refreshProducts(true);
+                refreshDashboard(true);
+                return { success: true };
+            }
+            return { success: false, message: 'Gagal melakukan restok' };
+        } catch (err) {
+            console.error("Restock error:", err);
+            return { success: false, message: err.message };
+        }
+    }, [refreshProducts, refreshDashboard]);
+
     const lowStockItems = React.useMemo(() => {
-        return productsData.filter(p => Number(p.stok) <= (p.stok_minimum || 5));
+        return (productsData || []).map(p => {
+            const stock = Number(p.stok);
+            const minStock = Number(p.stok_minimum || 5);
+
+            let level = 'aman';
+            if (stock === 0) level = 'habis';
+            else if (stock <= minStock * 0.5) level = 'kritis';
+            else if (stock <= minStock) level = 'menipis';
+
+            return { ...p, level };
+        }).filter(p => p.level !== 'aman');
     }, [productsData]);
 
-    // Initial fetch
+    // Initial fetch when user logs in
     useEffect(() => {
-        refreshDashboard();
-        refreshProducts();
-        refreshOrders();
-    }, [refreshDashboard, refreshProducts, refreshOrders]);
+        if (user) {
+            refreshDashboard();
+            refreshProducts();
+            refreshOrders();
+        }
+    }, [refreshDashboard, refreshProducts, refreshOrders, user]);
 
     const value = React.useMemo(() => ({
         dashboardData,
         productsData,
         ordersData,
+        productsPagination,
+        ordersPagination,
         lowStockItems,
         loadingDashboard,
         loadingProducts,
@@ -80,12 +187,19 @@ export const DataProvider = ({ children }) => {
         refreshDashboard,
         refreshProducts,
         refreshOrders,
+        fetchMoreProducts,
+        fetchMoreOrders,
+        performRestock,
         setProductsData,
-        setOrdersData
+        setOrdersData,
+        user
     }), [
-        dashboardData, productsData, ordersData, lowStockItems,
+        dashboardData, productsData, ordersData,
+        productsPagination, ordersPagination, lowStockItems,
         loadingDashboard, loadingProducts, loadingOrders,
-        refreshDashboard, refreshProducts, refreshOrders
+        refreshDashboard, refreshProducts, refreshOrders,
+        fetchMoreProducts, fetchMoreOrders, performRestock,
+        user
     ]);
 
     return (

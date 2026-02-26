@@ -9,14 +9,17 @@ const Settings = lazy(() => import('./components/Settings/Settings'));
 const Kasir = lazy(() => import('./components/Kasir/Kasir'));
 import Login from './components/Login';
 const CustomerService = lazy(() => import('./components/CustomerService/CustomerService'));
+const ManajemenKaryawan = lazy(() => import('./components/ManajemenKaryawan/ManajemenKaryawan'));
 import './App.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DataProvider, useData } from './context/DataContext';
 import { NotificationProvider } from './context/NotificationContext';
+import { NotificationDropdown, RestokModal } from './components/Notifications/NotificationDropdown';
+import { BellButton } from './components/Notifications/BellButton';
 import ErrorBoundary from './components/Common/ErrorBoundary';
 import { Bell, X, Menu as MenuIcon } from 'lucide-react';
 
-const TEAL = "#4A9BAD";
+const TEAL = "var(--primary-brand)";
 
 const AppContent = ({
   user, theme, currentView, setCurrentView, isSidebarOpen, setIsSidebarOpen,
@@ -26,14 +29,28 @@ const AppContent = ({
   showSettings, setShowSettings
 }) => {
   const {
-    dashboardData, lowStockItems
+    dashboardData, lowStockItems, performRestock
   } = useData();
+
+  const [restokProduct, setRestokProduct] = useState(null);
+
+  const handleSaveRestok = async (productId, qty) => {
+    const res = await performRestock(productId, qty);
+    if (res.success) {
+      setRestokProduct(null);
+    }
+  };
 
   // Use the global lowStockItems calculation for consistency
   const notifications = lowStockItems || [];
 
+  // Close notifications automatically when navigating to a different view
+  useEffect(() => {
+    setShowNotifications(false);
+  }, [currentView, setShowNotifications]);
+
   return (
-    <div className="app-main-wrapper" style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#F5F7F8' }}>
+    <div className="app-main-wrapper" style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-app)' }}>
       <style>{`
         .mobile-top-bar-teal {
           background: ${TEAL};
@@ -46,14 +63,15 @@ const AppContent = ({
           color: #fff;
         }
         .hamburger-teal { 
-          background: rgba(255,255,255,0.15); border: none; cursor: pointer; 
+          background: rgba(255,255,255,0.2); border: none; cursor: pointer; 
           width: 36px; height: 36px; border-radius: 10px; 
           display: flex; align-items: center; justify-content: center;
+          color: #fff;
         }
         .store-logo-header { font-size: 16px; font-weight: 800; color: #fff; letter-spacing: -0.5px; position: absolute; left: 50%; transform: translateX(-50%); }
         .store-logo-header span { opacity: 0.65; }
-        .top-bar-btn { width: 34px; height: 34px; border-radius: 9px; background: rgba(255,255,255,0.15); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; position: relative; }
-        .notif-dot { position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%; background: #FF4757; border: 2px solid ${TEAL}; }
+        .top-bar-btn { width: 34px; height: 34px; border-radius: 9px; background: rgba(255,255,255,0.2); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; position: relative; }
+        .notif-dot { position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--status-red); border: 2px solid #fff; }
       `}</style>
 
       {!user ? (
@@ -72,53 +90,23 @@ const AppContent = ({
             >
               <MenuIcon size={20} />
             </motion.button>
-            <div className="store-logo-header">Pointly<span> POS</span></div>
+            <div className="store-logo-header">Pointly</div>
             <div className="mobile-top-right">
-              <button className="top-bar-btn" onClick={() => setShowNotifications(!showNotifications)}>
-                <Bell size={20} />
-                {notifications.length > 0 && <div className="notif-dot" />}
-              </button>
-            </div>
+              <div style={{ position: 'relative' }}>
+                <BellButton
+                  count={notifications.length}
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  hasNew={notifications.length > 0}
+                />
 
-            {/* Notification Popover */}
-            <AnimatePresence>
-              {showNotifications && (
-                <motion.div
-                  className="notification-popover"
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  style={{
-                    position: 'absolute', top: '100%', right: '20px',
-                    width: '300px', background: '#fff', borderRadius: '18px',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.15)', padding: '16px',
-                    marginTop: '10px', color: '#333'
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                    <h3 style={{ fontSize: '15px', fontWeight: '800' }}>Notifikasi</h3>
-                    <button onClick={() => setShowNotifications(false)} style={{ background: 'none', border: 'none', color: '#999' }}><X size={18} /></button>
-                  </div>
-                  <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                    {notifications.length === 0 ? (
-                      <div style={{ textAlign: 'center', padding: '20px' }}>
-                        <p style={{ color: '#aaa', fontSize: '13px' }}>Semua stok aman</p>
-                      </div>
-                    ) : (
-                      notifications.map((item, idx) => (
-                        <div key={idx} style={{ display: 'flex', gap: '12px', padding: '10px', background: '#F9FAFB', borderRadius: '12px', marginBottom: '8px' }}>
-                          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#FEE2E2', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>!</div>
-                          <div>
-                            <p style={{ fontSize: '13px', fontWeight: '700' }}>Stok Menipis!</p>
-                            <p style={{ fontSize: '12px', color: '#666' }}>{item.nama_barang} sisa {item.stok}</p>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                {showNotifications && (
+                  <NotificationDropdown
+                    onClose={() => setShowNotifications(false)}
+                    onRestok={(p) => setRestokProduct(p)}
+                  />
+                )}
+              </div>
+            </div>
           </div>
 
           <Sidebar
@@ -131,6 +119,14 @@ const AppContent = ({
             isOpen={isSidebarOpen}
             onClose={() => setIsSidebarOpen(false)}
           />
+
+          {restokProduct && (
+            <RestokModal
+              product={restokProduct}
+              onClose={() => setRestokProduct(null)}
+              onSave={handleSaveRestok}
+            />
+          )}
 
           <main className="main-content" style={{ flex: 1, overflowY: 'auto', position: 'relative' }}>
             <AnimatePresence mode="wait">
@@ -145,8 +141,8 @@ const AppContent = ({
               >
                 <Suspense fallback={
                   <div className="view-loading-skeleton" style={{ padding: '40px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    <div style={{ height: '40px', width: '200px', background: '#e5e7eb', borderRadius: '8px', animation: 'pulse 1.5s infinite' }}></div>
-                    <div style={{ flex: 1, background: '#e5e7eb', borderRadius: '12px', animation: 'pulse 1.5s infinite' }}></div>
+                    <div style={{ height: '40px', width: '200px', background: 'var(--bg-app-alt)', borderRadius: '8px', animation: 'pulse 1.5s infinite' }}></div>
+                    <div style={{ flex: 1, background: 'var(--bg-app-alt)', borderRadius: '12px', animation: 'pulse 1.5s infinite' }}></div>
                   </div>
                 }>
                   <ErrorBoundary key={currentView}>
@@ -156,8 +152,9 @@ const AppContent = ({
                     {currentView === 'history' && <History />}
                     {currentView === 'report' && <Report />}
                     {currentView === 'stok-mutasi' && <StokMutasi />}
-                    {currentView === 'settings' && <Settings user={user} theme={theme} onToggleTheme={toggleTheme} />}
-                    {currentView === 'cs' && <CustomerService />}
+                    {currentView === 'settings' && <Settings user={user} theme={theme} onToggleTheme={toggleTheme} onLogout={() => setShowLogoutConfirm(true)} onUpdateUser={handleLoginSuccess} />}
+                    {currentView === 'cs' && <CustomerService onBack={() => setCurrentView('dashboard')} />}
+                    {currentView === 'employee' && <ManajemenKaryawan onBack={() => setCurrentView('dashboard')} />}
                   </ErrorBoundary>
                 </Suspense>
               </motion.div>
@@ -170,25 +167,25 @@ const AppContent = ({
               <div className="modal-overlay" style={{ zIndex: 10000 }}>
                 <motion.div
                   className="modal-content"
-                  style={{ width: 320, textAlign: 'center', padding: '30px', background: '#fff', borderRadius: '24px' }}
+                  style={{ width: 320, textAlign: 'center', padding: '30px', background: 'var(--bg-surface)', borderRadius: '24px', border: '1px solid var(--border-light)' }}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                 >
-                  <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', fontWeight: '800' }}>Keluar Aplikasi?</h3>
-                  <p style={{ color: '#666', marginBottom: 25, fontSize: 14 }}>
+                  <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)' }}>Keluar Aplikasi?</h3>
+                  <p style={{ color: 'var(--text-secondary)', marginBottom: 25, fontSize: 14 }}>
                     Anda akan diarahkan kembali ke halaman login.
                   </p>
                   <div style={{ display: 'flex', gap: 12 }}>
                     <button
                       onClick={() => setShowLogoutConfirm(false)}
-                      style={{ flex: 1, padding: 12, borderRadius: 14, background: '#F3F4F6', color: '#555', fontWeight: 600 }}
+                      style={{ flex: 1, padding: 12, borderRadius: 14, background: 'var(--bg-app-alt)', color: 'var(--text-secondary)', fontWeight: 600 }}
                     >
-                      Kembali
+                      Batal
                     </button>
                     <button
                       onClick={confirmLogout}
-                      style={{ flex: 1, padding: 12, borderRadius: 14, background: '#FF4757', color: 'white', fontWeight: 600 }}
+                      style={{ flex: 1, padding: 12, borderRadius: 14, background: 'var(--status-red)', color: 'white', fontWeight: 600 }}
                     >
                       Ya, Keluar
                     </button>
@@ -242,14 +239,30 @@ const App = () => {
     }
   }, [theme]);
 
-  const handleLoginSuccess = (userData) => {
+  const handleLoginSuccess = (userData, token) => {
     setUser(userData);
     localStorage.setItem('pos_user', JSON.stringify(userData));
+    if (token) {
+      localStorage.setItem('pos_token', token);
+    }
+    setCurrentView('dashboard');
   };
 
-  const confirmLogout = () => {
+  const confirmLogout = async () => {
+    try {
+      const token = localStorage.getItem('pos_token');
+      if (token) {
+        await import('./config').then(({ apiFetch }) =>
+          apiFetch('/logout', { method: 'POST' })
+        );
+      }
+    } catch (e) {
+      // Ignore errors — still log out locally
+      console.warn('Logout API call failed, logging out locally:', e);
+    }
     setUser(null);
     localStorage.removeItem('pos_user');
+    localStorage.removeItem('pos_token');
     setShowLogoutConfirm(false);
   };
 
@@ -259,7 +272,7 @@ const App = () => {
 
   return (
     <NotificationProvider>
-      <DataProvider>
+      <DataProvider key={user?.id_user || 'guest'} user={user}>
         <AppContent
           user={user}
           theme={theme}

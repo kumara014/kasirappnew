@@ -42,7 +42,7 @@ const Home = () => {
                     <p>Sistem Kasir Pintar untuk Solusi Usaha Anda</p>
                 </div>
                 <div className="search-bar-header">
-                    <Search size={18} color="#888" />
+                    <Search size={18} color="var(--text-tertiary)" />
                     <input type="text" placeholder="Search category, menu or etc" />
                 </div>
             </header>
@@ -53,24 +53,24 @@ const Home = () => {
                     label="Total Omzet Today"
                     value={`Rp ${summary.omzet_today.toLocaleString()}`}
                     trend="+12%"
-                    color="#FF8C00"
-                    bgColor="#FFF4E6"
+                    color="var(--status-orange)"
+                    bgColor="var(--status-orange-light)"
                 />
                 <StatCard
                     icon={<ShoppingBag size={24} />}
                     label="Total Sell Today (Kasir)"
                     value={summary.sell_today}
                     trend="+5%"
-                    color="#73AABE"
-                    bgColor="#EBF4F7"
+                    color="var(--primary-brand)"
+                    bgColor="var(--primary-light)"
                 />
                 <StatCard
                     icon={<Users size={24} />}
                     label="Dine in"
                     value="Mock Only"
                     trend="+0%"
-                    color="#FF6B6B"
-                    bgColor="#FFEBEB"
+                    color="var(--status-red)"
+                    bgColor="var(--status-red-light)"
                     disabled
                 />
                 <StatCard
@@ -78,8 +78,8 @@ const Home = () => {
                     label="Take away"
                     value="Mock Only"
                     trend="+0%"
-                    color="#FFC107"
-                    bgColor="#FFF8E1"
+                    color="var(--status-orange)"
+                    bgColor="var(--status-orange-light)"
                     disabled
                 />
             </div>
@@ -89,19 +89,19 @@ const Home = () => {
                     <div className="chart-header">
                         <h3>Daily Sales Trend</h3>
                     </div>
-                    <div style={{ height: 250, background: '#f9f9f9', borderRadius: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px dashed #ddd' }}>
+                    <div style={{ height: 250, background: 'var(--bg-app-alt)', borderRadius: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px dashed var(--border-light)' }}>
                         {summary?.chart_data?.length > 0 ? (
                             <div style={{ width: '100%', padding: 20 }}>
                                 {summary.chart_data.slice(-5).map((d, i) => (
                                     <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5, fontSize: 12 }}>
                                         <span>{d.date}</span>
-                                        <div style={{ flex: 1, height: 10, background: '#FF8C00', margin: '0 10px', borderRadius: 5, maxWidth: (d.total / 100000) * 100 + '%' }}></div>
-                                        <span>Rp {Number(d.total).toLocaleString()}</span>
+                                        <div style={{ flex: 1, height: 10, background: 'var(--status-orange)', margin: '0 10px', borderRadius: 5, maxWidth: (d.total / 100000) * 100 + '%' }}></div>
+                                        <span style={{ color: "var(--text-primary)" }}>Rp {Number(d.total).toLocaleString()}</span>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <span style={{ color: '#999' }}>No data for chart yet</span>
+                            <span style={{ color: 'var(--text-tertiary)' }}>No data for chart yet</span>
                         )}
                     </div>
                 </div>
@@ -111,15 +111,15 @@ const Home = () => {
                         <h3>Total Income Breakdown</h3>
                     </div>
                     <div className="pie-container">
-                        <div style={{ height: 180, width: 180, borderRadius: '50%', border: '15px solid #FF8C00', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'inset 0 0 10px rgba(0,0,0,0.05)' }}>
+                        <div style={{ height: 180, width: 180, borderRadius: '50%', border: '15px solid var(--status-orange)', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'inset 0 0 10px rgba(0,0,0,0.05)' }}>
                             <div className="pie-center-text">
-                                <h3 style={{ fontSize: 16 }}>Rp {summary.omzet_today.toLocaleString()}</h3>
-                                <p style={{ fontSize: 10, color: '#888' }}>Today</p>
+                                <h3 style={{ fontSize: 16, color: 'var(--text-primary)' }}>Rp {summary.omzet_today.toLocaleString()}</h3>
+                                <p style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>Today</p>
                             </div>
                         </div>
                     </div>
                     <div className="pie-legend" style={{ marginTop: 20 }}>
-                        <div className="legend-item"><span className="dot" style={{ background: '#FF8C00' }}></span> Omzet</div>
+                        <div className="legend-item"><span className="dot" style={{ background: 'var(--status-orange)' }}></span> Omzet</div>
                     </div>
                 </div>
             </div>
@@ -161,7 +161,7 @@ const StatCard = ({ icon, label, value, trend, color, bgColor }) => (
             <div className="stat-icon-wrapper" style={{ color: color, backgroundColor: bgColor }}>
                 {icon}
             </div>
-            <span className="trend-badge" style={{ color: '#73AABE' }}>{trend} <ArrowUp size={12} /></span>
+            <span className="trend-badge" style={{ color: 'var(--primary-dark)' }}>{trend} <ArrowUp size={12} /></span>
         </div>
         <div className="stat-content">
             <h2>{value}</h2>

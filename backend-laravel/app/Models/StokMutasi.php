@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class StokMutasi extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\Multitenantable;
 
     protected $table = 'stok_mutasi';
     protected $primaryKey = 'id_mutasi';
@@ -16,10 +16,12 @@ class StokMutasi extends Model
         'id_barang',
         'jenis',
         'jumlah',
-        'keterangan'
+        'keterangan',
+        'user_id'
     ];
 
-    public function barang() {
+    public function barang()
+    {
         return $this->belongsTo(Barang::class, 'id_barang');
     }
 }

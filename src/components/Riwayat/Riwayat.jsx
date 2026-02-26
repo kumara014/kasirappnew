@@ -4,9 +4,9 @@ import { useData } from '../../context/DataContext';
 import { apiFetch } from '../../config';
 import { haptic } from '../../utils/haptics';
 
-const TEAL = "#4A9BAD";
-const TEAL_LIGHT = "#EAF5F7";
-const TEAL_DARK = "#357585";
+const TEAL = "var(--primary-brand)";
+const TEAL_LIGHT = "var(--primary-light)";
+const TEAL_DARK = "var(--primary-dark)";
 
 const formatRp = (n) => "Rp" + new Intl.NumberFormat("id-ID").format(n);
 const formatDate = (d) => {
@@ -20,10 +20,10 @@ const formatTime = (d) => {
 
 const METHOD_ICON = { Tunai: "💵", QRIS: "📱", Transfer: "🏦", Cash: "💵" };
 const METHOD_COLOR = {
-    Tunai: { bg: "#EAFAF1", color: "#27AE60" },
-    Cash: { bg: "#EAFAF1", color: "#27AE60" },
-    QRIS: { bg: TEAL_LIGHT, color: TEAL },
-    Transfer: { bg: "#EEF0FF", color: "#6C63FF" }
+    Tunai: { bg: "var(--status-green-light)", color: "var(--status-green)" },
+    Cash: { bg: "var(--status-green-light)", color: "var(--status-green)" },
+    QRIS: { bg: "var(--primary-light)", color: "var(--primary-brand)" },
+    Transfer: { bg: "var(--status-blue-light)", color: "var(--status-blue)" }
 };
 
 function isToday(d) {
@@ -57,7 +57,7 @@ const DetailScreen = ({ trx, onBack }) => {
                     <button className="back-btn" onClick={onBack}>
                         <ArrowLeft size={20} />
                     </button>
-                    <span className="topbar-title">Detail <span style={{ color: TEAL }}>Transaksi</span></span>
+                    <span className="topbar-title">Detail <span style={{ color: "var(--primary-brand)" }}>Transaksi</span></span>
                 </div>
             </div>
 
@@ -88,7 +88,7 @@ const DetailScreen = ({ trx, onBack }) => {
                         <span className="card-subtitle">{trx.details?.length || 0} produk</span>
                     </div>
                     {trx.details?.map((item, i) => (
-                        <div key={i} className="item-row" style={{ borderBottom: i < (trx.details?.length || 0) - 1 ? "1px solid #F5F7F8" : "none" }}>
+                        <div key={i} className="item-row" style={{ borderBottom: i < (trx.details?.length || 0) - 1 ? "1px solid var(--border-light)" : "none" }}>
                             <div>
                                 <div className="item-name">{item.barang?.nama_barang || 'Produk'}</div>
                                 <div className="item-qty-price">{formatRp(item.harga)} × {item.qty}</div>
@@ -112,7 +112,7 @@ const DetailScreen = ({ trx, onBack }) => {
                             <span className="summary-label">Metode Bayar</span>
                             <span className="summary-val">{METHOD_ICON[methodFormatted] || "💰"} {methodFormatted}</span>
                         </div>
-                        {methodFormatted === "Tunai" && (
+                        {(methodFormatted === "Tunai" || methodFormatted === "Cash") && (
                             <>
                                 <div className="summary-row">
                                     <span className="summary-label">Uang Diterima</span>
@@ -120,13 +120,13 @@ const DetailScreen = ({ trx, onBack }) => {
                                 </div>
                                 <div className="summary-row">
                                     <span className="summary-label">Kembalian</span>
-                                    <span className="summary-val highlight">{formatRp(trx.kembalian)}</span>
+                                    <span className="summary-val highlight" style={{ color: "var(--primary-brand)" }}>{formatRp(trx.kembalian)}</span>
                                 </div>
                             </>
                         )}
                         <div className="summary-total-row">
                             <span className="total-label">Total</span>
-                            <span className="total-val">{formatRp(trx.total_harga)}</span>
+                            <span className="total-val" style={{ color: "var(--primary-brand)" }}>{formatRp(trx.total_harga)}</span>
                         </div>
                     </div>
                 </div>
@@ -140,13 +140,54 @@ const DetailScreen = ({ trx, onBack }) => {
                     <Send size={18} /> Kirim
                 </button>
             </div>
+
+            {/* Hidden Receipt for Printing */}
+            <div className="print-receipt-only">
+                <div className="r-header">
+                    <div className="r-brand">Pointly</div>
+                    <div className="r-sub">Digital POS System</div>
+                    <div className="r-line" />
+                    <div style={{ fontSize: 11 }}>{formatDate(trx.tanggal_transaksi)} • {formatTime(trx.tanggal_transaksi)}</div>
+                    <div style={{ fontSize: 11, marginTop: 4 }}>No: {trx.id_transaksi}</div>
+                </div>
+                <div className="r-line" />
+                {trx.details?.map((item, i) => (
+                    <div key={i} className="r-item">
+                        <div>
+                            <div>{item.barang?.nama_barang || 'Produk'}</div>
+                            <div style={{ fontSize: 11, opacity: 0.7 }}>{formatRp(item.harga)} x {item.qty}</div>
+                        </div>
+                        <div>{formatRp(item.harga * item.qty)}</div>
+                    </div>
+                ))}
+                <div className="r-total-section">
+                    <div className="r-item">
+                        <span>TOTAL</span>
+                        <span>{formatRp(trx.total_harga)}</span>
+                    </div>
+                    <div className="r-item" style={{ fontWeight: 400, marginTop: 4 }}>
+                        <span>Metode</span>
+                        <span>{methodFormatted}</span>
+                    </div>
+                </div>
+                <div className="r-footer">
+                    <div>Terima Kasih Telah Berbelanja!</div>
+                    <div>{new Date().toLocaleString()}</div>
+                </div>
+            </div>
         </div>
     );
 };
 
 // ── MAIN LIST SCREEN ──────────────────────────────────────────────────────────
 const History = () => {
-    const { ordersData, loadingOrders, refreshOrders } = useData();
+    const {
+        ordersData,
+        loadingOrders,
+        refreshOrders,
+        ordersPagination,
+        fetchMoreOrders
+    } = useData();
     const [search, setSearch] = useState("");
     const [filterMethod, setFilterMethod] = useState("Semua");
     const [selected, setSelected] = useState(null);
@@ -206,11 +247,11 @@ const History = () => {
 
             <div className="topbar">
                 <div className="topbar-row" style={{ marginBottom: 14 }}>
-                    <span className="topbar-title">Riwayat <span style={{ color: TEAL }}>Transaksi</span></span>
+                    <span className="topbar-title">Riwayat <span style={{ color: "var(--primary-brand)" }}>Transaksi</span></span>
                 </div>
 
                 <div className="search-wrap">
-                    <span className="search-ico"><Search size={16} color="#bbb" /></span>
+                    <span className="search-ico"><Search size={16} color="var(--text-tertiary)" /></span>
                     <input
                         className="search-input"
                         placeholder="Cari No. Invoice..."
@@ -293,6 +334,19 @@ const History = () => {
                         })}
                     </div>
                 ))}
+
+                {ordersPagination?.next_page_url && (
+                    <div style={{ marginTop: '24px', textAlign: 'center' }}>
+                        <button
+                            onClick={fetchMoreOrders}
+                            disabled={loadingOrders}
+                            className="btn-secondary"
+                            style={{ width: 'auto', padding: '10px 24px' }}
+                        >
+                            {loadingOrders ? 'Memuat...' : 'Muat Lebih Banyak'}
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -301,66 +355,92 @@ const History = () => {
 const globalCSS = `
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
   
+  @media print {
+    body * { visibility: hidden; }
+    .print-receipt-only, .print-receipt-only * { visibility: visible; }
+    .print-receipt-only { 
+      position: fixed; 
+      left: 0; 
+      top: 0; 
+      width: 80mm; 
+      margin: 0; 
+      padding: 10px; 
+      display: block !important;
+      background: #fff !important;
+      color: #000 !important;
+    }
+    .history-teal { display: none !important; }
+  }
+
+  .print-receipt-only { display: none; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .r-header { text-align: center; margin-bottom: 15px; }
+  .r-brand { font-size: 20px; font-weight: 800; }
+  .r-sub { font-size: 12px; opacity: 0.7; }
+  .r-line { border-bottom: 1px dashed #000; margin: 10px 0; }
+  .r-item { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+  .r-total-section { margin-top: 10px; font-weight: 700; border-top: 1px dashed #000; padding-top: 10px; }
+  .r-footer { text-align: center; margin-top: 20px; font-size: 11px; opacity: 0.6; }
+
   .history-teal { 
     font-family: 'Plus Jakarta Sans', sans-serif; 
-    background: #F5F7F8; 
+    background: var(--bg-app); 
     min-height: 100vh; 
     width: 100%;
     display: flex; 
     flex-direction: column; 
     position: relative; 
-    color: #111;
+    color: var(--text-primary);
   }
 
-  .topbar { background: #fff; padding: 12px 20px 0; border-bottom: 1px solid #ECEEF0; position: sticky; top: 0; z-index: 100; }
+  .topbar { background: var(--bg-surface); padding: 12px 20px 0; border-bottom: 1px solid var(--border-light); position: sticky; top: 0; z-index: 100; }
   .topbar-row { display: flex; align-items: center; gap: 12px; }
-  .topbar-title { font-size: 18px; font-weight: 800; color: #111; letter-spacing: -0.4px; }
+  .topbar-title { font-size: 18px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.4px; }
   
-  .back-btn { width: 38px; height: 38px; border-radius: 10px; background: #F5F7F8; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #333; transition: all 0.2s; }
-  .back-btn:active { transform: scale(0.9); background: #ECEEF0; }
+  .back-btn { width: 38px; height: 38px; border-radius: 10px; background: var(--bg-app-alt); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-primary); transition: all 0.2s; }
+  .back-btn:active { transform: scale(0.9); background: var(--border-light); }
 
   .search-wrap { position: relative; margin: 14px 0; }
-  .search-input { width: 100%; padding: 10px 16px 10px 40px; border: 1.5px solid #E5E9EC; border-radius: 12px; font-size: 14px; background: #FAFBFC; outline: none; transition: all 0.2s; font-family: inherit; }
-  .search-input:focus { border-color: ${TEAL}; background: #fff; }
+  .search-input { width: 100%; padding: 10px 16px 10px 40px; border: 1.5px solid var(--border-strong); border-radius: 12px; font-size: 14px; background: var(--bg-surface-alt); color: var(--text-primary); outline: none; transition: all 0.2s; font-family: inherit; }
+  .search-input:focus { border-color: var(--primary-brand); background: var(--bg-surface); }
   .search-ico { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); display: flex; }
 
   .filter-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; scrollbar-width: none; }
   .filter-scroll::-webkit-scrollbar { display: none; }
-  .filter-pill { flex-shrink: 0; padding: 6px 14px; border-radius: 20px; border: 1.5px solid #E5E9EC; background: #fff; color: #777; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; white-space: nowrap; font-family: inherit; }
-  .filter-pill.active { border-color: #1a1a18; background: #1a1a18; color: #fff; }
+  .filter-pill { flex-shrink: 0; padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border-strong); background: var(--bg-surface); color: var(--text-tertiary); font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; white-space: nowrap; font-family: inherit; }
+  .filter-pill.active { border-color: var(--text-primary); background: var(--text-primary); color: var(--bg-surface); }
 
   .content { flex: 1; padding: 16px; padding-bottom: 100px; }
 
   .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
-  .stat-card { background: #fff; border-radius: 16px; padding: 12px 14px; border: 1.5px solid #ECEEF0; }
-  .stat-label { font-size: 10px; color: #aaa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-  .stat-val { font-size: 20px; font-weight: 800; color: #111; letter-spacing: -0.5px; }
-  .stat-val.omzet { color: ${TEAL}; font-size: 15px; margin-top: 2px; }
+  .stat-card { background: var(--bg-surface); border-radius: 16px; padding: 12px 14px; border: 1.5px solid var(--border-light); }
+  .stat-label { font-size: 10px; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .stat-val { font-size: 20px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px; }
+  .stat-val.omzet { color: var(--primary-brand); font-size: 15px; margin-top: 2px; }
 
   .date-group { margin-bottom: 8px; }
   .date-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; margin-top: 6px; }
-  .date-label { font-size: 12px; font-weight: 700; color: #888; white-space: nowrap; }
-  .date-line { flex: 1; height: 1.5px; background: #ECEEF0; border-radius: 2px; }
-  .date-amount { font-size: 11px; color: #aaa; font-weight: 700; white-space: nowrap; }
+  .date-label { font-size: 12px; font-weight: 700; color: var(--text-secondary); white-space: nowrap; }
+  .date-line { flex: 1; height: 1.5px; background: var(--border-light); border-radius: 2px; }
+  .date-amount { font-size: 11px; color: var(--text-tertiary); font-weight: 700; white-space: nowrap; }
 
-  .trx-card { background: #fff; border-radius: 18px; padding: 14px; margin-bottom: 10px; border: 1.5px solid #ECEEF0; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
-  .trx-card:active { transform: scale(0.97); border-color: ${TEAL}; }
+  .trx-card { background: var(--bg-surface); border-radius: 18px; padding: 14px; margin-bottom: 10px; border: 1.5px solid var(--border-light); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
+  .trx-card:active { transform: scale(0.97); border-color: var(--primary-brand); }
   
   .trx-method-ico { width: 46px; height: 46px; border-radius: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; }
   
   .trx-info { flex: 1; min-width: 0; }
   .trx-top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-  .trx-id { font-size: 13px; font-weight: 700; color: #111; font-family: monospace; }
-  .trx-total { font-size: 15px; font-weight: 800; color: #111; letter-spacing: -0.3px; }
+  .trx-id { font-size: 13px; font-weight: 700; color: var(--text-primary); font-family: monospace; }
+  .trx-total { font-size: 15px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px; }
   
   .trx-bottom-row { display: flex; align-items: center; justify-content: space-between; }
   .trx-left { display: flex; align-items: center; gap: 8px; }
   .trx-method-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
-  .trx-time { font-size: 11px; color: #bbb; font-weight: 500; }
-  .trx-arrow { font-size: 18px; color: #ddd; font-weight: 400; }
+  .trx-time { font-size: 11px; color: var(--text-tertiary); font-weight: 500; }
+  .trx-arrow { font-size: 18px; color: var(--border-strong); font-weight: 400; }
 
   /* Detail Screen Styles */
-  .invoice-header-card { background: ${TEAL}; border-radius: 18px; padding: 20px; margin-bottom: 16px; position: relative; overflow: hidden; box-shadow: 0 8px 24px ${TEAL}33; }
+  .invoice-header-card { background: var(--primary-brand); border-radius: 18px; padding: 20px; margin-bottom: 16px; position: relative; overflow: hidden; box-shadow: 0 8px 24px rgba(74, 155, 173, 0.2); }
   .circle-bg-1 { position: absolute; top: -30px; right: -30px; width: 110px; height: 110px; border-radius: 50%; background: rgba(255,255,255,0.08); }
   .circle-bg-2 { position: absolute; bottom: -20px; left: 20px; width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.05); }
   .label-light { font-size: 11px; color: rgba(255,255,255,0.65); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
@@ -369,36 +449,35 @@ const globalCSS = `
   .badge-light { background: rgba(255,255,255,0.15); border-radius: 8px; padding: 4px 10px; font-size: 10px; color: #fff; font-weight: 700; }
   .badge-method { border-radius: 8px; padding: 4px 10px; font-size: 10px; font-weight: 800; }
 
-  .card-box { background: #fff; border-radius: 18px; border: 1.5px solid #ECEEF0; overflow: hidden; margin-bottom: 14px; }
-  .card-header { padding: 14px 16px; border-bottom: 1px solid #F5F7F8; display: flex; justify-content: space-between; align-items: center; }
-  .card-title { font-size: 13px; font-weight: 800; color: #111; }
-  .card-subtitle { font-size: 11px; color: #aaa; font-weight: 600; }
+  .card-box { background: var(--bg-surface); border-radius: 18px; border: 1.5px solid var(--border-light); overflow: hidden; margin-bottom: 14px; }
+  .card-header { padding: 14px 16px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; }
+  .card-title { font-size: 13px; font-weight: 800; color: var(--text-primary); }
+  .card-subtitle { font-size: 11px; color: var(--text-tertiary); font-weight: 600; }
 
-  .item-row { padding: 13px 16px; display: flex; justify-content: space-between; align-items: center; }
-  .item-name { font-size: 14px; font-weight: 700; color: #111; margin-bottom: 2px; }
-  .item-qty-price { font-size: 12px; color: #aaa; font-weight: 600; }
-  .item-total { font-size: 14px; font-weight: 800; color: #333; }
+  .item-row { padding: 13px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-light); }
+  .item-name { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+  .item-qty-price { font-size: 12px; color: var(--text-tertiary); font-weight: 600; }
+  .item-total { font-size: 14px; font-weight: 800; color: var(--text-primary); }
 
   .summary-body { padding: 16px; }
   .summary-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-  .summary-label { font-size: 13px; color: #888; font-weight: 600; }
-  .summary-val { font-size: 13px; font-weight: 700; color: #333; }
-  .summary-val.highlight { color: ${TEAL}; }
+  .summary-label { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
+  .summary-val { font-size: 13px; font-weight: 700; color: var(--text-primary); }
   
-  .summary-total-row { margin-top: 14px; padding-top: 14px; border-top: 1.5px dashed #ECEEF0; display: flex; justify-content: space-between; align-items: center; }
-  .total-label { font-size: 15px; font-weight: 800; color: #111; }
-  .total-val { font-size: 22px; font-weight: 800; color: ${TEAL}; letter-spacing: -0.5px; }
+  .summary-total-row { margin-top: 14px; padding-top: 14px; border-top: 1.5px dashed var(--border-light); display: flex; justify-content: space-between; align-items: center; }
+  .total-label { font-size: 15px; font-weight: 800; color: var(--text-primary); }
+  .total-val { font-size: 22px; font-weight: 800; color: var(--primary-brand); letter-spacing: -0.5px; }
 
-  .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 1px solid #ECEEF0; padding: 12px 20px 32px; display: flex; gap: 10px; z-index: 100; }
-  .btn-print { flex: 1; padding: 13px; border-radius: 14px; border: 1.5px solid ${TEAL}; background: ${TEAL_LIGHT}; color: ${TEAL}; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
-  .btn-share { flex: 1; padding: 13px; border-radius: 14px; border: 1.5px solid #ECEEF0; background: #F5FAFB; color: #555; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
+  .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-surface); border-top: 1px solid var(--border-light); padding: 12px 20px 32px; display: flex; gap: 10px; z-index: 100; box-shadow: var(--shadow-lg); }
+  .btn-print { flex: 1; padding: 13px; border-radius: 14px; border: 1.5px solid var(--primary-brand); background: var(--primary-light); color: var(--primary-brand); font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
+  .btn-share { flex: 1; padding: 13px; border-radius: 14px; border: 1.5px solid var(--border-light); background: var(--bg-app-alt); color: var(--text-secondary); font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
 
   .empty-state { text-align: center; padding: 80px 20px; }
   .empty-icon { font-size: 48px; margin-bottom: 12px; }
-  .empty-text { font-size: 14px; font-weight: 700; color: #bbb; }
+  .empty-text { font-size: 14px; font-weight: 700; color: var(--text-tertiary); }
 
   @keyframes skeleton { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-  .skeleton-card { height: 80px; background: #fff; border-radius: 18px; border: 1.5px solid #ECEEF0; margin-bottom: 10px; animation: skeleton 1.5s infinite; }
+  .skeleton-card { height: 80px; background: var(--bg-surface); border-radius: 18px; border: 1.5px solid var(--border-light); margin-bottom: 10px; animation: skeleton 1.5s infinite; }
 `;
 
 export default History;

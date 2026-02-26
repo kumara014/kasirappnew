@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Grid, Menu, ShoppingCart, Clock, PieChart, LogOut, User, MessageCircleMore, X, Bell, ArrowLeftRight } from 'lucide-react';
+import { Home, Grid, Menu, ShoppingCart, Clock, PieChart, LogOut, User, Users, MessageCircleMore, X, Bell, ArrowLeftRight } from 'lucide-react';
 import './Sidebar.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { haptic } from '../utils/haptics';
@@ -12,17 +12,17 @@ const Sidebar = ({ activeView, onNavigate, user, onLogout, theme, onToggleTheme,
   const hasPermission = (view) => {
     if (!user) return false;
     if (user.role === 'admin') return true;
-    if (!user.permissions || user.permissions.length === 0) return true;
+    if (!user.permissions || (user.permissions || []).length === 0) return true;
     return user.permissions.includes(view);
   };
 
   const navItems = [
-    { id: 'dashboard', icon: <Grid size={20} />, label: 'Dashboard', permission: 'dashboard' },
-    { id: 'order', icon: <ShoppingCart size={20} />, label: 'Kasir', permission: 'order' },
-    { id: 'menu', icon: <Menu size={20} />, label: 'Kelola Barang', permission: 'menu' },
-    { id: 'stok-mutasi', icon: <ArrowLeftRight size={20} />, label: 'Stok Mutasi', permission: 'stok-mutasi' },
-    { id: 'history', icon: <Clock size={20} />, label: 'Riwayat', permission: 'history' },
-    { id: 'report', icon: <PieChart size={20} />, label: 'Laporan', permission: 'report' },
+    { id: 'dashboard', icon: <Grid size={20} />, label: 'Dashboard', permission: 'Dashboard' },
+    { id: 'order', icon: <ShoppingCart size={20} />, label: 'Kasir', permission: 'Kasir' },
+    { id: 'menu', icon: <Menu size={20} />, label: 'Kelola Barang', permission: 'Kelola Produk' },
+    { id: 'stok-mutasi', icon: <ArrowLeftRight size={20} />, label: 'Stok Mutasi', permission: 'Mutasi Stok' },
+    { id: 'history', icon: <Clock size={20} />, label: 'Riwayat', permission: 'Riwayat' },
+    { id: 'report', icon: <PieChart size={20} />, label: 'Laporan', permission: 'Laporan' },
   ];
 
   return (
@@ -53,13 +53,14 @@ const Sidebar = ({ activeView, onNavigate, user, onLogout, theme, onToggleTheme,
             transition={{ type: "tween", ease: "circOut", duration: 0.32 }}
             style={{
               position: 'fixed', top: 0, left: 0, bottom: 0,
-              width: '280px', background: '#fff',
+              width: '280px', background: 'var(--bg-surface)',
               zIndex: 2001, display: 'flex', flexDirection: 'column',
-              boxShadow: '4px 0 32px rgba(0,0,0,0.12)',
-              overflowY: 'auto'
+              boxShadow: 'var(--shadow-lg)',
+              overflowY: 'auto',
+              borderRight: '1px solid var(--border-light)'
             }}
           >
-            <div className="drawer-header-teal" style={{ background: TEAL, padding: '52px 20px 24px', position: 'relative', overflow: 'hidden', color: '#fff' }}>
+            <div className="drawer-header-teal" style={{ background: 'var(--primary-brand)', padding: '52px 20px 24px', position: 'relative', overflow: 'hidden', color: '#fff' }}>
               <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '120px', height: '120px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
               <button
                 onClick={onClose}
@@ -75,7 +76,7 @@ const Sidebar = ({ activeView, onNavigate, user, onLogout, theme, onToggleTheme,
             </div>
 
             <nav className="drawer-nav" style={{ flex: 1, padding: '12px' }}>
-              <div style={{ fontSize: '10px', fontWeight: '700', color: '#bbb', textTransform: 'uppercase', letterSpacing: '0.8px', padding: '8px 10px 6px' }}>Menu Utama</div>
+              <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.8px', padding: '8px 10px 6px' }}>Menu Utama</div>
               {navItems.map((n) => hasPermission(n.permission) && (
                 <div
                   key={n.id}
@@ -85,55 +86,62 @@ const Sidebar = ({ activeView, onNavigate, user, onLogout, theme, onToggleTheme,
                     display: 'flex', alignItems: 'center', gap: '14px',
                     padding: '12px 14px', borderRadius: '13px',
                     cursor: 'pointer', marginBottom: '2px',
-                    background: activeView === n.id ? TEAL_LIGHT : 'transparent',
-                    color: activeView === n.id ? TEAL : '#555',
+                    background: activeView === n.id ? 'var(--primary-light)' : 'transparent',
+                    color: activeView === n.id ? 'var(--primary-brand)' : 'var(--text-secondary)',
                     position: 'relative',
                     transition: 'all 0.2s'
                   }}
                 >
-                  <div style={{ width: '38px', height: '38px', borderRadius: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: activeView === n.id ? `${TEAL}22` : '#F5F7F8' }}>{n.icon}</div>
+                  <div style={{ width: '38px', height: '38px', borderRadius: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: activeView === n.id ? 'var(--primary-light)' : 'var(--bg-app-alt)' }}>{n.icon}</div>
                   <div style={{ fontSize: '14px', fontWeight: '600' }}>{n.label}</div>
-                  {activeView === n.id && <div style={{ width: '4px', height: '20px', borderRadius: '2px', background: TEAL, marginLeft: 'auto' }} />}
+                  {activeView === n.id && <div style={{ width: '4px', height: '20px', borderRadius: '2px', background: 'var(--primary-brand)', marginLeft: 'auto' }} />}
                 </div>
               ))}
 
-              <div style={{ height: '1px', background: '#F0F2F4', margin: '8px 12px' }} />
-              <div style={{ fontSize: '10px', fontWeight: '700', color: '#bbb', textTransform: 'uppercase', letterSpacing: '0.8px', padding: '8px 10px 6px' }}>Lainnya</div>
+              <div style={{ height: '1px', background: 'var(--border-light)', margin: '8px 12px' }} />
+              <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.8px', padding: '8px 10px 6px' }}>Lainnya</div>
 
               <div
                 className={`nav-item-teal ${activeView === 'cs' ? 'active' : ''}`}
                 onClick={() => { haptic.tap(); onNavigate('cs'); onClose(); }}
-                style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '12px 14px', borderRadius: '13px', cursor: 'pointer', marginBottom: '2px' }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '14px', padding: '12px 14px', borderRadius: '13px', cursor: 'pointer', marginBottom: '2px',
+                  background: activeView === 'cs' ? 'var(--primary-light)' : 'transparent',
+                  color: activeView === 'cs' ? 'var(--primary-brand)' : 'var(--text-secondary)'
+                }}
               >
-                <div style={{ width: '38px', height: '38px', borderRadius: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F5F7F8' }}><MessageCircleMore size={20} /></div>
-                <div style={{ fontSize: '14px', fontWeight: '600', color: '#555' }}>Bantuan</div>
+                <div style={{ width: '38px', height: '38px', borderRadius: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: activeView === 'cs' ? 'var(--primary-light)' : 'var(--bg-app-alt)' }}><MessageCircleMore size={20} /></div>
+                <div style={{ fontSize: '14px', fontWeight: '600' }}>Bantuan</div>
               </div>
+
+              {hasPermission('Karyawan') && (
+                <div
+                  className={`nav-item-teal ${activeView === 'employee' ? 'active' : ''}`}
+                  onClick={() => { haptic.tap(); onNavigate('employee'); onClose(); }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '14px', padding: '12px 14px', borderRadius: '13px', cursor: 'pointer', marginBottom: '2px',
+                    background: activeView === 'employee' ? 'var(--primary-light)' : 'transparent',
+                    color: activeView === 'employee' ? 'var(--primary-brand)' : 'var(--text-secondary)'
+                  }}
+                >
+                  <div style={{ width: '38px', height: '38px', borderRadius: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: activeView === 'employee' ? 'var(--primary-light)' : 'var(--bg-app-alt)' }}><Users size={20} /></div>
+                  <div style={{ fontSize: '14px', fontWeight: '600' }}>Tim Karyawan</div>
+                </div>
+              )}
 
               <div
                 className={`nav-item-teal ${activeView === 'settings' ? 'active' : ''}`}
                 onClick={() => { haptic.tap(); onNavigate('settings'); onClose(); }}
-                style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '12px 14px', borderRadius: '13px', cursor: 'pointer', marginBottom: '2px' }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '14px', padding: '12px 14px', borderRadius: '13px', cursor: 'pointer', marginBottom: '2px',
+                  background: activeView === 'settings' ? 'var(--primary-light)' : 'transparent',
+                  color: activeView === 'settings' ? 'var(--primary-brand)' : 'var(--text-secondary)'
+                }}
               >
-                <div style={{ width: '38px', height: '38px', borderRadius: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F5F7F8' }}><User size={20} /></div>
-                <div style={{ fontSize: '14px', fontWeight: '600', color: '#555' }}>Pengaturan</div>
+                <div style={{ width: '38px', height: '38px', borderRadius: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: activeView === 'settings' ? 'var(--primary-light)' : 'var(--bg-app-alt)' }}><User size={20} /></div>
+                <div style={{ fontSize: '14px', fontWeight: '600' }}>Pengaturan</div>
               </div>
             </nav>
-
-            <div className="drawer-footer" style={{ padding: '14px 12px 28px', borderTop: '1px solid #F0F2F4' }}>
-              <div
-                className="logout-btn-teal"
-                onClick={() => {
-                  haptic.tap();
-                  if (window.confirm("Apakah anda yakin ingin keluar?")) {
-                    onLogout();
-                  }
-                }}
-                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', borderRadius: '13px', cursor: 'pointer', background: '#FFF0F1' }}
-              >
-                <div style={{ width: '38px', height: '38px', borderRadius: '11px', background: '#FFDDE0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FF4757' }}><LogOut size={20} /></div>
-                <div style={{ fontSize: '14px', fontWeight: '700', color: '#FF4757' }}>Keluar</div>
-              </div>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>

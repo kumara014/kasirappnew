@@ -3,6 +3,7 @@
     padding-bottom: 80px;
     overflow-y: auto;
     height: 100vh;
+    background: var(--bg-app);
     animation: fadeIn 0.5s ease;
 }
 
@@ -39,7 +40,7 @@
 }
 
 .search-bar-header {
-    background: #fff;
+    background: var(--bg-surface);
     padding: 10px 15px;
     border-radius: 8px;
     display: flex;
@@ -47,6 +48,7 @@
     gap: 10px;
     width: 300px;
     box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
 }
 
 .search-bar-header input {
@@ -54,6 +56,8 @@
     outline: none;
     font-size: 14px;
     width: 100%;
+    background: transparent;
+    color: var(--text-primary);
 }
 
 /* Stats Cards */
@@ -65,7 +69,7 @@
 }
 
 .stat-card {
-    background: #fff;
+    background: var(--bg-surface);
     padding: 20px;
     border-radius: 12px;
     box-shadow: var(--shadow-sm);
@@ -73,6 +77,7 @@
     flex-direction: column;
     gap: 15px;
     transition: transform 0.2s;
+    border: 1px solid var(--border-light);
 }
 
 .stat-card:hover {
@@ -106,6 +111,7 @@
     font-size: 24px;
     font-weight: 700;
     margin-bottom: 4px;
+    color: var(--text-primary);
 }
 
 .stat-content p {
@@ -122,10 +128,11 @@
 }
 
 .chart-card {
-    background: #fff;
+    background: var(--bg-surface);
     padding: 24px;
     border-radius: 12px;
     box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
 }
 
 .chart-header {
@@ -138,6 +145,7 @@
 .chart-header h3 {
     font-size: 18px;
     font-weight: 600;
+    color: var(--text-primary);
 }
 
 /* Pie Chart Layout */
@@ -158,6 +166,7 @@
 .pie-center-text h3 {
     font-size: 20px;
     font-weight: 700;
+    color: var(--text-primary);
 }
 
 .pie-legend {
@@ -192,6 +201,7 @@
 .section-header h3 {
     font-size: 18px;
     font-weight: 600;
+    color: var(--text-primary);
 }
 
 .view-all {
@@ -208,13 +218,14 @@
 }
 
 .dish-item {
-    background: #fff;
+    background: var(--bg-surface);
     padding: 15px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     gap: 15px;
     box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
 }
 
 .dish-item.disabled {
@@ -225,7 +236,7 @@
     font-size: 24px;
     width: 40px;
     height: 40px;
-    background: #f5f5f5;
+    background: var(--bg-app-alt);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -236,6 +247,7 @@
     font-size: 14px;
     font-weight: 600;
     margin-bottom: 2px;
+    color: var(--text-primary);
 }
 
 .dish-info p {

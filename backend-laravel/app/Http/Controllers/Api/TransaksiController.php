@@ -9,6 +9,7 @@ use App\Models\TransaksiDetail;
 use App\Models\Barang;
 use App\Models\StokMutasi;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class TransaksiController extends Controller
 {
@@ -36,6 +37,7 @@ class TransaksiController extends Controller
                     'uang_bayar' => $request->uang_bayar,
                     'kembalian' => $kembalian,
                     'metode_pembayaran' => $request->metode_pembayaran ?? 'Cash',
+                    'user_id' => Auth::user()->getOwnerId(),
                 ]);
 
                 $details = [];
@@ -61,6 +63,10 @@ class TransaksiController extends Controller
                         'harga' => $item['harga'],
                         'qty' => $item['qty'],
                         'subtotal' => $item['harga'] * $item['qty'],
+                        'user_id' => Auth::id(),
+                        'metode_pembayaran' => $request->metode_pembayaran ?? 'Cash',
+                        'uang_bayar' => $request->uang_bayar,
+                        'kembalian' => $kembalian,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
@@ -68,8 +74,8 @@ class TransaksiController extends Controller
 
                 TransaksiDetail::insert($details);
 
-                // Invalidate dashboard cache
-                \Cache::forget('dashboard_summary');
+                // Invalidate user-specific dashboard cache
+                \Cache::forget('dashboard_summary_' . Auth::id());
 
                 return response()->json([
                     'message' => 'Transaksi berhasil disimpan.',
@@ -91,7 +97,7 @@ class TransaksiController extends Controller
 
     public function index()
     {
-        return response()->json(Transaksi::with('details.barang')->latest()->get());
+        return Transaksi::with('details.barang')->latest()->paginate(15);
     }
 
     public function show($id)

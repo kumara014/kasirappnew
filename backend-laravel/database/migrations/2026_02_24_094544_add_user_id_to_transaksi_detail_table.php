@@ -7,9 +7,9 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        if (!Schema::hasColumn('stok_mutasi', 'user_id')) {
-            Schema::table('stok_mutasi', function (Blueprint $table) {
-                $table->unsignedBigInteger('user_id')->nullable()->after('id_mutasi');
+        if (!Schema::hasColumn('transaksi_detail', 'user_id')) {
+            Schema::table('transaksi_detail', function (Blueprint $table) {
+                $table->unsignedBigInteger('user_id')->nullable()->after('id_detail');
                 $table->foreign('user_id')->references('id_user')->on('users')->onDelete('cascade');
             });
         }
@@ -17,8 +17,8 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::table('stok_mutasi', function (Blueprint $table) {
-            if (Schema::hasColumn('stok_mutasi', 'user_id')) {
+        Schema::table('transaksi_detail', function (Blueprint $table) {
+            if (Schema::hasColumn('transaksi_detail', 'user_id')) {
                 $table->dropForeign(['user_id']);
                 $table->dropColumn('user_id');
             }

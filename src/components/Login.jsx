@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Mail, Lock, LogIn, Store, ShoppingBag, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, LogIn, Store, ShoppingBag, ArrowRight, ArrowLeft, CheckCircle2, Check, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { apiFetch } from '../config';
 import { useNotification } from '../context/NotificationContext';
 import { haptic } from '../utils/haptics';
 
-const TEAL = "#4A9BAD";
-const TEAL_LIGHT = "#EAF5F7";
-const TEAL_DARK = "#357585";
+const TEAL = "var(--primary-brand)";
+const TEAL_LIGHT = "var(--primary-light)";
+const TEAL_DARK = "var(--primary-dark)";
 
 const BUSINESS_TYPES = [
     { id: "minimarket", label: "Minimarket", icon: "🏪" },
@@ -48,14 +48,14 @@ function SuccessScreen({ type, data }) {
         <div className="auth-screen">
             <div className="success-content">
                 <div className="success-check-box">
-                    <CheckCircle2 size={42} color="#fff" strokeWidth={3} />
+                    <Check size={48} color="#fff" strokeWidth={4} />
                 </div>
                 {type === "register" ? (
                     <>
                         <div className="success-title">Akun Berhasil Dibuat!</div>
                         <div className="success-sub">
                             Selamat datang di Pointly,<br />
-                            <strong style={{ color: "#333" }}>{data.nama_usaha}</strong> 🎉<br />
+                            <strong style={{ color: "var(--text-primary)" }}>{data.nama_usaha}</strong> 🎉<br />
                             <span style={{ fontSize: 12 }}>Tipe: {data.tipe_bisnis}</span>
                         </div>
                     </>
@@ -63,7 +63,7 @@ function SuccessScreen({ type, data }) {
                     <>
                         <div className="success-title">Login Berhasil!</div>
                         <div className="success-sub">
-                            Selamat datang kembali,<br /><strong style={{ color: "#333" }}>{data.email}</strong>
+                            Selamat datang kembali,<br /><strong style={{ color: "var(--text-primary)" }}>{data.email}</strong>
                         </div>
                     </>
                 )}
@@ -176,7 +176,7 @@ const Login = ({ onLoginSuccess }) => {
                 setSuccessData({ email: loginForm.email });
                 setScreen("success_login");
                 setTimeout(() => {
-                    onLoginSuccess(data.user);
+                    onLoginSuccess(data.user, data.token);
                 }, 1500);
             } else {
                 haptic.error();
@@ -218,7 +218,7 @@ const Login = ({ onLoginSuccess }) => {
                 setSuccessData({ nama_usaha: regForm.nama_usaha, tipe_bisnis: regForm.tipe_bisnis });
                 setScreen("success_register");
                 setTimeout(() => {
-                    onLoginSuccess(data.user);
+                    onLoginSuccess(data.user, data.token);
                 }, 2000);
             } else {
                 haptic.error();
@@ -237,9 +237,16 @@ const Login = ({ onLoginSuccess }) => {
         }
     };
 
-    if (screen === "success_login") return <SuccessScreen type="login" data={successData} />;
-    if (screen === "success_register") return <SuccessScreen type="register" data={successData} />;
-    if (screen === "forgot") return <ForgotScreen onBack={() => setScreen("login")} />;
+    const wrapAuth = (content) => (
+        <div className="auth-screen">
+            <style>{globalCSS}</style>
+            {content}
+        </div>
+    );
+
+    if (screen === "success_login") return wrapAuth(<SuccessScreen type="login" data={successData} />);
+    if (screen === "success_register") return wrapAuth(<SuccessScreen type="register" data={successData} />);
+    if (screen === "forgot") return wrapAuth(<ForgotScreen onBack={() => setScreen("login")} />);
 
     return (
         <div className="auth-screen">
@@ -396,7 +403,7 @@ const Login = ({ onLoginSuccess }) => {
 
                                 <div className="reg-actions">
                                     <button onClick={() => setRegStep(1)} className="btn-back-square">←</button>
-                                    <button onClick={handleRegister} disabled={regLoading || !regForm.email || regForm.password.length < 6} className="btn-primary">
+                                    <button onClick={handleRegister} disabled={regLoading || !regForm.email || (regForm.password || "").length < 6} className="btn-primary">
                                         {regLoading ? 'Mendaftar...' : 'Buat Akun'}
                                     </button>
                                 </div>
@@ -424,13 +431,13 @@ const globalCSS = `
   
   .auth-screen {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background: #F5F7F8;
+    background: var(--bg-app);
     min-height: 100vh;
     width: 100%;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    color: #111;
+    color: var(--text-primary);
   }
 
   /* Wave Header */
@@ -442,9 +449,9 @@ const globalCSS = `
   .circle-3 { top: 20px; left: -20px; width: 120px; height: 120px; }
   
   .auth-branding { position: relative; z-index: 2; }
-  .auth-logo-box { width: 72px; height: 72px; border-radius: 24px; background: rgba(255,255,255,0.22); display: flex; alignItems: center; justifyContent: center; margin: 0 auto 16px; border: 1.5px solid rgba(255,255,255,0.3); }
-  .auth-app-name { fontSize: 26px; fontWeight: 800; color: #fff; letterSpacing: -0.6px; }
-  .auth-app-sub { fontSize: 13px; color: rgba(255,255,255,0.7); marginTop: 4px; }
+  .auth-logo-box { width: 72px; height: 72px; border-radius: 24px; background: rgba(255,255,255,0.22); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; border: 1.5px solid rgba(255,255,255,0.3); }
+  .auth-app-name { font-size: 26px; font-weight: 800; color: #fff; letter-spacing: -0.6px; }
+  .auth-app-sub { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 4px; }
   
   .wave-svg-wrap { margin-top: -2px; }
   .wave-svg-wrap svg { display: block; width: 100%; height: 40px; }
@@ -452,80 +459,95 @@ const globalCSS = `
   /* Content */
   .auth-main-wrap { flex: 1; padding: 0 24px 40px; }
   
-  .auth-tab-row { display: flex; background: #ECEEF0; border-radius: 16px; padding: 4px; margin-bottom: 24px; }
-  .auth-tab-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; background: transparent; cursor: pointer; font-size: 14px; font-weight: 600; color: #aaa; transition: all 0.2s; font-family: inherit; }
-  .auth-tab-btn.active { background: #fff; color: #111; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+  .auth-tab-row { display: flex; background: var(--bg-app-alt); border-radius: 16px; padding: 4px; margin-bottom: 24px; }
+  .auth-tab-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; background: transparent; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-secondary); transition: all 0.2s; font-family: inherit; }
+  .auth-tab-btn.active { background: var(--bg-surface); color: var(--text-primary); font-weight: 700; box-shadow: var(--shadow-sm); }
 
-  .auth-card { background: #fff; border-radius: 24px; padding: 24px; border: 1.5px solid #ECEEF0; box-shadow: 0 8px 30px rgba(0,0,0,0.04); margin-bottom: 20px; }
+  .auth-card { background: var(--bg-surface); border-radius: 24px; padding: 24px; border: 1.5px solid var(--border-light); box-shadow: var(--shadow-sm); margin-bottom: 20px; }
   .animate-in { animation: fadeIn 0.4s ease-out; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
   .auth-card-header { margin-bottom: 24px; }
-  .card-title { font-size: 20px; font-weight: 800; color: #111; letter-spacing: -0.5px; margin-bottom: 6px; }
-  .card-sub { font-size: 14px; color: #aaa; font-weight: 500; }
+  .card-title { font-size: 20px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px; margin-bottom: 6px; }
+  .card-sub { font-size: 14px; color: var(--text-secondary); font-weight: 500; }
 
   .auth-input-group { margin-bottom: 20px; }
-  .auth-label { display: block; font-size: 11px; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .auth-label { display: block; font-size: 11px; font-weight: 800; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
   .auth-input-rel { position: relative; }
-  .auth-input-ico { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #bbb; pointer-events: none; }
-  .auth-input { width: 100%; padding: 14px 16px; border: 1.5px solid #ECEEF0; border-radius: 14px; font-size: 15px; outline: none; background: #FAFBFC; transition: all 0.2s; font-family: inherit; }
+  .auth-input-ico { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-tertiary); pointer-events: none; }
+  .auth-input { width: 100%; padding: 14px 16px; border: 1.5px solid var(--border-light); border-radius: 14px; font-size: 15px; outline: none; background: var(--bg-app-alt); transition: all 0.2s; font-family: inherit; color: var(--text-primary); }
   .auth-input.with-ico { padding-left: 48px; }
-  .auth-input:focus { border-color: ${TEAL}; background: #fff; box-shadow: 0 0 0 4px ${TEAL}10; }
+  .auth-input:focus { border-color: ${TEAL}; background: var(--bg-surface); box-shadow: 0 0 0 4px var(--primary-light); }
   
-  .pass-toggle-btn { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #bbb; padding: 4px; display: flex; }
+  .pass-toggle-btn { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-tertiary); padding: 4px; display: flex; }
 
   .forgot-link-box { text-align: right; margin-top: -10px; margin-bottom: 24px; }
   .auth-link { font-size: 13px; font-weight: 700; color: ${TEAL}; cursor: pointer; }
   .auth-link-bold { color: ${TEAL}; font-weight: 800; cursor: pointer; }
 
-  .btn-primary { width: 100%; padding: 16px; border-radius: 16px; background: ${TEAL}; color: #fff; border: none; cursor: pointer; font-size: 16px; font-weight: 700; transition: all 0.2s; font-family: inherit; box-shadow: 0 8px 20px ${TEAL}33; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-primary { width: 100%; padding: 16px; border-radius: 16px; background: ${TEAL}; color: #fff; border: none; cursor: pointer; font-size: 16px; font-weight: 700; transition: all 0.2s; font-family: inherit; box-shadow: 0 8px 20px var(--primary-light); display: flex; align-items: center; justify-content: center; gap: 8px; }
   .btn-primary:active { transform: scale(0.98); }
-  .btn-primary:disabled { background: #C5D8DC; cursor: not-allowed; box-shadow: none; }
+  .btn-primary:disabled { background: var(--text-tertiary); cursor: not-allowed; box-shadow: none; }
 
   /* Register Steps */
   .reg-steps-indicator { display: flex; margin-bottom: 24px; align-items: center; }
   .step-item { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
-  .step-circle { width: 34px; height: 34px; border-radius: 50%; background: #E5E9EC; color: #bbb; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; z-index: 2; transition: all 0.3s; }
+  .step-circle { width: 34px; height: 34px; border-radius: 50%; background: var(--bg-app-alt); color: var(--text-tertiary); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; z-index: 2; transition: all 0.3s; }
   .step-item.active .step-circle { background: ${TEAL}; color: #fff; }
-  .step-label { font-size: 11px; font-weight: 700; color: #bbb; margin-top: 8px; transition: all 0.3s; }
+  .step-label { font-size: 11px; font-weight: 700; color: var(--text-tertiary); margin-top: 8px; transition: all 0.3s; }
   .step-item.active .step-label { color: ${TEAL}; }
-  .step-line { position: absolute; top: 17px; left: 50%; width: 100%; height: 2px; background: #E5E9EC; z-index: 1; }
+  .step-line { position: absolute; top: 17px; left: 50%; width: 100%; height: 2px; background: var(--bg-app-alt); z-index: 1; }
   .step-line.active { background: ${TEAL}; }
 
   .biz-type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .biz-type-btn { padding: 14px 8px; border-radius: 16px; border: 1.5px solid #E5E9EC; background: #FAFBFC; cursor: pointer; transition: all 0.2s; display: flex; flexDirection: column; alignItems: center; gap: 6px; font-family: inherit; }
+  .biz-type-btn { padding: 14px 8px; border-radius: 16px; border: 1.5px solid var(--border-light); background: var(--bg-app-alt); cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 6px; font-family: inherit; }
   .biz-type-btn.active { border-color: ${TEAL}; background: ${TEAL_LIGHT}; }
   .biz-ico { font-size: 26px; }
-  .biz-lbl { font-size: 11px; font-weight: 700; color: #666; text-align: center; }
+  .biz-lbl { font-size: 11px; font-weight: 700; color: var(--text-secondary); text-align: center; }
   .biz-type-btn.active .biz-lbl { color: ${TEAL}; }
 
   .reg-review-box { display: flex; align-items: center; background: ${TEAL_LIGHT}; border-radius: 18px; padding: 14px 18px; gap: 12px; }
-  .review-ico { font-size: 20px; width: 42px; height: 42px; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .review-ico { font-size: 20px; width: 42px; height: 42px; background: var(--bg-surface); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
   .review-info { flex: 1; }
-  .review-name { font-size: 14px; font-weight: 800; color: #111; }
+  .review-name { font-size: 14px; font-weight: 800; color: var(--text-primary); }
   .review-type { font-size: 11px; color: ${TEAL}; font-weight: 700; }
-  .btn-edit-auth { fontSize: 11px; color: ${TEAL}; background: #fff; border: 1.5px solid ${TEAL}44; border-radius: 10px; padding: 6px 12px; cursor: pointer; font-weight: 700; }
+  .btn-edit-auth { font-size: 11px; color: ${TEAL}; background: var(--bg-surface); border: 1.5px solid var(--primary-light); border-radius: 10px; padding: 6px 12px; cursor: pointer; font-weight: 700; }
 
   .reg-actions { display: flex; gap: 12px; margin-top: 10px; }
-  .btn-back-square { width: 56px; height: 56px; border-radius: 16px; border: 1.5px solid #ECEEF0; background: #fff; color: #555; font-size: 18px; cursor: pointer; }
+  .btn-back-square { width: 56px; height: 56px; border-radius: 16px; border: 1.5px solid var(--border-light); background: var(--bg-surface); color: var(--text-secondary); font-size: 18px; cursor: pointer; }
 
-  .auth-footer-text { text-align: center; font-size: 14px; color: #aaa; margin-top: 20px; font-weight: 500; }
-  .auth-copyright { text-align: center; margin-top: 32px; fontSize: 11px; color: #ccc; fontWeight: 500; }
+  .auth-footer-text { text-align: center; font-size: 14px; color: var(--text-tertiary); margin-top: 20px; font-weight: 500; }
+  .auth-copyright { text-align: center; margin-top: 32px; font-size: 11px; color: var(--text-tertiary); font-weight: 500; }
 
   /* Success Screen */
   .success-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
-  .success-check-box { width: 96px; height: 96px; border-radius: 32px; background: linear-gradient(135deg, ${TEAL}, ${TEAL_DARK}); display: flex; alignItems: center; justifyContent: center; margin-bottom: 28px; box-shadow: 0 14px 36px ${TEAL}55; animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-  .success-title { font-size: 24px; font-weight: 800; color: #111; letter-spacing: -0.6px; margin-bottom: 12px; }
-  .success-sub { font-size: 15px; color: #aaa; line-height: 1.7; margin-bottom: 40px; }
+  .success-check-box { 
+    width: 96px; height: 96px; border-radius: 32px; 
+    background: linear-gradient(135deg, ${TEAL}, ${TEAL_DARK}); 
+    display: flex; align-items: center; justify-content: center; 
+    margin-bottom: 28px; 
+    box-shadow: 0 20px 40px var(--primary-light), inset 0 -4px 10px rgba(0,0,0,0.1), inset 0 4px 10px rgba(255,255,255,0.2); 
+    animation: successPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    border: 4px solid var(--bg-surface);
+  }
+  
+  @keyframes successPop {
+    0% { transform: scale(0.5); opacity: 0; }
+    60% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .success-title { font-size: 24px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.6px; margin-bottom: 12px; }
+  .success-sub { font-size: 15px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 40px; }
   
   .success-loader { display: flex; gap: 8px; margin-bottom: 12px; }
   .loader-dot { width: 9px; height: 9px; border-radius: 50%; background: ${TEAL}; animation: bounce 1.2s ease-in-out infinite; }
-  .loader-text { font-size: 12px; color: #bbb; font-weight: 600; }
+  .loader-text { font-size: 13px; color: ${TEAL}; font-weight: 700; letter-spacing: 0.5px; }
 
   .sent-icon-box { font-size: 42px; margin-bottom: 24px; animation: scaleIn 0.5s; }
-  .back-btn-auth { width: 42px; height: 42px; border-radius: 12px; background: #fff; border: 1.5px solid #ECEEF0; cursor: pointer; display: flex; alignItems: center; justifyContent: center; color: #333; margin-bottom: 24px; }
-  .auth-form-title { font-size: 26px; font-weight: 800; color: #111; margin-bottom: 8px; }
-  .auth-form-sub { font-size: 14px; color: #aaa; line-height: 1.6; margin-bottom: 30px; }
+  .back-btn-auth { width: 42px; height: 42px; border-radius: 12px; background: var(--bg-surface); border: 1.5px solid var(--border-light); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-primary); margin-bottom: 24px; }
+  .auth-form-title { font-size: 26px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; }
+  .auth-form-sub { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 30px; }
 
   @keyframes scaleIn { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   @keyframes bounce { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Transaksi extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\Multitenantable;
 
     protected $table = 'transaksi';
     protected $primaryKey = 'id_transaksi';
@@ -18,7 +18,8 @@ class Transaksi extends Model
         'uang_bayar',
         'kembalian',
         'metode_pembayaran',
-        'tanggal_transaksi'
+        'tanggal_transaksi',
+        'user_id'
     ];
 
     public function details()

@@ -40,7 +40,14 @@ const RANDOM_EMOJIS = ["📁", "🏷️", "🛍️", "📌", "⭐", "🔖", "�
 
 const Menu = () => {
     const { notify } = useNotification();
-    const { productsData, loadingProducts, refreshProducts, lowStockItems } = useData();
+    const {
+        productsData,
+        loadingProducts,
+        refreshProducts,
+        lowStockItems,
+        productsPagination,
+        fetchMoreProducts
+    } = useData();
     const [categories, setCategories] = useState([]);
 
     const [activeCategory, setActiveCategory] = useState("Semua");
@@ -84,7 +91,7 @@ const Menu = () => {
     };
 
     const getIcon = (catName) => CAT_ICONS[catName] || "📦";
-    const getColor = (catName) => CAT_COLORS[catName] || RANDOM_COLORS[Math.abs(catName.length) % RANDOM_COLORS.length];
+    const getColor = (catName) => CAT_COLORS[catName] || RANDOM_COLORS[Math.abs((catName || "").length) % RANDOM_COLORS.length];
 
     const filtered = productsData.filter((p) => {
         const matchCat = activeCategory === "Semua" || String(p.id_kategori) === String(activeCategory);
@@ -119,6 +126,12 @@ const Menu = () => {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            // Check size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                notify('Ukuran gambar terlalu besar (maks 10MB)', 'error');
+                e.target.value = null;
+                return;
+            }
             setSelectedFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -140,7 +153,7 @@ const Menu = () => {
         formData.append('nama_barang', form.nama_barang);
         formData.append('harga', form.harga);
         formData.append('stok', form.stok);
-        formData.append('id_kategori', form.id_kategori);
+        formData.append('id_kategori', form.id_kategori || '');
         formData.append('stok_minimum', form.stok_minimum);
 
         if (selectedFile) {
@@ -163,11 +176,15 @@ const Menu = () => {
                 setScreen("list");
                 refreshProducts(true);
             } else {
+                if (res.status === 422 && data.errors) {
+                    const firstError = Object.values(data.errors)[0][0];
+                    throw new Error(firstError);
+                }
                 throw new Error(data.message || 'Gagal menyimpan');
             }
         } catch (err) {
             haptic.error();
-            notify('Error: ' + err.message, 'error');
+            notify('Gagal: ' + err.message, 'error');
         } finally {
             setIsProcessing(false);
         }
@@ -325,13 +342,20 @@ const Menu = () => {
                         />
 
                         <div className="input-label">Harga Jual *</div>
-                        <input
-                            className="form-input"
-                            placeholder="0"
-                            type="number"
-                            value={form.harga}
-                            onChange={(e) => setForm({ ...form, harga: e.target.value })}
-                        />
+                        <div className="input-with-prefix">
+                            <span className="prefix-text">Rp</span>
+                            <input
+                                className="form-input"
+                                placeholder="0"
+                                type="text"
+                                inputMode="numeric"
+                                value={form.harga ? new Intl.NumberFormat("id-ID").format(form.harga) : ""}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, "");
+                                    setForm({ ...form, harga: val });
+                                }}
+                            />
+                        </div>
                     </div>
 
                     {/* Kategori */}
@@ -341,6 +365,14 @@ const Menu = () => {
                             <button onClick={() => setScreen("add_category")} className="add-cat-btn">+ Baru</button>
                         </div>
                         <div className="cat-grid">
+                            {/* Option for No Category */}
+                            <button
+                                onClick={() => setForm({ ...form, id_kategori: "" })}
+                                className={`cat-tab-btn ${!form.id_kategori ? 'active' : ''}`}
+                            >
+                                <span>📁</span> Tanpa Kategori
+                            </button>
+
                             {categories.map((c) => {
                                 const isActive = String(form.id_kategori) === String(c.id_kategori);
                                 return (
@@ -434,8 +466,8 @@ const Menu = () => {
 
             <div className="topbar">
                 <div className="topbar-row" style={{ marginBottom: 14 }}>
-                    <span className="topbar-title">Kelola <span style={{ color: TEAL }}>Produk</span></span>
-                    <button onClick={openAdd} className="add-fab-header">+</button>
+                    <span className="topbar-title">Kelola <span style={{ color: "var(--primary-brand)" }}>Produk</span></span>
+                    <button onClick={openAdd} className="add-fab-header"><Plus size={22} /></button>
                 </div>
 
                 <div className="search-wrap">
@@ -453,7 +485,7 @@ const Menu = () => {
                         onClick={() => setActiveCategory("Semua")}
                         className={`cat-pill ${activeCategory === "Semua" ? 'active all' : ''}`}
                     >
-                        Semua ({productsData.length})
+                        Semua ({(productsData || []).length})
                     </button>
                     {categories.map((c) => {
                         const isActive = String(activeCategory) === String(c.id_kategori);
@@ -475,9 +507,9 @@ const Menu = () => {
             <div className="content">
                 {lowStockItems.length > 0 && (
                     <div className="alert-box">
-                        <AlertTriangle size={20} color="#E67E22" />
+                        <AlertTriangle size={20} color="var(--status-orange)" />
                         <div>
-                            <div className="alert-title">{lowStockItems.length} produk stok menipis</div>
+                            <div className="alert-title">{(lowStockItems || []).length} produk stok menipis</div>
                             <div className="alert-desc">Segera lakukan restok</div>
                         </div>
                     </div>
@@ -486,63 +518,73 @@ const Menu = () => {
                 <div className="stats-grid">
                     <div className="stat-card">
                         <div className="stat-label">Total Produk</div>
-                        <div className="stat-val">{productsData.length}</div>
+                        <div className="stat-val">{(productsData || []).length}</div>
                     </div>
                     <div className="stat-card">
                         <div className="stat-label">Stok Menipis</div>
-                        <div className="stat-val" style={{ color: lowStockItems.length > 0 ? "#FF4757" : "#2ECC71" }}>
-                            {lowStockItems.length}
+                        <div className="stat-val" style={{ color: (lowStockItems || []).length > 0 ? "var(--status-red)" : "var(--status-green)" }}>
+                            {(lowStockItems || []).length}
                         </div>
                     </div>
                 </div>
 
-                <div className="results-count">{filtered.length} produk ditemukan</div>
+                <div className="results-count">{(filtered || []).length} produk ditemukan</div>
 
-                {loadingProducts && productsData.length === 0 ? (
+                {loadingProducts && (productsData || []).length === 0 ? (
                     <div className="empty-state">
                         <div className="skeleton-list">
                             {[1, 2, 3, 4].map(i => <div key={i} className="skeleton-card" />)}
                         </div>
                     </div>
-                ) : filtered.length === 0 ? (
-                    <div className="empty-state">
-                        <div style={{ fontSize: 40, marginBottom: 12 }}>📭</div>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: '#bbb' }}>Produk tidak ditemukan</div>
-                    </div>
-                ) : filtered.map((p) => {
-                    const col = getColor(p.nama_kategori || "");
-                    const isLow = Number(p.stok) <= (p.stok_minimum || 5);
-                    return (
-                        <div key={p.id_barang} className="product-card">
-                            {isLow && <div className="low-stock-badge">STOK TIPIS</div>}
-                            <div className="product-card-main">
-                                <div className="product-img-box" style={{ background: col.bg }}>
-                                    {p.gambar ? <SafeImage src={p.gambar} className="img-full" /> : <span>{getIcon(p.nama_kategori)}</span>}
-                                </div>
-                                <div className="product-details">
-                                    <div className="p-name">{p.nama_barang}</div>
-                                    <div className="p-cat" style={{ background: col.bg, color: col.color }}>
-                                        {getIcon(p.nama_kategori)} {p.nama_kategori || "Tanpa Kategori"}
+                ) : (
+                    <>
+                        {filtered.map((p) => {
+                            const col = getColor(p.nama_kategori || "");
+                            const isLow = Number(p.stok) <= (p.stok_minimum || 5);
+                            return (
+                                <div key={p.id_barang} className="product-card">
+                                    {isLow && <div className="low-stock-badge">STOK TIPIS</div>}
+                                    <div className="product-card-main">
+                                        <div className="product-img-box" style={{ background: col.bg }}>
+                                            {p.gambar ? <SafeImage src={p.gambar} className="img-full" /> : <span>{getIcon(p.nama_kategori)}</span>}
+                                        </div>
+                                        <div className="product-details">
+                                            <div className="p-name">{p.nama_barang}</div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
+                                                <div className="p-cat" style={{ background: col.bg, color: col.color, border: `1px solid ${col.color}44`, marginBottom: 0 }}>
+                                                    {getIcon(p.nama_kategori)} {p.nama_kategori || "Tanpa Kategori"}
+                                                </div>
+                                                <div className="stock-tag" style={{ color: stockColor(p), background: stockBg(p) }}>
+                                                    📦 {p.stok}
+                                                </div>
+                                            </div>
+                                            <div className="p-price">{formatRp(p.harga)}</div>
+                                        </div>
+                                        <div className="p-actions">
+                                            <button onClick={() => openEdit(p)} className="p-action-btn edit"><Edit2 size={16} /></button>
+                                            <button onClick={() => confirmDelete(p)} className="p-action-btn delete"><Trash2 size={16} /></button>
+                                        </div>
                                     </div>
-                                    <div className="p-price">{formatRp(p.harga)}</div>
                                 </div>
-                                <div className="p-actions">
-                                    <button onClick={() => openEdit(p)} className="p-action-btn edit"><Edit2 size={16} /></button>
-                                    <button onClick={() => confirmDelete(p)} className="p-action-btn delete"><Trash2 size={16} /></button>
-                                </div>
+                            );
+                        })}
+                        {productsPagination?.next_page_url && (
+                            <div style={{ marginTop: '24px', textAlign: 'center', gridColumn: '1 / -1' }}>
+                                <button
+                                    onClick={fetchMoreProducts}
+                                    disabled={loadingProducts}
+                                    className="btn-secondary"
+                                    style={{ width: 'auto', padding: '10px 24px' }}
+                                >
+                                    {loadingProducts ? 'Memuat...' : 'Muat Lebih Banyak'}
+                                </button>
                             </div>
-
-                            <div className="p-stock-meter">
-                                <div className="stock-label" style={{ color: stockColor(p), background: stockBg(p) }}>
-                                    Stok: {p.stok}
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
+                        )}
+                    </>
+                )}
             </div>
 
-            <button onClick={openAdd} className="fab-btn">+</button>
+            <button onClick={openAdd} className="fab-btn"><Plus size={32} /></button>
         </div>
     );
 };
@@ -552,102 +594,106 @@ const globalCSS = `
   
   .kelola-produk-teal { 
     font-family: 'Plus Jakarta Sans', sans-serif; 
-    background: #F5F7F8; 
+    background: var(--bg-app); 
     min-height: 100vh; 
     width: 100%;
     display: flex; 
     flex-direction: column; 
     position: relative; 
-    color: #111;
+    color: var(--text-primary);
   }
 
-  .topbar { background: #fff; padding: 12px 20px 0; border-bottom: 1px solid #ECEEF0; position: sticky; top: 0; z-index: 100; }
+  .topbar { background: var(--bg-surface); padding: 12px 20px 0; border-bottom: 1px solid var(--border-light); position: sticky; top: 0; z-index: 100; }
   .topbar-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .topbar-title { font-size: 18px; font-weight: 800; color: #111; letter-spacing: -0.4px; }
+  .topbar-title { font-size: 18px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.4px; }
   
-  .back-btn { width: 38px; height: 38px; border-radius: 10px; background: #F5F7F8; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #333; transition: all 0.2s; }
-  .back-btn:active { transform: scale(0.9); background: #ECEEF0; }
+  .back-btn { width: 38px; height: 38px; border-radius: 10px; background: var(--bg-app-alt); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); transition: all 0.2s; }
+  .back-btn:active { transform: scale(0.9); background: var(--border-light); }
 
-  .add-fab-header { width: 36px; height: 36px; border-radius: 10px; background: ${TEAL}; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff; font-weight: 700; }
+  .add-fab-header { width: 36px; height: 36px; border-radius: 10px; background: var(--primary-brand); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; transition: all 0.2s; }
+  .add-fab-header:active { transform: scale(0.9); }
 
   .search-wrap { position: relative; margin: 14px 0; }
-  .search-input { width: 100%; padding: 10px 16px 10px 40px; border: 1.5px solid #E5E9EC; border-radius: 12px; font-size: 14px; background: #fff; outline: none; transition: all 0.2s; }
-  .search-input:focus { border-color: ${TEAL}; box-shadow: 0 0 0 4px ${TEAL}11; }
-  .search-ico { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #bbb; display: flex; }
+  .search-input { width: 100%; padding: 10px 16px 10px 40px; border: 1.5px solid var(--border-strong); border-radius: 12px; font-size: 14px; background: var(--bg-surface); color: var(--text-primary); outline: none; transition: all 0.2s; }
+  .search-input:focus { border-color: var(--primary-brand); box-shadow: 0 0 0 4px rgba(74, 155, 173, 0.1); }
+  .search-ico { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-tertiary); display: flex; }
 
-  .cat-tabs-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; scrollbarWidth: "none"; }
+  .cat-tabs-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; scrollbar-width: none; }
   .cat-tabs-scroll::-webkit-scrollbar { display: none; }
-  .cat-pill { flex-shrink: 0; padding: 6px 14px; borderRadius: 20px; border: 1.5px solid #E5E9EC; background: #fff; color: #777; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; border-radius: 20px; }
-  .cat-pill.active { border-color: ${TEAL}; background: ${TEAL_LIGHT}; color: ${TEAL}; }
-  .cat-pill.active.all { background: #1a1a18; color: #fff; border-color: #1a1a18; }
+  .cat-pill { flex-shrink: 0; padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border-strong); background: var(--bg-surface); color: var(--text-secondary); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+  .cat-pill.active { border-color: var(--primary-brand); background: var(--primary-light); color: var(--primary-brand); }
+  .cat-pill.active.all { background: var(--text-primary); color: var(--bg-surface); border-color: var(--text-primary); }
 
   .content { flex: 1; padding: 16px; padding-bottom: 100px; }
 
-  .alert-box { background: #FFF8EC; border: 1.5px solid #F5CBA7; border-radius: 14px; padding: 12px 14px; marginBottom: 16px; display: flex; alignItems: center; gap: 12px; margin-bottom: 16px; }
-  .alert-title { font-size: 13px; font-weight: 700; color: #E67E22; }
-  .alert-desc { font-size: 11px; color: #aaa; margin-top: 1px; }
+  .alert-box { background: var(--status-orange-light); border: 1.5px solid var(--status-orange); border-radius: 14px; padding: 12px 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; border-color: rgba(245, 158, 11, 0.3); }
+  .alert-title { font-size: 13px; font-weight: 700; color: var(--status-orange); }
+  .alert-desc { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
 
   .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
-  .stat-card { background: #fff; border-radius: 16px; padding: 12px 16px; border: 1.5px solid #ECEEF0; }
-  .stat-label { font-size: 11px; color: #aaa; fontWeight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-  .stat-val { font-size: 22px; font-weight: 800; color: #111; letter-spacing: -0.5px; }
+  .stat-card { background: var(--bg-surface); border-radius: 16px; padding: 12px 16px; border: 1.5px solid var(--border-light); }
+  .stat-label { font-size: 11px; color: var(--text-tertiary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .stat-val { font-size: 22px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px; }
 
-  .results-count { font-size: 12px; color: #aaa; font-weight: 600; margin-bottom: 12px; }
+  .results-count { font-size: 12px; color: var(--text-tertiary); font-weight: 600; margin-bottom: 12px; }
 
-  .product-card { background: #fff; border-radius: 18px; padding: 14px; marginBottom: 12px; border: 1.5px solid #ECEEF0; position: relative; overflow: hidden; margin-bottom: 12px; transition: transform 0.2s; }
-  .low-stock-badge { position: absolute; top: 0; right: 0; background: #FF4757; color: #fff; font-size: 9px; font-weight: 800; padding: 4px 12px; border-radius: 0 0 0 12px; }
+  .product-card { background: var(--bg-surface); border-radius: 18px; padding: 14px; border: 1.5px solid var(--border-light); position: relative; overflow: hidden; margin-bottom: 12px; transition: transform 0.2s; }
+  .low-stock-badge { position: absolute; top: 0; right: 0; background: var(--status-red); color: #fff; font-size: 9px; font-weight: 800; padding: 4px 12px; border-radius: 0 0 0 12px; }
   
   .product-card-main { display: flex; gap: 14px; align-items: flex-start; }
-  .product-img-box { width: 54px; height: 54px; border-radius: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 24px; overflow: hidden; }
+  .product-img-box { width: 54px; height: 54px; border-radius: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 24px; overflow: hidden; background: var(--bg-app-alt); }
   .img-full { width: 100%; height: 100%; object-fit: cover; }
   
   .product-details { flex: 1; min-width: 0; }
-  .p-name { font-size: 15px; font-weight: 700; color: #111; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .p-name { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .p-cat { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: 700; margin-bottom: 6px; }
-  .p-price { font-size: 16px; font-weight: 800; color: ${TEAL}; }
+  .p-price { font-size: 16px; font-weight: 800; color: var(--primary-brand); }
 
   .p-actions { display: flex; flex-direction: column; gap: 8px; }
   .p-action-btn { width: 34px; height: 34px; border-radius: 10px; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
-  .p-action-btn.edit { background: ${TEAL_LIGHT}; color: ${TEAL}; }
-  .p-action-btn.delete { background: #FFF0F1; color: #FF4757; }
+  .p-action-btn.edit { background: var(--primary-light); color: var(--primary-brand); }
+  .p-action-btn.delete { background: var(--status-red-light); color: var(--status-red); }
 
-  .p-stock-meter { marginTop: 14px; display: flex; justifyContent: flex-end; align-items: center; gap: 12px; margin-top: 14px; }
-  .stock-label { font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 8px; flex-shrink: 0; }
+  .stock-tag { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 8px; flex-shrink: 0; }
 
-  .fab-btn { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 18px; background: ${TEAL}; border: none; color: #fff; font-size: 28px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px ${TEAL}44; cursor: pointer; z-index: 100; transition: transform 0.2s; }
-  .fab-btn:active { transform: scale(0.9); }
+  .fab-btn { position: fixed; bottom: 24px; right: 24px; width: 60px; height: 60px; border-radius: 20px; background: var(--primary-brand); border: none; color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 30px rgba(74, 155, 173, 0.3); cursor: pointer; z-index: 100; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  .fab-btn:active { transform: scale(0.85); box-shadow: 0 4px 10px rgba(74, 155, 173, 0.2); }
 
   /* Form Styles */
-  .form-card { background: #fff; border-radius: 20px; padding: 18px; border: 1.5px solid #ECEEF0; margin-bottom: 14px; }
-  .input-label { font-size: 11px; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
-  .form-input { width: 100%; padding: 12px 14px; border: 1.5px solid #E5E9EC; border-radius: 12px; font-size: 15px; outline: none; background: #FAFBFC; margin-bottom: 16px; font-family: inherit; transition: all 0.2s; }
-  .form-input:focus { border-color: ${TEAL}; background: #fff; }
+  .form-card { background: var(--bg-surface); border-radius: 20px; padding: 18px; border: 1.5px solid var(--border-light); margin-bottom: 14px; }
+  .input-label { font-size: 11px; font-weight: 800; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .form-input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border-strong); border-radius: 12px; font-size: 15px; outline: none; background: var(--bg-surface-alt); color: var(--text-primary); margin-bottom: 16px; font-family: inherit; transition: all 0.2s; }
+  .form-input:focus { border-color: var(--primary-brand); background: var(--bg-surface); }
 
-  .image-preview-box { width: 100px; height: 100px; border-radius: 24px; background: ${TEAL_LIGHT}; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px dashed ${TEAL}33; }
-  .camera-btn { position: absolute; bottom: -5px; right: -5px; width: 36px; height: 36px; border-radius: 12px; background: #fff; border: 1.5px solid #ECEEF0; display: flex; align-items: center; justify-content: center; color: ${TEAL}; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .input-with-prefix { position: relative; width: 100%; margin-bottom: 16px; }
+  .prefix-text { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-weight: 700; color: var(--primary-brand); font-size: 15px; }
+  .input-with-prefix .form-input { padding-left: 44px; margin-bottom: 0; }
 
-  .add-cat-btn { padding: 4px 12px; border-radius: 8px; border: 1.5px solid ${TEAL}; background: ${TEAL_LIGHT}; color: ${TEAL}; font-size: 11px; font-weight: 700; cursor: pointer; }
+  .image-preview-box { width: 100px; height: 100px; border-radius: 24px; background: var(--primary-light); display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px dashed rgba(74, 155, 173, 0.2); }
+  .camera-btn { position: absolute; bottom: -5px; right: -5px; width: 36px; height: 36px; border-radius: 12px; background: var(--bg-surface); border: 1.5px solid var(--border-light); display: flex; align-items: center; justify-content: center; color: var(--primary-brand); cursor: pointer; box-shadow: var(--shadow-sm); }
+
+  .add-cat-btn { padding: 4px 12px; border-radius: 8px; border: 1.5px solid var(--primary-brand); background: var(--primary-light); color: var(--primary-brand); font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .cat-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-  .cat-tab-btn { padding: 8px 14px; border-radius: 12px; border: 1.5px solid #E5E9EC; background: #FAFBFC; color: #666; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-  .cat-tab-btn.active { border-color: ${TEAL}; background: ${TEAL_LIGHT}; color: ${TEAL}; }
+  .cat-tab-btn { padding: 8px 14px; border-radius: 12px; border: 1.5px solid var(--border-strong); background: var(--bg-surface-alt); color: var(--text-secondary); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .cat-tab-btn.active { border-color: var(--primary-brand); background: var(--primary-light); color: var(--primary-brand); }
 
-  .stock-tip { margin-top: 10px; padding: 8px 12px; background: #FFF8EC; border-radius: 10px; font-size: 11px; color: #E67E22; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .stock-tip { margin-top: 10px; padding: 8px 12px; background: var(--status-orange-light); border-radius: 10px; font-size: 11px; color: var(--status-orange); font-weight: 600; display: flex; align-items: center; gap: 8px; }
 
-  .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 1px solid #ECEEF0; padding: 12px 20px 32px; display: flex; gap: 12px; z-index: 100; }
-  .btn-secondary { flex: 1; padding: 14px; border-radius: 14px; border: 1.5px solid #ECEEF0; background: #F5F7F8; color: #555; font-size: 14px; font-weight: 700; cursor: pointer; }
-  .btn-primary { flex: 2; padding: 14px; border-radius: 14px; border: none; background: ${TEAL}; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; }
-  .btn-primary:disabled { background: #C5D8DC; cursor: not-allowed; }
+  .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-surface); border-top: 1px solid var(--border-light); padding: 12px 20px 32px; display: flex; gap: 12px; z-index: 100; }
+  .btn-secondary { flex: 1; padding: 14px; border-radius: 14px; border: 1.5px solid var(--border-light); background: var(--bg-app-alt); color: var(--text-secondary); font-size: 14px; font-weight: 700; cursor: pointer; }
+  .btn-primary { flex: 2; padding: 14px; border-radius: 14px; border: none; background: var(--primary-brand); color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .btn-primary:disabled { background: var(--text-tertiary); opacity: 0.5; cursor: not-allowed; }
 
-  .confirm-card { background: #fff; border-radius: 24px; padding: 28px; border: 1.5px solid #ECEEF0; width: 90%; max-width: 400px; text-align: center; }
-  .delete-icon-box { width: 64px; height: 64px; border-radius: 20px; background: #FFF0F1; display: flex; align-items: center; justify-content: center; fontSize: 32px; margin: 0 auto 16px; font-size: 32px; }
-  .confirm-title { font-size: 20px; font-weight: 800; color: #111; margin-bottom: 8px; }
-  .confirm-desc { font-size: 14px; color: #888; margin-bottom: 4px; }
-  .confirm-target { font-size: 16px; font-weight: 700; color: #111; margin-bottom: 4px; }
-  .confirm-warning { font-size: 12px; color: #aaa; margin-bottom: 24px; }
-  .btn-delete-final { padding: 13px; border-radius: 14px; border: none; background: #FF4757; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .confirm-card { background: var(--bg-surface); border-radius: 24px; padding: 28px; border: 1.5px solid var(--border-light); width: 90%; max-width: 400px; text-align: center; }
+  .delete-icon-box { width: 64px; height: 64px; border-radius: 20px; background: var(--status-red-light); display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px; }
+  .confirm-title { font-size: 20px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; }
+  .confirm-desc { font-size: 14px; color: var(--text-secondary); margin-bottom: 4px; }
+  .confirm-target { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+  .confirm-warning { font-size: 12px; color: var(--text-tertiary); margin-bottom: 24px; }
+  .btn-delete-final { padding: 13px; border-radius: 14px; border: none; background: var(--status-red); color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; }
 
   @keyframes skeleton { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-  .skeleton-card { height: 120px; background: #fff; border-radius: 18px; border: 1.5px solid #ECEEF0; margin-bottom: 12px; animation: skeleton 1.5s infinite; }
+  .skeleton-card { height: 120px; background: var(--bg-surface); border-radius: 18px; border: 1.5px solid var(--border-light); margin-bottom: 12px; animation: skeleton 1.5s infinite; }
 `;
 
 export default Menu;
