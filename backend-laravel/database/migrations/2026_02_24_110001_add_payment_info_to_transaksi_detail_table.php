@@ -9,7 +9,13 @@ return new class extends Migration {
     {
         Schema::table('transaksi_detail', function (Blueprint $table) {
             $table->string('metode_pembayaran')->nullable()->after('subtotal');
+        });
+
+        Schema::table('transaksi_detail', function (Blueprint $table) {
             $table->decimal('uang_bayar', 15, 2)->nullable()->after('metode_pembayaran');
+        });
+
+        Schema::table('transaksi_detail', function (Blueprint $table) {
             $table->decimal('kembalian', 15, 2)->nullable()->after('uang_bayar');
         });
     }

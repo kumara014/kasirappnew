@@ -15,7 +15,13 @@ class AddRegistrationFieldsToUsersTable extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('nama_usaha')->nullable()->after('name');
+        });
+
+        Schema::table('users', function (Blueprint $table) {
             $table->string('tipe_bisnis')->nullable()->after('nama_usaha');
+        });
+
+        Schema::table('users', function (Blueprint $table) {
             $table->string('no_hp')->nullable()->unique()->after('tipe_bisnis');
         });
     }
