@@ -314,7 +314,12 @@ function PaymentScreen({ cart, total, onBack, onPay, isProcessing }) {
                                 value={cashInput ? new Intl.NumberFormat("id-ID").format(cashInput) : ""}
                                 onChange={(e) => {
                                     const raw = e.target.value.replace(/\D/g, "");
-                                    setCashInput(raw);
+                                    // Handle empty or zero
+                                    if (!raw || raw === "0") {
+                                        setCashInput("");
+                                    } else {
+                                        setCashInput(raw);
+                                    }
                                 }}
                             />
                         </div>

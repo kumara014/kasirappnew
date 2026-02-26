@@ -168,7 +168,7 @@ export default function Dashboard({ onNavigate }) {
                     <div className="dash-header-circle1" />
                     <div className="dash-header-circle2" />
                     <div className="greeting">{greeting} 👋</div>
-                    <div className="username">Pointly Store Admin</div>
+                    <div className="username">{user?.name || 'Pointly Store Admin'}</div>
                     <div className="date-tag">📅 {dateStr}</div>
                 </div>
 

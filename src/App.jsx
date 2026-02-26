@@ -1,5 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import Sidebar from './components/Sidebar';
+import { App as CapacitorApp } from '@capacitor/app';
 const Menu = lazy(() => import('./components/Barang/Barang'));
 const Dashboard = lazy(() => import('./components/Dashboard/Dashboard'));
 const History = lazy(() => import('./components/Riwayat/Riwayat'));
@@ -17,7 +18,7 @@ import { NotificationProvider } from './context/NotificationContext';
 import { NotificationDropdown, RestokModal } from './components/Notifications/NotificationDropdown';
 import { BellButton } from './components/Notifications/BellButton';
 import ErrorBoundary from './components/Common/ErrorBoundary';
-import { Bell, X, Menu as MenuIcon } from 'lucide-react';
+import { Bell, X, Menu as MenuIcon, RefreshCcw } from 'lucide-react';
 
 const TEAL = "var(--primary-brand)";
 
@@ -29,7 +30,8 @@ const AppContent = ({
   showSettings, setShowSettings
 }) => {
   const {
-    dashboardData, lowStockItems, performRestock
+    dashboardData, lowStockItems, performRestock,
+    refreshDashboard, refreshProducts, refreshOrders
   } = useData();
 
   const [restokProduct, setRestokProduct] = useState(null);
@@ -38,6 +40,26 @@ const AppContent = ({
     const res = await performRestock(productId, qty);
     if (res.success) {
       setRestokProduct(null);
+    }
+  };
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefreshAll = async () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    haptic.impact();
+    try {
+      await Promise.all([
+        refreshDashboard(true),
+        refreshProducts(true),
+        refreshOrders(true)
+      ]);
+      haptic.success();
+    } catch (err) {
+      console.error("Refresh failed:", err);
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 500);
     }
   };
 
@@ -91,7 +113,17 @@ const AppContent = ({
               <MenuIcon size={20} />
             </motion.button>
             <div className="store-logo-header">Pointly</div>
-            <div className="mobile-top-right">
+            <div className="mobile-top-right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <motion.button
+                className="top-bar-btn"
+                whileTap={{ scale: 0.9 }}
+                onClick={handleRefreshAll}
+                animate={isRefreshing ? { rotate: 360 } : { rotate: 0 }}
+                transition={isRefreshing ? { duration: 1, repeat: Infinity, ease: "linear" } : { duration: 0.2 }}
+                style={{ background: 'rgba(255,255,255,0.15)' }}
+              >
+                <RefreshCcw size={18} />
+              </motion.button>
               <div style={{ position: 'relative' }}>
                 <BellButton
                   count={notifications.length}
@@ -238,6 +270,34 @@ const App = () => {
       if (metaThemeColor) metaThemeColor.setAttribute('content', '#4A9BAD');
     }
   }, [theme]);
+
+  // Handle Android Hardware Back Button
+  useEffect(() => {
+    const setupBackButton = async () => {
+      return await CapacitorApp.addListener('backButton', ({ canGoBack }) => {
+        if (showLogoutConfirm) {
+          setShowLogoutConfirm(false);
+        } else if (isSidebarOpen) {
+          setIsSidebarOpen(false);
+        } else if (showNotifications) {
+          setShowNotifications(false);
+        } else if (showSettings) {
+          setShowSettings(false);
+        } else if (currentView !== 'dashboard') {
+          setCurrentView('dashboard');
+        } else {
+          // On dashboard with no UI overlays, exit the app
+          CapacitorApp.exitApp();
+        }
+      });
+    };
+
+    const backButtonListener = setupBackButton();
+
+    return () => {
+      backButtonListener.then(l => l.remove());
+    };
+  }, [currentView, isSidebarOpen, showNotifications, showSettings, showLogoutConfirm]);
 
   const handleLoginSuccess = (userData, token) => {
     setUser(userData);
