@@ -103,6 +103,8 @@ class AuthController extends Controller
             $updateData['bank_info'] = is_string($request->bank_info) ? json_decode($request->bank_info, true) : $request->bank_info;
         }
 
+        \Log::info('Update Profile Request:', $request->all());
+
         if ($request->has('qris_image') && !empty($request->qris_image)) {
             // Handle image upload if it's a file or base64
             if ($request->hasFile('qris_image')) {
@@ -124,6 +126,12 @@ class AuthController extends Controller
 
                 $fileName = 'qris_' . time() . '.' . $type;
                 $path = 'qris/' . $fileName;
+                
+                // Ensure directory exists
+                if (!\Illuminate\Support\Facades\Storage::disk('public')->exists('qris')) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->makeDirectory('qris');
+                }
+
                 \Illuminate\Support\Facades\Storage::disk('public')->put($path, $image_data);
                 $updateData['qris_image'] = $path;
             } else {
@@ -131,6 +139,8 @@ class AuthController extends Controller
                 $updateData['qris_image'] = $request->qris_image;
             }
         }
+
+        \Log::info('Final Update Data:', $updateData);
 
         if (!empty($updateData)) {
             $user->update($updateData);
