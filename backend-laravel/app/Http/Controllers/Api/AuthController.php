@@ -100,7 +100,13 @@ class AuthController extends Controller
         if ($request->has('tipe_bisnis')) $updateData['tipe_bisnis'] = $request->tipe_bisnis;
         
         if ($request->has('bank_info')) {
-            $updateData['bank_info'] = is_string($request->bank_info) ? json_decode($request->bank_info, true) : $request->bank_info;
+            $bankData = $request->bank_info;
+            if (is_string($bankData)) {
+                $decoded = json_decode($bankData, true);
+                $updateData['bank_info'] = is_array($decoded) ? $decoded : [];
+            } else {
+                $updateData['bank_info'] = is_array($bankData) ? $bankData : [];
+            }
         }
 
         \Log::info('Update Profile Request:', $request->all());
