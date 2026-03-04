@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { apiFetch, STORAGE_URL } from "../../config";
 import { useNotification } from "../../context/NotificationContext";
+import SafeImage from "../Common/SafeImage";
 
 const TEAL = "#4A9BAD";
 const TEAL_LIGHT = "#EAF5F7";
@@ -465,6 +466,8 @@ function AkunPassword({ onBack, user, onUpdateUser, onLogout }) {
     );
 }
 
+
+
 // ── METODE PEMBAYARAN ──────────────────────────────────────────────────────────
 function MetodePembayaran({ onBack, user, onUpdateUser }) {
     const [qrisImage, setQrisImage] = useState(user?.qris_image || null);
@@ -558,7 +561,7 @@ function MetodePembayaran({ onBack, user, onUpdateUser }) {
 
                     <div style={{ textAlign: "center", padding: "10px", border: "2px dashed #ECEEF0", borderRadius: 14, background: "#FAFBFC", cursor: "pointer", position: "relative" }}>
                         {qrisImage ? (
-                            <img src={qrisImage.startsWith('data:') ? qrisImage : (qrisImage.startsWith('http') ? qrisImage : `${STORAGE_URL}/${qrisImage}`)} alt="QRIS" style={{ maxWidth: "100%", maxHeight: 200, borderRadius: 8 }} />
+                            <SafeImage src={qrisImage} alt="QRIS" style={{ maxWidth: "100%", maxHeight: 200, borderRadius: 8 }} />
                         ) : (
                             <div style={{ padding: "30px 0" }}>
                                 <div style={{ fontSize: 32, marginBottom: 8 }}>🖼️</div>

@@ -344,13 +344,15 @@ function PaymentScreen({ cart, total, onBack, onPay, isProcessing, user }) {
                     </div>
                 )}
 
+
+
                 {method === "QRIS" && (
                     <div className="qris-box">
                         <div className="qris-desc">Scan QR berikut untuk membayar</div>
                         <div className="qris-placeholder">
                             {user?.qris_image ? (
-                                <img
-                                    src={user.qris_image.startsWith('data:') ? user.qris_image : `${STORAGE_URL}/${user.qris_image}`}
+                                <SafeImage
+                                    src={user.qris_image}
                                     alt="QRIS"
                                     style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 12 }}
                                 />
