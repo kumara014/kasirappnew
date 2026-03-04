@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">restaurant-pos-dashboard</string>
-    <string name="title_activity_main">restaurant-pos-dashboard</string>
+    <string name="app_name">Pointly</string>
+    <string name="title_activity_main">Pointly</string>
     <string name="package_name">com.restaurant.pos</string>
     <string name="custom_url_scheme">com.restaurant.pos</string>
 </resources>

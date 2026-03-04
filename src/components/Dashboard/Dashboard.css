@@ -337,6 +337,23 @@
     color: var(--text-secondary);
 }
 
+@media (max-width: 1024px) {
+    .dashboard-container {
+        padding: var(--spacing-lg);
+        padding-bottom: 80px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+
+    .charts-row,
+    .bottom-section {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 768px) {
     .dashboard-container {
         padding: 15px;
@@ -361,11 +378,10 @@
     .shortcut-grid {
         grid-template-columns: repeat(4, 1fr);
         gap: 8px;
-        /* Slightly tighter on mobile */
     }
 
     .shortcut-card {
-        padding: 15px;
+        padding: 12px 8px;
     }
 
     .shortcut-icon {
@@ -374,7 +390,7 @@
     }
 
     .shortcut-card span {
-        font-size: 13px;
+        font-size: 11px;
     }
 
     .stat-card {
@@ -396,5 +412,28 @@
 
     .dish-list {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .shortcut-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .shortcut-card {
+        padding: 14px 10px;
+    }
+
+    .shortcut-card span {
+        font-size: 12px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-header h1 {
+        font-size: 22px;
     }
 }

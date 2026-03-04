@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { apiFetch } from "../../config";
+import { apiFetch, STORAGE_URL } from "../../config";
 import { useNotification } from "../../context/NotificationContext";
 
 const TEAL = "#4A9BAD";
@@ -465,12 +465,152 @@ function AkunPassword({ onBack, user, onUpdateUser, onLogout }) {
     );
 }
 
+// ── METODE PEMBAYARAN ──────────────────────────────────────────────────────────
+function MetodePembayaran({ onBack, user, onUpdateUser }) {
+    const [qrisImage, setQrisImage] = useState(user?.qris_image || null);
+    const [bankList, setBankList] = useState(Array.isArray(user?.bank_info) ? user.bank_info : []);
+    const [loading, setLoading] = useState(false);
+    const { notify } = useNotification();
+
+    // Sync state if user prop changes (e.g., after save or refresh)
+    React.useEffect(() => {
+        if (user) {
+            setQrisImage(user.qris_image || null);
+            setBankList(Array.isArray(user.bank_info) ? user.bank_info : []);
+        }
+    }, [user]);
+
+    const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setQrisImage(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const addBank = () => {
+        setBankList([...bankList, { name: "", account: "" }]);
+    };
+
+    const updateBank = (index, field, value) => {
+        const newList = [...bankList];
+        newList[index][field] = value;
+        setBankList(newList);
+    };
+
+    const removeBank = (index) => {
+        setBankList(bankList.filter((_, i) => i !== index));
+    };
+
+    const handleSave = async () => {
+        setLoading(true);
+        try {
+            const res = await apiFetch('/user/profile', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name: user?.name,
+                    email: user?.email,
+                    nama_usaha: user?.nama_usaha,
+                    tipe_bisnis: user?.tipe_bisnis,
+                    bank_info: bankList,
+                    qris_image: qrisImage
+                })
+            });
+            const data = await res.json();
+            if (data.status === 'success') {
+                onUpdateUser(data.user);
+                // Also update local state to reflect the processed data (like file paths)
+                setQrisImage(data.user.qris_image || null);
+                setBankList(Array.isArray(data.user.bank_info) ? data.user.bank_info : []);
+                notify("Metode pembayaran berhasil disimpan");
+            } else {
+                notify(data.message || "Gagal menyimpan", "error");
+            }
+        } catch (err) {
+            notify("Kesalahan koneksi", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div style={pageStyle}>
+            <style>{globalCSS}</style>
+            <div className="topbar" style={{ paddingBottom: 16 }}>
+                <div className="topbar-row">
+                    <button className="back-btn" onClick={onBack}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
+                    </button>
+                    <span className="topbar-title">Metode <span style={{ color: TEAL }}>Pembayaran</span></span>
+                </div>
+            </div>
+
+            <div className="content">
+                {/* QRIS Section */}
+                <div style={{ background: "#fff", borderRadius: 18, border: "1.5px solid #ECEEF0", padding: 18, marginBottom: 16 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#111", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+                        <div style={{ width: 28, height: 28, borderRadius: 8, background: TEAL_LIGHT, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>📱</div>
+                        Pengaturan QRIS
+                    </div>
+
+                    <div style={{ textAlign: "center", padding: "10px", border: "2px dashed #ECEEF0", borderRadius: 14, background: "#FAFBFC", cursor: "pointer", position: "relative" }}>
+                        {qrisImage ? (
+                            <img src={qrisImage.startsWith('data:') ? qrisImage : (qrisImage.startsWith('http') ? qrisImage : `${STORAGE_URL}/${qrisImage}`)} alt="QRIS" style={{ maxWidth: "100%", maxHeight: 200, borderRadius: 8 }} />
+                        ) : (
+                            <div style={{ padding: "30px 0" }}>
+                                <div style={{ fontSize: 32, marginBottom: 8 }}>🖼️</div>
+                                <div style={{ fontSize: 13, fontWeight: 600, color: "#aaa" }}>Upload Foto QRIS Toko</div>
+                            </div>
+                        )}
+                        <input type="file" accept="image/*" onChange={handleFileUpload} style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer" }} />
+                    </div>
+                </div>
+
+                {/* Bank Transfer Section */}
+                <div style={{ background: "#fff", borderRadius: 18, border: "1.5px solid #ECEEF0", padding: 18, marginBottom: 14 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#111", marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <div style={{ width: 28, height: 28, borderRadius: 8, background: "#EEF0FF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>🏦</div>
+                            Transfer Bank
+                        </div>
+                        <button onClick={addBank} style={{ padding: "6px 12px", borderRadius: 8, background: TEAL, color: "#fff", border: "none", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>+ Tambah</button>
+                    </div>
+
+                    {(!bankList || bankList.length === 0) ? (
+                        <div style={{ textAlign: "center", padding: "20px 0", color: "#aaa", fontSize: 12 }}>Belum ada rekening ditambahkan</div>
+                    ) : (
+                        bankList.map((bank, idx) => (
+                            <div key={idx} style={{ padding: 14, borderRadius: 12, border: "1.5px solid #F0F2F4", marginBottom: 10, position: "relative" }}>
+                                <button onClick={() => removeBank(idx)} style={{ position: "absolute", top: 10, right: 10, background: "none", border: "none", color: "#FF4757", fontSize: 14, cursor: "pointer" }}>✕</button>
+                                <div className="input-label">Nama Bank (misal: BCA)</div>
+                                <input className="form-input" value={bank.name} onChange={e => updateBank(idx, "name", e.target.value)} style={{ marginBottom: 10 }} />
+                                <div className="input-label">Nomor Rekening</div>
+                                <input className="form-input" value={bank.account} onChange={e => updateBank(idx, "account", e.target.value)} />
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+
+            <div className="bottom-bar">
+                <button onClick={handleSave} disabled={loading} style={{ ...btnPrimary, background: loading ? "#C5D8DC" : TEAL }}>
+                    {loading ? "Menyimpan..." : "💾 Simpan Perubahan"}
+                </button>
+            </div>
+        </div>
+    );
+}
+
 // ── MAIN PENGATURAN ────────────────────────────────────────────────────────────
 export default function Settings({ user, onUpdateUser, onLogout }) {
-    const [screen, setScreen] = useState("main"); // main | profil | akun
+    const [screen, setScreen] = useState("main"); // main | profil | akun | payment
 
     if (screen === "profil") return <ProfilUsaha onBack={() => setScreen("main")} user={user} onUpdateUser={onUpdateUser} />;
     if (screen === "akun") return <AkunPassword onBack={() => setScreen("main")} user={user} onUpdateUser={onUpdateUser} onLogout={onLogout} />;
+    if (screen === "payment") return <MetodePembayaran onBack={() => setScreen("main")} user={user} onUpdateUser={onUpdateUser} />;
 
     const btype = BUSINESS_TYPES.find(b => b.id === user?.tipe_bisnis);
 
@@ -479,6 +619,7 @@ export default function Settings({ user, onUpdateUser, onLogout }) {
             title: "Usaha",
             items: [
                 { icon: "🏪", label: "Profil Usaha", desc: "Nama, tipe, email", color: TEAL_LIGHT, iconColor: TEAL, action: "profil" },
+                { icon: "💳", label: "Metode Pembayaran", desc: "QRIS dan rekening bank", color: "#FFF8EC", iconColor: "#F39C12", action: "payment" },
                 { icon: "🔒", label: "Akun & Keamanan", desc: "Email dan password login", color: "#EEF0FF", iconColor: "#6C63FF", action: "akun" },
             ],
         },

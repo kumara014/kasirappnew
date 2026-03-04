@@ -54,7 +54,7 @@ class ReportController extends Controller
 
         // Trend Data
         $trend = [];
-        $format = $range > 60 ? 'M' : ($range > 7 ? 'd/m' : 'D'); // Month name if > 60 days, else date
+        $format = $range > 7 ? 'd/m' : 'D'; // Fix: 30 & 90 days show daily format "d/m" instead of identical Month names
 
         for ($i = $range - 1; $i >= 0; $i--) {
             $date = (clone $now)->subDays($i)->format('Y-m-d');

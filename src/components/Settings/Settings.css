@@ -430,3 +430,29 @@
         white-space: nowrap;
     }
 }
+
+@media (max-width: 480px) {
+    .settings-container {
+        padding: 1rem;
+    }
+
+    .settings-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .card {
+        padding: 1.25rem;
+    }
+
+    .input-row {
+        grid-template-columns: 1fr;
+    }
+
+    .permissions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-card {
+        width: 95%;
+    }
+}

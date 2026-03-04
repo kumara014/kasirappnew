@@ -35,6 +35,25 @@ const AppContent = ({
   } = useData();
 
   const [restokProduct, setRestokProduct] = useState(null);
+  const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 1024);
+  const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(
+    () => localStorage.getItem('sidebar_collapsed') === 'true'
+  );
+
+  // Listen for resize to switch between desktop/mobile sidebar modes
+  useEffect(() => {
+    const onResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  const handleToggleDesktopCollapse = () => {
+    setIsDesktopCollapsed(prev => {
+      const next = !prev;
+      localStorage.setItem('sidebar_collapsed', String(next));
+      return next;
+    });
+  };
 
   const handleSaveRestok = async (productId, qty) => {
     const res = await performRestock(productId, qty);
@@ -48,14 +67,14 @@ const AppContent = ({
   const handleRefreshAll = async () => {
     if (isRefreshing) return;
     setIsRefreshing(true);
-    haptic.impact();
+    // haptic? .impact();
     try {
       await Promise.all([
         refreshDashboard(true),
         refreshProducts(true),
         refreshOrders(true)
       ]);
-      haptic.success();
+      // haptic? .success();
     } catch (err) {
       console.error("Refresh failed:", err);
     } finally {
@@ -65,6 +84,40 @@ const AppContent = ({
 
   // Use the global lowStockItems calculation for consistency
   const notifications = lowStockItems || [];
+
+  // Pull to refresh logic
+  const [pullY, setPullY] = useState(0);
+  const [startY, setStartY] = useState(0);
+  const PULL_THRESHOLD = 80;
+
+  const handleTouchStart = (e) => {
+    // Only allow pull to refresh if at the top of the scroll
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent && mainContent.scrollTop === 0) {
+      setStartY(e.touches[0].pageY);
+    } else {
+      setStartY(0);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (startY === 0 || isRefreshing) return;
+    const y = e.touches[0].pageY;
+    const diff = y - startY;
+    if (diff > 0) {
+      // Apply resistance
+      const pull = Math.min(diff * 0.4, PULL_THRESHOLD + 20);
+      setPullY(pull);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (pullY >= PULL_THRESHOLD && !isRefreshing) {
+      handleRefreshAll();
+    }
+    setPullY(0);
+    setStartY(0);
+  };
 
   // Close notifications automatically when navigating to a different view
   useEffect(() => {
@@ -99,99 +152,186 @@ const AppContent = ({
       {!user ? (
         <Login onLoginSuccess={handleLoginSuccess} />
       ) : (
-        <div className="app-layout" style={{ display: 'flex', height: '100%', position: 'relative', overflow: 'hidden' }}>
-
-          {/* Top Bar - Hidden when Kasir (order) is active on mobile to prevent header overlap */}
-          <div className="mobile-top-bar-teal" style={{
-            display: (currentView === 'order' && window.innerWidth <= 1024) ? 'none' : 'flex'
-          }}>
-            <motion.button
-              className="hamburger-teal"
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setIsSidebarOpen(true)}
-            >
-              <MenuIcon size={20} />
-            </motion.button>
-            <div className="store-logo-header">Pointly</div>
-            <div className="mobile-top-right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <motion.button
-                className="top-bar-btn"
-                whileTap={{ scale: 0.9 }}
-                onClick={handleRefreshAll}
-                animate={isRefreshing ? { rotate: 360 } : { rotate: 0 }}
-                transition={isRefreshing ? { duration: 1, repeat: Infinity, ease: "linear" } : { duration: 0.2 }}
-                style={{ background: 'rgba(255,255,255,0.15)' }}
-              >
-                <RefreshCcw size={18} />
-              </motion.button>
-              <div style={{ position: 'relative' }}>
-                <BellButton
-                  count={notifications.length}
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  hasNew={notifications.length > 0}
-                />
-
-                {showNotifications && (
-                  <NotificationDropdown
-                    onClose={() => setShowNotifications(false)}
-                    onRestok={(p) => setRestokProduct(p)}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-
-          <Sidebar
-            activeView={currentView}
-            onNavigate={setCurrentView}
-            user={user}
-            onLogout={() => setShowLogoutConfirm(true)}
-            theme={theme}
-            onToggleTheme={toggleTheme}
-            isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
-          />
-
-          {restokProduct && (
-            <RestokModal
-              product={restokProduct}
-              onClose={() => setRestokProduct(null)}
-              onSave={handleSaveRestok}
+        <div
+          className="app-layout"
+          style={{
+            display: 'flex',
+            flexDirection: isDesktop ? 'row' : 'column',
+            height: '100%',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Desktop persistent sidebar */}
+          {isDesktop && (
+            <Sidebar
+              activeView={currentView}
+              onNavigate={setCurrentView}
+              user={user}
+              onLogout={() => setShowLogoutConfirm(true)}
+              theme={theme}
+              onToggleTheme={toggleTheme}
+              isOpen={false}
+              onClose={() => { }}
+              isDesktop={true}
+              collapsed={isDesktopCollapsed}
+              onToggleCollapse={handleToggleDesktopCollapse}
             />
           )}
 
-          <main className="main-content" style={{ flex: 1, overflowY: 'auto', position: 'relative' }}>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentView}
-                className="view-wrapper"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                style={{ height: '100%' }}
-              >
-                <Suspense fallback={
-                  <div className="view-loading-skeleton" style={{ padding: '40px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    <div style={{ height: '40px', width: '200px', background: 'var(--bg-app-alt)', borderRadius: '8px', animation: 'pulse 1.5s infinite' }}></div>
-                    <div style={{ flex: 1, background: 'var(--bg-app-alt)', borderRadius: '12px', animation: 'pulse 1.5s infinite' }}></div>
+          {/* Mobile overlay sidebar — moved up for absolute positioning reliability */}
+          {!isDesktop && (
+            <Sidebar
+              activeView={currentView}
+              onNavigate={setCurrentView}
+              user={user}
+              onLogout={() => setShowLogoutConfirm(true)}
+              theme={theme}
+              onToggleTheme={toggleTheme}
+              isOpen={isSidebarOpen}
+              onClose={() => setIsSidebarOpen(false)}
+              isDesktop={false}
+              collapsed={false}
+              onToggleCollapse={() => { }}
+            />
+          )}
+
+          {/* Right panel: top bar (mobile only) + main content */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+
+            {/* Mobile top bar — hidden on desktop */}
+            {!isDesktop && (
+              <div className="mobile-top-bar-teal" style={{
+                display: (currentView === 'order') ? 'none' : 'flex'
+              }}>
+                <motion.button
+                  className="hamburger-teal"
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setIsSidebarOpen(true)}
+                >
+                  <MenuIcon size={20} />
+                </motion.button>
+                <div className="store-logo-header">Pointly</div>
+                <div className="mobile-top-right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ position: 'relative' }}>
+                    <BellButton
+                      count={notifications.length}
+                      onClick={() => setShowNotifications(!showNotifications)}
+                      hasNew={notifications.length > 0}
+                    />
+                    {showNotifications && (
+                      <NotificationDropdown
+                        onClose={() => setShowNotifications(false)}
+                        onRestok={(p) => setRestokProduct(p)}
+                        onManageStock={() => setCurrentView('stok-mutasi')}
+                      />
+                    )}
                   </div>
-                }>
-                  <ErrorBoundary key={currentView}>
-                    {currentView === 'dashboard' && <Dashboard onNavigate={setCurrentView} />}
-                    {currentView === 'menu' && <Menu />}
-                    {currentView === 'order' && <Kasir onToggleSidebar={() => setIsSidebarOpen(true)} />}
-                    {currentView === 'history' && <History />}
-                    {currentView === 'report' && <Report />}
-                    {currentView === 'stok-mutasi' && <StokMutasi />}
-                    {currentView === 'settings' && <Settings user={user} theme={theme} onToggleTheme={toggleTheme} onLogout={() => setShowLogoutConfirm(true)} onUpdateUser={handleLoginSuccess} />}
-                    {currentView === 'cs' && <CustomerService onBack={() => setCurrentView('dashboard')} />}
-                    {currentView === 'employee' && <ManajemenKaryawan onBack={() => setCurrentView('dashboard')} />}
-                  </ErrorBoundary>
-                </Suspense>
-              </motion.div>
-            </AnimatePresence>
-          </main>
+                </div>
+              </div>
+            )}
+
+            {restokProduct && (
+              <RestokModal
+                product={restokProduct}
+                onClose={() => setRestokProduct(null)}
+                onSave={handleSaveRestok}
+              />
+            )}
+
+            <main
+              className="main-content"
+              style={{ flex: 1, overflowY: 'auto', position: 'relative' }}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
+              {/* Pull to Refresh Indicator */}
+              <div style={{
+                position: 'absolute',
+                top: -40,
+                left: 0,
+                right: 0,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: 40,
+                transform: `translateY(${pullY}px)`,
+                opacity: pullY / PULL_THRESHOLD,
+                zIndex: 100,
+                pointerEvents: 'none'
+              }}>
+                <motion.div
+                  animate={isRefreshing ? { rotate: 360 } : { rotate: pullY * 3 }}
+                  transition={isRefreshing ? { duration: 1, repeat: Infinity, ease: "linear" } : { duration: 0 }}
+                  style={{
+                    background: 'white',
+                    borderRadius: '50%',
+                    padding: 8,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    color: TEAL
+                  }}
+                >
+                  <RefreshCcw size={20} />
+                </motion.div>
+              </div>
+
+              {/* Main Refresh Loading Overlay */}
+              <AnimatePresence>
+                {isRefreshing && pullY === 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    style={{
+                      position: 'absolute',
+                      top: 20,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      zIndex: 100,
+                      background: 'white',
+                      borderRadius: '50%',
+                      padding: 8,
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      color: TEAL
+                    }}
+                  >
+                    <RefreshCcw className="spin-fast" size={20} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentView}
+                  className="view-wrapper"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  style={{ height: '100%' }}
+                >
+                  <Suspense fallback={
+                    <div className="view-loading-skeleton" style={{ padding: '40px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      <div style={{ height: '40px', width: '200px', background: 'var(--bg-app-alt)', borderRadius: '8px', animation: 'pulse 1.5s infinite' }}></div>
+                      <div style={{ flex: 1, background: 'var(--bg-app-alt)', borderRadius: '12px', animation: 'pulse 1.5s infinite' }}></div>
+                    </div>
+                  }>
+                    <ErrorBoundary key={currentView}>
+                      {currentView === 'dashboard' && <Dashboard onNavigate={setCurrentView} />}
+                      {currentView === 'menu' && <Menu />}
+                      {currentView === 'order' && <Kasir onToggleSidebar={() => setIsSidebarOpen(true)} />}
+                      {currentView === 'history' && <History />}
+                      {currentView === 'report' && <Report />}
+                      {currentView === 'stok-mutasi' && <StokMutasi />}
+                      {currentView === 'settings' && <Settings user={user} theme={theme} onToggleTheme={toggleTheme} onLogout={() => setShowLogoutConfirm(true)} onUpdateUser={handleLoginSuccess} />}
+                      {currentView === 'cs' && <CustomerService onBack={() => setCurrentView('dashboard')} />}
+                      {currentView === 'employee' && <ManajemenKaryawan onBack={() => setCurrentView('dashboard')} />}
+                    </ErrorBoundary>
+                  </Suspense>
+                </motion.div>
+              </AnimatePresence>
+            </main>
+          </div>
 
           {/* Global Logout Selection UI */}
           <AnimatePresence>
@@ -246,18 +386,33 @@ const App = () => {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('pos_theme') || 'light';
   });
-  const [currentView, setCurrentView] = useState(() => {
-    return localStorage.getItem('pos_view') || 'dashboard';
-  });
+  const [currentView, setCurrentViewRaw] = useState('dashboard');
+  const [viewHistory, setViewHistory] = useState(['dashboard']);
+
+  // Wrap setCurrentView to manage history
+  const setCurrentView = (newView) => {
+    if (newView === currentView) return;
+
+    // If going to dashboard, clear history
+    if (newView === 'dashboard') {
+      setViewHistory(['dashboard']);
+    } else {
+      // Add to history
+      setViewHistory(prev => {
+        // If the view is already the last one, don't add
+        if (prev[prev.length - 1] === newView) return prev;
+        return [...prev, newView];
+      });
+    }
+    setCurrentViewRaw(newView);
+  };
 
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
-  useEffect(() => {
-    localStorage.setItem('pos_view', currentView);
-  }, [currentView]);
+
 
   useEffect(() => {
     localStorage.setItem('pos_theme', theme);
@@ -283,6 +438,13 @@ const App = () => {
           setShowNotifications(false);
         } else if (showSettings) {
           setShowSettings(false);
+        } else if (viewHistory.length > 1) {
+          // Go back in history
+          const newHistory = [...viewHistory];
+          newHistory.pop(); // Remove current view
+          const prevView = newHistory[newHistory.length - 1];
+          setViewHistory(newHistory);
+          setCurrentViewRaw(prevView);
         } else if (currentView !== 'dashboard') {
           setCurrentView('dashboard');
         } else {
@@ -297,15 +459,15 @@ const App = () => {
     return () => {
       backButtonListener.then(l => l.remove());
     };
-  }, [currentView, isSidebarOpen, showNotifications, showSettings, showLogoutConfirm]);
+  }, [currentView, viewHistory, isSidebarOpen, showNotifications, showSettings, showLogoutConfirm]);
 
   const handleLoginSuccess = (userData, token) => {
     setUser(userData);
     localStorage.setItem('pos_user', JSON.stringify(userData));
     if (token) {
       localStorage.setItem('pos_token', token);
+      setCurrentView('dashboard');
     }
-    setCurrentView('dashboard');
   };
 
   const confirmLogout = async () => {

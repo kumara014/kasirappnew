@@ -54,7 +54,7 @@ class DashboardController extends Controller
                 ->get();
 
             // Get Weekly Sales for Chart
-            $chart_data = Transaksi::select(DB::raw('DATE(tanggal_transaksi) as date'), DB::raw('SUM(total_harga) as total'))
+            $chart_data = Transaksi::select(DB::raw('DATE(tanggal_transaksi) as date'), DB::raw('CAST(SUM(total_harga) AS DECIMAL(15,2)) as total'))
                 ->where('user_id', $ownerId)
                 ->where('tanggal_transaksi', '>=', now()->subDays(7))
                 ->groupBy(DB::raw('DATE(tanggal_transaksi)'))

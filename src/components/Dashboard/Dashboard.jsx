@@ -56,7 +56,7 @@ export default function Dashboard({ onNavigate }) {
     const weekData = (summary?.chart_data?.length > 0)
         ? summary.chart_data.map((d, i, arr) => ({
             day: new Date(d.date).toLocaleDateString('id-ID', { weekday: 'short' }),
-            val: d.total || 0,
+            val: Number(d.total) || 0,
             today: i === arr.length - 1
         }))
         : [
@@ -77,9 +77,7 @@ export default function Dashboard({ onNavigate }) {
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         
         .dashboard-content { 
-            padding-bottom: 100px; 
-            max-width: 800px;
-            margin: 0 auto;
+            padding-bottom: 100px;
         }
 
         /* Header */
@@ -160,6 +158,41 @@ export default function Dashboard({ onNavigate }) {
         .dashboard-content > *:nth-child(2) { animation-delay: 0.1s; }
         .dashboard-content > *:nth-child(3) { animation-delay: 0.2s; }
         .dashboard-content > *:nth-child(4) { animation-delay: 0.3s; }
+
+        /* ── RESPONSIVE ── */
+        @media (min-width: 768px) {
+          .dashboard-content { max-width: 820px; margin: 0 auto; }
+          .dash-header { padding: 48px 32px 90px; }
+          .stats-row { margin: -55px 24px 0; gap: 16px; }
+          .stat-val { font-size: 16px; }
+          .section { padding: 28px 24px 0; }
+          .actions-grid { gap: 16px; }
+          .action-icon { width: 54px; height: 54px; }
+          .chart-total { font-size: 28px; }
+          .chart-bars { height: 130px; gap: 14px; }
+        }
+
+        @media (min-width: 1024px) {
+          .dashboard-content { max-width: 100%; }
+          .dash-header { padding: 48px 40px 90px; }
+          .stats-row { margin: -55px 32px 0; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+          .stat-card { padding: 20px 18px; }
+          .stat-icon { width: 52px; height: 52px; }
+          .stat-val { font-size: 18px; }
+          .stat-label { font-size: 13px; }
+          .section { padding: 32px 32px 0; }
+          .section-title { font-size: 18px; }
+          .actions-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+          .action-btn { padding: 20px 16px; border-radius: 22px; }
+          .action-icon { width: 60px; height: 60px; border-radius: 18px; }
+          .action-label { font-size: 13px; }
+          .chart-card { padding: 28px; }
+          .chart-total { font-size: 30px; }
+          .chart-bars { height: 150px; gap: 16px; }
+          .trx-item { padding: 18px 20px; gap: 16px; border-radius: 20px; }
+          .trx-invoice { font-size: 15px; }
+          .trx-total { font-size: 16px; }
+        }
       `}</style>
 
             <div className="dashboard-content">

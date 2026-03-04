@@ -3,8 +3,8 @@ import { useState } from "react";
 const TEAL = "var(--primary-brand, #4A9BAD)";
 const TEAL_LIGHT = "var(--primary-light, #EAF5F7)";
 const TEAL_DARK = "var(--primary-dark, #357585)";
-const WA_NUMBER = "6282288667686";
-const WA_DISPLAY = "0822-8866-7686";
+const WA_NUMBER = "6282299667686";
+const WA_DISPLAY = "0822-9966-7686";
 
 const FAQ_DATA = [
     {

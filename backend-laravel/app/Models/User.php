@@ -29,6 +29,8 @@ class User extends Authenticatable
         'tipe_bisnis',
         'permissions',
         'owner_id',
+        'qris_image',
+        'bank_info',
     ];
 
     /**
@@ -49,6 +51,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'permissions' => 'array',
+        'bank_info' => 'array',
     ];
 
     public function getOwnerId()

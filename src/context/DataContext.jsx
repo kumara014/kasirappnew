@@ -4,8 +4,7 @@ import { apiFetch } from '../config';
 const DataContext = createContext();
 
 const handleUnauthorized = () => {
-    localStorage.removeItem('pos_user');
-    localStorage.removeItem('pos_token');
+    localStorage.clear();
     window.location.reload();
 };
 

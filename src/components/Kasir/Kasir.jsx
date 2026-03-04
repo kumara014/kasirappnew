@@ -3,7 +3,7 @@ import './Kasir.css';
 import './PaymentStyles.css';
 import { Search, Coffee, Utensils, User, Edit, Plus, Minus, X, Printer, CheckCircle, Wallet, Trash2, Filter, Menu } from 'lucide-react';
 import { useData } from '../../context/DataContext';
-import { apiFetch } from '../../config';
+import { apiFetch, STORAGE_URL } from '../../config';
 import { useNotification } from '../../context/NotificationContext';
 import SafeImage from '../Common/SafeImage';
 import { haptic } from '../../utils/haptics';
@@ -16,19 +16,19 @@ const TEAL_LIGHT = "var(--primary-light)";
 const TEAL_DARK = "var(--primary-dark)";
 
 const CAT_ICONS = {
-    'Makanan': '🍜',
-    'Minuman': '💧',
-    'Snack': '🍪',
-    'Sembako': '🌾',
-    'Perawatan': '🧴'
+    'makanan': '🍜',
+    'minuman': '💧',
+    'snack': '🍪',
+    'sembako': '🌾',
+    'perawatan': '🧴'
 };
 
 const CAT_COLORS = {
-    'Makanan': { bg: "var(--status-orange-light)", color: "var(--status-orange)" },
-    'Minuman': { bg: "var(--primary-light)", color: "var(--primary-brand)" },
-    'Snack': { bg: "var(--status-red-light)", color: "var(--status-red)" },
-    'Sembako': { bg: "var(--status-green-light)", color: "var(--status-green)" },
-    'Perawatan': { bg: "var(--status-blue-light)", color: "var(--status-blue)" },
+    'makanan': { bg: "var(--status-orange-light)", color: "var(--status-orange)" },
+    'minuman': { bg: "var(--primary-light)", color: "var(--primary-brand)" },
+    'snack': { bg: "var(--status-red-light)", color: "var(--status-red)" },
+    'sembako': { bg: "var(--status-green-light)", color: "var(--status-green)" },
+    'perawatan': { bg: "var(--status-blue-light)", color: "var(--status-blue)" },
 };
 
 const RANDOM_COLORS = [
@@ -38,8 +38,8 @@ const RANDOM_COLORS = [
     { bg: "var(--status-blue-light)", color: "var(--status-blue)" },
 ];
 
-const getIcon = (catName) => CAT_ICONS[catName] || "📦";
-const getColor = (catName) => CAT_COLORS[catName] || RANDOM_COLORS[Math.abs((catName || "").length) % RANDOM_COLORS.length];
+const getIcon = (catName) => CAT_ICONS[(catName || "").toLowerCase()] || "📦";
+const getColor = (catName) => CAT_COLORS[(catName || "").toLowerCase()] || RANDOM_COLORS[Math.abs((catName || "").length) % RANDOM_COLORS.length];
 
 // ─── SCREEN: CASHIER ──────────────────────────────────────────────────────────
 function CashierScreen({ onCheckout, products, categories, catFilter, setCatFilter, searchQuery, setSearchQuery, cart, setCart, loading, onToggleSidebar }) {
@@ -155,6 +155,9 @@ function CashierScreen({ onCheckout, products, categories, catFilter, setCatFilt
                         <div className="product-grid">
                             {filtered.map((p) => {
                                 const qty = getItemQty(p.id_barang);
+                                const category = categories.find(c => String(c.id_kategori) === String(p.id_kategori));
+                                const catName = p.nama_kategori || category?.nama_kategori || "";
+
                                 return (
                                     <div key={p.id_barang} className={`product-item${qty > 0 ? " in-cart" : ""}`} onClick={() => qty === 0 && Number(p.stok) > 0 && addToCart(p)}>
                                         <div className="product-icon">
@@ -168,10 +171,10 @@ function CashierScreen({ onCheckout, products, categories, catFilter, setCatFilt
                                         <div className="product-info">
                                             <div className="product-info-name">{p.nama_barang}</div>
                                             <div className="product-info-cat" style={{
-                                                background: getColor(p.nama_kategori).bg,
-                                                color: getColor(p.nama_kategori).color
+                                                background: getColor(catName).bg,
+                                                color: getColor(catName).color
                                             }}>
-                                                {getIcon(p.nama_kategori)} {p.nama_kategori || "Tanpa Kategori"}
+                                                {getIcon(catName)} {catName || "Tanpa Kategori"}
                                             </div>
                                             <div className="product-info-sub">Stok: {p.stok}</div>
                                         </div>
@@ -247,7 +250,7 @@ function CashierScreen({ onCheckout, products, categories, catFilter, setCatFilt
 }
 
 // ─── SCREEN: PAYMENT METHOD ───────────────────────────────────────────────────
-function PaymentScreen({ cart, total, onBack, onPay, isProcessing }) {
+function PaymentScreen({ cart, total, onBack, onPay, isProcessing, user }) {
     const [method, setMethod] = useState("Cash");
     const [cashInput, setCashInput] = useState("");
 
@@ -258,7 +261,7 @@ function PaymentScreen({ cart, total, onBack, onPay, isProcessing }) {
     const canPay = (cashValid || onlineValid) && !isProcessing;
 
     const handleQuick = (val) => {
-        setCashInput("Rp" + new Intl.NumberFormat("id-ID").format(val));
+        setCashInput(String(val));
         haptic.tap();
     };
 
@@ -272,7 +275,9 @@ function PaymentScreen({ cart, total, onBack, onPay, isProcessing }) {
         <>
             <div className="topbar" style={{ paddingBottom: 16 }}>
                 <div className="topbar-row" style={{ marginBottom: 0 }}>
-                    <button className="back-btn" onClick={onBack}>←</button>
+                    <button className="back-btn" onClick={onBack}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
+                    </button>
                     <span className="topbar-title">Metode <span style={{ color: "var(--primary-brand)" }}>Pembayaran</span></span>
                 </div>
             </div>
@@ -343,11 +348,18 @@ function PaymentScreen({ cart, total, onBack, onPay, isProcessing }) {
                     <div className="qris-box">
                         <div className="qris-desc">Scan QR berikut untuk membayar</div>
                         <div className="qris-placeholder">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo_QRIS.svg/1200px-Logo_QRIS.svg.png" alt="QRIS" style={{ width: 80, marginBottom: 10 }} />
-                            <img
-                                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=RESTO_TRANSACTION_${Date.now()}_TOTAL_${total}`}
-                                alt="QR Code"
-                            />
+                            {user?.qris_image ? (
+                                <img
+                                    src={user.qris_image.startsWith('data:') ? user.qris_image : `${STORAGE_URL}/${user.qris_image}`}
+                                    alt="QRIS"
+                                    style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 12 }}
+                                />
+                            ) : (
+                                <div style={{ padding: '20px', color: '#aaa', fontSize: '13px' }}>
+                                    <div style={{ fontSize: '30px', marginBottom: '10px' }}>⚠️</div>
+                                    QRIS belum diatur di Pengaturan.
+                                </div>
+                            )}
                         </div>
                         <div className="qris-total">{formatRp(total)}</div>
                     </div>
@@ -356,20 +368,24 @@ function PaymentScreen({ cart, total, onBack, onPay, isProcessing }) {
                 {method === "Transfer" && (
                     <div className="transfer-box">
                         <div className="section-title">Rekening Tujuan</div>
-                        <div className="transfer-item">
-                            <div>
-                                <div style={{ fontWeight: 700 }}>BCA</div>
-                                <div style={{ fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>1234567890</div>
+                        {(user?.bank_info || []).length > 0 ? (
+                            (user?.bank_info || []).map((bank, i) => (
+                                <div key={i} className="transfer-item">
+                                    <div>
+                                        <div style={{ fontWeight: 700 }}>{bank.name}</div>
+                                        <div style={{ fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>{bank.account}</div>
+                                    </div>
+                                    <button className="copy-btn" onClick={() => {
+                                        navigator.clipboard.writeText(bank.account);
+                                        notify('Berhasil disalin!');
+                                    }}>Salin</button>
+                                </div>
+                            ))
+                        ) : (
+                            <div style={{ textAlign: 'center', padding: '20px', color: '#aaa', fontSize: '13px' }}>
+                                Belum ada rekening bank yang diatur di Pengaturan.
                             </div>
-                            <button className="copy-btn">Salin</button>
-                        </div>
-                        <div className="transfer-item">
-                            <div>
-                                <div style={{ fontWeight: 700 }}>Mandiri</div>
-                                <div style={{ fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>0987654321</div>
-                            </div>
-                            <button className="copy-btn">Salin</button>
-                        </div>
+                        )}
                     </div>
                 )}
             </div>
@@ -533,7 +549,7 @@ function SuccessScreen({ cart, total, payInfo, onNew, transactionResult }) {
 // ─── MAIN KASIR COMPONENT ─────────────────────────────────────────────────────
 const Kasir = ({ onToggleSidebar }) => {
     const { notify } = useNotification();
-    const { productsData, loadingProducts, refreshProducts, refreshDashboard, refreshOrders } = useData();
+    const { user, productsData, loadingProducts, refreshProducts, refreshDashboard, refreshOrders } = useData();
     const [catFilter, setCatFilter] = useState('All');
     const [categories, setCategories] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -687,6 +703,8 @@ const Kasir = ({ onToggleSidebar }) => {
         .cart-icon-btn { position: relative; width: 42px; height: 42px; border-radius: 12px; background: var(--primary-light); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: transform 0.1s; }
         .cart-icon-btn:active { transform: scale(0.9); }
         .cart-badge { position: absolute; top: -5px; right: -5px; background: var(--status-red); color: #fff; border-radius: 10px; font-size: 10px; font-weight: 700; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; padding: 0 4px; border: 2px solid var(--bg-surface); }
+        .back-btn { width: 40px; height: 40px; border-radius: 12px; background: var(--bg-app-alt, #F5F7F8); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-primary, #333); flex-shrink: 0; transition: all 0.2s; }
+        .back-btn:active { background: var(--border-light, #ECEEF0); transform: scale(0.95); }
         
         .content { 
           flex: 1; 
@@ -809,6 +827,11 @@ const Kasir = ({ onToggleSidebar }) => {
         .radio-dot { width: 8px; height: 8px; border-radius: 50%; background: #fff; }
         
         .cash-input-area { background: var(--bg-surface); border-radius: 20px; padding: 20px; border: 1.5px solid var(--border-light); width: 100%; }
+        .input-label { font-size: 12px; font-weight: 800; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; display: block; }
+        .input-with-prefix { position: relative; width: 100%; margin-bottom: 16px; }
+        .prefix-text { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-weight: 700; color: var(--primary-brand); font-size: 16px; }
+        .input-with-prefix .form-input { width: 100%; padding: 14px 14px 14px 44px; border: 2px solid var(--border-light); border-radius: 12px; font-size: 18px; font-weight: 700; outline: none; color: var(--text-primary); background: var(--bg-surface-alt); margin: 0; box-sizing: border-box; transition: all 0.2s; }
+        .input-with-prefix .form-input:focus { border-color: var(--primary-brand); box-shadow: 0 0 0 4px rgba(74, 155, 173, 0.1); }
         .quick-cash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
         .quick-cash-btn { padding: 12px 4px; border-radius: 12px; border: 1.5px solid var(--border-strong); background: var(--bg-surface-alt); color: var(--text-secondary); font-size: 12px; font-weight: 700; cursor: pointer; }
         .quick-cash-btn.active { border-color: var(--primary-brand); background: var(--primary-light); color: var(--primary-brand); }
@@ -948,6 +971,7 @@ const Kasir = ({ onToggleSidebar }) => {
 
             {screen === "payment" && (
                 <PaymentScreen
+                    user={user}
                     cart={cart}
                     total={total}
                     isProcessing={isProcessing}

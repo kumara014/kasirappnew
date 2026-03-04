@@ -36,6 +36,7 @@ class AuthController extends Controller
             'token' => $token,
             'user' => [
                 'id' => $user->id_user,
+                'id_user' => $user->id_user,
                 'username' => $user->username,
                 'name' => $user->name,
                 'role' => $user->role,
@@ -43,6 +44,8 @@ class AuthController extends Controller
                 'tipe_bisnis' => $user->tipe_bisnis,
                 'email' => $user->email,
                 'permissions' => $user->permissions ?? ['dashboard', 'menu', 'order', 'history', 'report', 'stok-mutasi', 'settings'],
+                'qris_image' => $user->qris_image,
+                'bank_info' => $user->bank_info,
             ]
         ]);
     }
@@ -82,24 +85,64 @@ class AuthController extends Controller
         $user = $request->user();
 
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id_user . ',id_user',
-            'nama_usaha' => 'required|string|max:255',
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|email|unique:users,email,' . $user->id_user . ',id_user',
+            'nama_usaha' => 'nullable|string|max:255',
             'tipe_bisnis' => 'nullable|string|max:255',
+            'bank_info' => 'nullable', // Expected to be array or JSON
+            'qris_image' => 'nullable' // Could be file or base64
         ]);
 
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'nama_usaha' => $request->nama_usaha,
-            'tipe_bisnis' => $request->tipe_bisnis,
-        ]);
+        $updateData = [];
+        if ($request->has('name')) $updateData['name'] = $request->name;
+        if ($request->has('email')) $updateData['email'] = $request->email;
+        if ($request->has('nama_usaha')) $updateData['nama_usaha'] = $request->nama_usaha;
+        if ($request->has('tipe_bisnis')) $updateData['tipe_bisnis'] = $request->tipe_bisnis;
+        
+        if ($request->has('bank_info')) {
+            $updateData['bank_info'] = is_string($request->bank_info) ? json_decode($request->bank_info, true) : $request->bank_info;
+        }
+
+        if ($request->has('qris_image') && !empty($request->qris_image)) {
+            // Handle image upload if it's a file or base64
+            if ($request->hasFile('qris_image')) {
+                $path = $request->file('qris_image')->store('qris', 'public');
+                $updateData['qris_image'] = $path;
+            } else if (preg_match('/^data:image\/(\w+);base64,/', $request->qris_image, $type)) {
+                // Base64 logic
+                $image_data = substr($request->qris_image, strpos($request->qris_image, ',') + 1);
+                $type = strtolower($type[1]); // jpg, png, gif
+
+                if (!in_array($type, ['jpg', 'jpeg', 'gif', 'png'])) {
+                    return response()->json(['status' => 'error', 'message' => 'Invalid image type'], 422);
+                }
+
+                $image_data = base64_decode($image_data);
+                if ($image_data === false) {
+                    return response()->json(['status' => 'error', 'message' => 'Base64 decode failed'], 422);
+                }
+
+                $fileName = 'qris_' . time() . '.' . $type;
+                $path = 'qris/' . $fileName;
+                \Illuminate\Support\Facades\Storage::disk('public')->put($path, $image_data);
+                $updateData['qris_image'] = $path;
+            } else {
+                // If it's just a string path (not a new upload), keep it as is
+                $updateData['qris_image'] = $request->qris_image;
+            }
+        }
+
+        if (!empty($updateData)) {
+            $user->update($updateData);
+            $user->refresh();
+        }
 
         return response()->json([
             'status' => 'success',
             'message' => 'Profil berhasil diperbarui',
             'user' => [
                 'id' => $user->id_user,
+                'id_user' => $user->id_user,
                 'username' => $user->username,
                 'name' => $user->name,
                 'role' => $user->role,
@@ -107,6 +150,8 @@ class AuthController extends Controller
                 'tipe_bisnis' => $user->tipe_bisnis,
                 'email' => $user->email,
                 'permissions' => $user->permissions,
+                'qris_image' => $user->qris_image,
+                'bank_info' => $user->bank_info,
             ]
         ]);
     }

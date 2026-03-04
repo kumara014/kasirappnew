@@ -21,14 +21,19 @@ const formatRp = (n) => "Rp" + new Intl.NumberFormat("id-ID").format(n || 0);
 // ── MINI BAR CHART ─────────────────────────────────────────────────────────────
 function BarChart({ data = [], activeBar, onBarClick }) {
     const maxVal = Math.max(...(data || []).map((d) => d.total || 0), 1);
+    const itemWidth = (data || []).length > 15 ? 32 : ((data || []).length > 7 ? 44 : "auto");
+    const containerStyle = (data || []).length > 7
+        ? { display: "flex", alignItems: "flex-end", gap: 6, height: 110, overflowX: "auto", paddingBottom: 10 }
+        : { display: "flex", alignItems: "flex-end", gap: 5, height: 100 };
+
     return (
-        <div style={{ display: "flex", alignItems: "flex-end", gap: 5, height: 100 }}>
+        <div className={(data || []).length > 7 ? "chart-scroll" : ""} style={containerStyle}>
             {(data || []).map((d, i) => {
                 const pct = (d.total / maxVal) * 100;
                 const isActive = activeBar === i;
                 return (
                     <div key={i} onClick={() => onBarClick(i)}
-                        style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 5, height: "100%", justifyContent: "flex-end", cursor: "pointer" }}>
+                        style={{ flex: data.length > 7 ? `0 0 ${itemWidth}px` : 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 5, height: "100%", justifyContent: "flex-end", cursor: "pointer", position: "relative" }}>
                         {isActive && (
                             <div style={{ fontSize: 9, fontWeight: 700, color: TEAL, background: TEAL_LIGHT, padding: "2px 5px", borderRadius: 5, whiteSpace: "nowrap", position: "absolute", bottom: "105%", zIndex: 5 }}>
                                 {formatRp(d.total)}
@@ -210,7 +215,7 @@ export default function Laporan() {
                         <div style={{ marginTop: 12, background: "var(--primary-light)", borderRadius: 11, padding: "10px 14px", display: "flex", justifyContent: "space-between", animation: "fadeIn 0.2s ease" }}>
                             <div style={{ textAlign: "center" }}>
                                 <div style={{ fontSize: 10, color: "var(--primary-brand)", fontWeight: 600 }}>OMZET</div>
-                                <div style={{ fontSize: 14, fontWeight: 800, color: "var(--primary-brand)" }}>{formatRp(trend[activeBar].total)}</div>
+                                <div style={{ fontSize: 14, fontWeight: 800, color: "var(--primary-brand)" }}>{formatRp(Number(trend[activeBar].total))}</div>
                             </div>
                             <div style={{ width: 1, background: `var(--primary-brand)33` }} />
                             <div style={{ textAlign: "center" }}>
@@ -226,30 +231,7 @@ export default function Laporan() {
                     )}
                 </div>
 
-                {/* Payment Method donut */}
-                <div style={{ background: "var(--bg-surface)", borderRadius: 16, padding: 16, border: "1.5px solid var(--border-light)", marginBottom: 14 }}>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", marginBottom: 14 }}>Metode Pembayaran</div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                        <DonutChart data={payment_methods} />
-                        <div style={{ flex: 1 }}>
-                            {(payment_methods || []).map((m) => (
-                                <div key={m.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                        <div style={{ width: 10, height: 10, borderRadius: 3, background: m.color, flexShrink: 0 }} />
-                                        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)" }}>{m.icon} {m.label}</span>
-                                    </div>
-                                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                        <div style={{ width: 60, height: 6, background: "var(--border-light)", borderRadius: 3, overflow: "hidden" }}>
-                                            <div style={{ width: `${m.value}%`, height: "100%", background: m.color, borderRadius: 3 }} />
-                                        </div>
-                                        <span style={{ fontSize: 13, fontWeight: 800, color: m.color, minWidth: 30, textAlign: "right" }}>{m.value}%</span>
-                                    </div>
-                                </div>
-                            ))}
-                            {(payment_methods?.length || 0) === 0 && <p style={{ fontSize: 12, color: "var(--text-tertiary)", textAlign: "center" }}>Belum ada data pembayaran</p>}
-                        </div>
-                    </div>
-                </div>
+                {/* Payment method section removed as per request */}
 
                 {/* Top Products */}
                 <div style={{ background: "var(--bg-surface)", borderRadius: 16, border: "1.5px solid var(--border-light)", overflow: "hidden", marginBottom: 14 }}>
@@ -323,6 +305,8 @@ const globalCSS = `
   .back-btn { width: 40px; height: 40px; border-radius: 12px; background: var(--bg-app-alt); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-primary); flex-shrink: 0; transition: background 0.15s; }
   .back-btn:active { background: var(--border-light); }
   .content { flex: 1; padding: 16px; padding-bottom: 40px; overflow-y: auto; color: var(--text-primary); }
+  .chart-scroll::-webkit-scrollbar { display: none; }
+  .chart-scroll { -ms-overflow-style: none; scrollbar-width: none; }
   
   @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
   

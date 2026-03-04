@@ -57,4 +57,5 @@ export const apiFetch = (endpoint, options = {}) => {
     });
 };
 
+export const STORAGE_URL = API_BASE_URL.replace('/api', '/storage');
 export default API_BASE_URL;

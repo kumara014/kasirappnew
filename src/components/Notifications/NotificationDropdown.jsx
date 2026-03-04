@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useData } from "../../context/DataContext";
 import { useNotification } from "../../context/NotificationContext";
 import { X, CheckCircle, AlertCircle, Info, ArrowRight } from "lucide-react";
+import SafeImage from "../Common/SafeImage";
 
 const TEAL = "#4A9BAD";
 const TEAL_LIGHT = "#EAF5F7";
@@ -13,7 +14,7 @@ const LEVEL_CONFIG = {
     aman: { label: "Aman", color: "#27AE60", bg: "#EAFAF1", border: "#A9DFBF", icon: "🟢", dot: "#27AE60" },
 };
 
-export const NotificationDropdown = ({ onClose, onRestok }) => {
+export const NotificationDropdown = ({ onClose, onRestok, onManageStock }) => {
     const { lowStockItems } = useData();
     const { notify } = useNotification();
     const [readIds, setReadIds] = useState(() => {
@@ -145,9 +146,10 @@ export const NotificationDropdown = ({ onClose, onRestok }) => {
                                         }}
                                     >
                                         {p.gambar ? (
-                                            <img
-                                                src={p.gambar.startsWith('http') ? p.gambar : `${window.location.protocol}//${window.location.host}/api/images/${p.gambar}`}
+                                            <SafeImage
+                                                src={p.gambar}
                                                 alt={p.nama_barang}
+                                                className="img-notif-full"
                                                 style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 14 }}
                                             />
                                         ) : (
@@ -204,7 +206,10 @@ export const NotificationDropdown = ({ onClose, onRestok }) => {
                 <div style={{ padding: "14px 20px", borderTop: "1px solid var(--border-light)", background: "var(--bg-app-alt)" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 500 }}>{lowStockItems.length} produk perlu restok</div>
-                        <button style={{ fontSize: 12, fontWeight: 700, color: "var(--primary-brand)", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+                        <button
+                            onClick={() => { onClose(); onManageStock(); }}
+                            style={{ fontSize: 12, fontWeight: 700, color: "var(--primary-brand)", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
+                        >
                             Kelola Stok <ArrowRight size={14} />
                         </button>
                     </div>
@@ -250,7 +255,13 @@ export const RestokModal = ({ product, onClose, onSave }) => {
                 <div style={{ width: 40, height: 5, background: "var(--border-bold)", borderRadius: 10, margin: "0 auto 20px" }} />
 
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24, padding: "14px", background: cfg.bg, borderRadius: 20, border: `1.5px solid ${cfg.border}` }}>
-                    <div style={{ fontSize: 32 }}>{product.gambar ? "📦" : "📦"}</div>
+                    <div style={{ width: 64, height: 64, borderRadius: 20, background: "var(--bg-app-alt)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        {product.gambar ? (
+                            <SafeImage src={product.gambar} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        ) : (
+                            <span style={{ fontSize: 32 }}>📦</span>
+                        )}
+                    </div>
                     <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 16, fontWeight: 800, color: "var(--text-primary)" }}>{product.nama_barang}</div>
                         <div style={{ fontSize: 13, color: cfg.color, fontWeight: 600, marginTop: 2 }}>{cfg.label} · Tersisa {product.stok} pcs</div>

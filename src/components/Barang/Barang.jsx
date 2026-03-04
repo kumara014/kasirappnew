@@ -13,19 +13,19 @@ const TEAL_DARK = "#357585";
 const formatRp = (n) => "Rp" + new Intl.NumberFormat("id-ID").format(n);
 
 const CAT_ICONS = {
-    'Makanan': '🍜',
-    'Minuman': '💧',
-    'Snack': '🍪',
-    'Sembako': '🌾',
-    'Perawatan': '🧴'
+    'makanan': '🍜',
+    'minuman': '💧',
+    'snack': '🍪',
+    'sembako': '🌾',
+    'perawatan': '🧴'
 };
 
 const CAT_COLORS = {
-    'Makanan': { bg: "#FFF3E8", color: "#F08030" },
-    'Minuman': { bg: "#EAF5F7", color: "#4A9BAD" },
-    'Snack': { bg: "#FFF0F4", color: "#FF4B7B" },
-    'Sembako': { bg: "#F0FFF4", color: "#27AE60" },
-    'Perawatan': { bg: "#EEF0FF", color: "#6C63FF" },
+    'makanan': { bg: "#FFF3E8", color: "#F08030" },
+    'minuman': { bg: "#EAF5F7", color: "#4A9BAD" },
+    'snack': { bg: "#FFF0F4", color: "#FF4B7B" },
+    'sembako': { bg: "#F0FFF4", color: "#27AE60" },
+    'perawatan': { bg: "#EEF0FF", color: "#6C63FF" },
 };
 
 const RANDOM_COLORS = [
@@ -90,8 +90,8 @@ const Menu = () => {
         }
     };
 
-    const getIcon = (catName) => CAT_ICONS[catName] || "📦";
-    const getColor = (catName) => CAT_COLORS[catName] || RANDOM_COLORS[Math.abs((catName || "").length) % RANDOM_COLORS.length];
+    const getIcon = (catName) => CAT_ICONS[(catName || "").toLowerCase()] || "📦";
+    const getColor = (catName) => CAT_COLORS[(catName || "").toLowerCase()] || RANDOM_COLORS[Math.abs((catName || "").length) % RANDOM_COLORS.length];
 
     const filtered = productsData.filter((p) => {
         const matchCat = activeCategory === "Semua" || String(p.id_kategori) === String(activeCategory);
@@ -233,7 +233,8 @@ const Menu = () => {
                 const data = await res.json();
                 notify(`Kategori "${newCatName}" ditambahkan`, 'success');
                 fetchCategories();
-                setForm(f => ({ ...f, id_kategori: data.id_kategori }));
+                const newId = data.id_kategori || data.data?.id_kategori || data.id;
+                setForm(f => ({ ...f, id_kategori: newId }));
                 setNewCatName("");
                 setScreen("form");
             } else {
@@ -539,20 +540,22 @@ const Menu = () => {
                 ) : (
                     <>
                         {filtered.map((p) => {
-                            const col = getColor(p.nama_kategori || "");
+                            const category = categories.find(c => String(c.id_kategori) === String(p.id_kategori));
+                            const catName = p.nama_kategori || category?.nama_kategori || "";
+                            const col = getColor(catName);
                             const isLow = Number(p.stok) <= (p.stok_minimum || 5);
                             return (
                                 <div key={p.id_barang} className="product-card">
                                     {isLow && <div className="low-stock-badge">STOK TIPIS</div>}
                                     <div className="product-card-main">
                                         <div className="product-img-box" style={{ background: col.bg }}>
-                                            {p.gambar ? <SafeImage src={p.gambar} className="img-full" /> : <span>{getIcon(p.nama_kategori)}</span>}
+                                            {p.gambar ? <SafeImage src={p.gambar} className="img-full" /> : <span>{getIcon(catName)}</span>}
                                         </div>
                                         <div className="product-details">
                                             <div className="p-name">{p.nama_barang}</div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
                                                 <div className="p-cat" style={{ background: col.bg, color: col.color, border: `1px solid ${col.color}44`, marginBottom: 0 }}>
-                                                    {getIcon(p.nama_kategori)} {p.nama_kategori || "Tanpa Kategori"}
+                                                    {getIcon(catName)} {catName || "Tanpa Kategori"}
                                                 </div>
                                                 <div className="stock-tag" style={{ color: stockColor(p), background: stockBg(p) }}>
                                                     📦 {p.stok}
