@@ -266,7 +266,7 @@ const History = () => {
                     <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)" }}>Bulan:</span>
                     <input
                         type="month"
-                        style={{ flex: 1, padding: "8px 12px", border: "1.5px solid var(--border-strong)", borderRadius: 10, outline: "none", fontFamily: "inherit", fontSize: 13, color: "var(--text-primary)", background: "var(--bg-surface-alt)", cursor: "pointer" }}
+                        style={{ padding: "8px 12px", border: "1.5px solid var(--border-strong)", borderRadius: 10, outline: "none", fontFamily: "inherit", fontSize: 13, color: "var(--text-primary)", background: "var(--bg-surface-alt)", cursor: "pointer" }}
                         value={selectedMonth}
                         onChange={(e) => setSelectedMonth(e.target.value)}
                     />
