@@ -329,9 +329,9 @@ function PaymentScreen({ cart, total, onBack, onPay, isProcessing, user }) {
                             />
                         </div>
                         <div className="quick-cash-grid">
-                            {[50000, 100000, 150000, 200000, 500000, 1000000].map((v) => (
+                            {[10000, 20000, 50000, 100000, 150000, 200000].map((v) => (
                                 <button key={v} onClick={() => handleQuick(v)} className={`quick-cash-btn ${cashNum === v ? 'active' : ''}`}>
-                                    {v >= 1000000 ? "Rp1jt" : `Rp${v / 1000}rb`}
+                                    {`Rp${v / 1000}rb`}
                                 </button>
                             ))}
                         </div>
