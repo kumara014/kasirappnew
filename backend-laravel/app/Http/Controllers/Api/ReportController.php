@@ -16,24 +16,37 @@ class ReportController extends Controller
 {
     public function sales(Request $request)
     {
-        $range = $request->get('range', 30); // Default 30 days
         $now = Carbon::now();
-        $startDate = (clone $now)->subDays($range - 1)->startOfDay();
+        $monthStr = $request->get('month'); // Expects format YYYY-MM
+        
+        if ($monthStr) {
+            $startDate = Carbon::createFromFormat('Y-m-d', $monthStr . '-01')->startOfMonth();
+            $endDate = Carbon::createFromFormat('Y-m-d', $monthStr . '-01')->endOfMonth();
+        } else {
+            $range = $request->get('range', 30); // Default 30 days
+            $startDate = (clone $now)->subDays($range - 1)->startOfDay();
+            $endDate = $now;
+        }
 
         $ownerId = Auth::user()->getOwnerId();
 
         // Stats for Current Period
         $revenue = Transaksi::where('user_id', $ownerId)
-            ->where('tanggal_transaksi', '>=', $startDate)
+            ->whereBetween('tanggal_transaksi', [$startDate, $endDate])
             ->sum('total_harga') ?? 0;
 
         $total_orders = Transaksi::where('user_id', $ownerId)
-            ->where('tanggal_transaksi', '>=', $startDate)
+            ->whereBetween('tanggal_transaksi', [$startDate, $endDate])
             ->count() ?? 0;
 
         // Stats for Previous Period (for Growth)
-        $prevStartDate = (clone $startDate)->subDays($range);
-        $prevEndDate = (clone $startDate)->subSecond();
+        if ($monthStr) {
+            $prevStartDate = (clone $startDate)->subMonth()->startOfMonth();
+            $prevEndDate = (clone $startDate)->subMonth()->endOfMonth();
+        } else {
+            $prevStartDate = (clone $startDate)->subDays($range);
+            $prevEndDate = (clone $startDate)->subSecond();
+        }
 
         $prevRevenue = Transaksi::where('user_id', $ownerId)
             ->whereBetween('tanggal_transaksi', [$prevStartDate, $prevEndDate])
@@ -54,18 +67,35 @@ class ReportController extends Controller
 
         // Trend Data
         $trend = [];
-        $format = $range > 7 ? 'd/m' : 'D'; // Fix: 30 & 90 days show daily format "d/m" instead of identical Month names
-
-        for ($i = $range - 1; $i >= 0; $i--) {
-            $date = (clone $now)->subDays($i)->format('Y-m-d');
-            $label = (clone $now)->subDays($i)->format($format);
-            $trend[$date] = [
-                'date' => $date,
-                'label' => $label,
-                'total' => 0,
-                'trx' => 0,
-                'today' => $date === $now->format('Y-m-d')
-            ];
+        
+        if ($monthStr) {
+            $daysInMonth = $startDate->daysInMonth;
+            for ($i = 1; $i <= $daysInMonth; $i++) {
+                $dateObj = (clone $startDate)->addDays($i - 1);
+                if ($dateObj > $endDate) break; // Don't go past the month
+                $date = $dateObj->format('Y-m-d');
+                $label = $dateObj->format('d/m');
+                $trend[$date] = [
+                    'date' => $date,
+                    'label' => $label,
+                    'total' => 0,
+                    'trx' => 0,
+                    'today' => $date === $now->format('Y-m-d')
+                ];
+            }
+        } else {
+            $format = $range > 7 ? 'd/m' : 'D'; // Fix: 30 & 90 days show daily format "d/m" instead of identical Month names
+            for ($i = $range - 1; $i >= 0; $i--) {
+                $date = (clone $now)->subDays($i)->format('Y-m-d');
+                $label = (clone $now)->subDays($i)->format($format);
+                $trend[$date] = [
+                    'date' => $date,
+                    'label' => $label,
+                    'total' => 0,
+                    'trx' => 0,
+                    'today' => $date === $now->format('Y-m-d')
+                ];
+            }
         }
 
         $actualTrend = Transaksi::select(
@@ -74,7 +104,7 @@ class ReportController extends Controller
             DB::raw('COUNT(*) as trx')
         )
             ->where('user_id', $ownerId)
-            ->where('tanggal_transaksi', '>=', $startDate)
+            ->whereBetween('tanggal_transaksi', [$startDate, $endDate])
             ->groupBy(DB::raw('DATE(tanggal_transaksi)'))
             ->get();
 
@@ -87,7 +117,7 @@ class ReportController extends Controller
 
         // Payment Methods (Donut Chart)
         $paymentMethods = Transaksi::where('user_id', $ownerId)
-            ->where('tanggal_transaksi', '>=', $startDate)
+            ->whereBetween('tanggal_transaksi', [$startDate, $endDate])
             ->select('metode_pembayaran', DB::raw('COUNT(*) as count'))
             ->groupBy('metode_pembayaran')
             ->get();
@@ -116,7 +146,7 @@ class ReportController extends Controller
         $topProducts = TransaksiDetail::join('transaksi', 'transaksi_detail.id_transaksi', '=', 'transaksi.id_transaksi')
             ->join('barang', 'transaksi_detail.id_barang', '=', 'barang.id_barang')
             ->leftJoin('kategoris', 'barang.id_kategori', '=', 'kategoris.id_kategori')
-            ->where('transaksi.tanggal_transaksi', '>=', $startDate)
+            ->whereBetween('transaksi.tanggal_transaksi', [$startDate, $endDate])
             // Note: Since Transaksi and Barang have global scopes, it's safer to add explicit filters if join is used
             // but TransaksiDetail::join(...) will use TransaksiDetail's scope (none)
             // So we MUST add the user_id filter manually here because TransaksiDetail doesn't have it.
@@ -147,13 +177,20 @@ class ReportController extends Controller
 
     public function items(Request $request)
     {
-        $range = $request->get('range', 30);
-        $startDate = Carbon::now()->subDays($range - 1)->startOfDay();
+        $monthStr = $request->get('month');
+        if ($monthStr) {
+            $startDate = Carbon::createFromFormat('Y-m-d', $monthStr . '-01')->startOfMonth();
+            $endDate = Carbon::createFromFormat('Y-m-d', $monthStr . '-01')->endOfMonth();
+        } else {
+            $range = $request->get('range', 30);
+            $startDate = Carbon::now()->subDays($range - 1)->startOfDay();
+            $endDate = Carbon::now();
+        }
 
         $items = TransaksiDetail::join('transaksi', 'transaksi_detail.id_transaksi', '=', 'transaksi.id_transaksi')
             ->join('barang', 'transaksi_detail.id_barang', '=', 'barang.id_barang')
             ->leftJoin('kategoris', 'barang.id_kategori', '=', 'kategoris.id_kategori')
-            ->where('transaksi.tanggal_transaksi', '>=', $startDate)
+            ->whereBetween('transaksi.tanggal_transaksi', [$startDate, $endDate])
             ->where('transaksi.user_id', Auth::id())
             ->select(
                 'barang.nama_barang as product_name',

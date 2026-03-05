@@ -190,12 +190,14 @@ const History = () => {
     } = useData();
     const [search, setSearch] = useState("");
     const [filterMethod, setFilterMethod] = useState("Semua");
+    const [selectedMonth, setSelectedMonth] = useState("");
     const [selected, setSelected] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
 
     useEffect(() => {
-        refreshOrders(true);
-    }, [refreshOrders]);
+        const filters = selectedMonth ? { month: selectedMonth } : {};
+        refreshOrders(true, filters);
+    }, [refreshOrders, selectedMonth]);
 
     const handleViewDetail = async (trx) => {
         haptic.tap();
@@ -258,6 +260,24 @@ const History = () => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
+                </div>
+
+                <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 14 }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)" }}>Bulan:</span>
+                    <input
+                        type="month"
+                        style={{ flex: 1, padding: "8px 12px", border: "1.5px solid var(--border-strong)", borderRadius: 10, outline: "none", fontFamily: "inherit", fontSize: 13, color: "var(--text-primary)", background: "var(--bg-surface-alt)", cursor: "pointer" }}
+                        value={selectedMonth}
+                        onChange={(e) => setSelectedMonth(e.target.value)}
+                    />
+                    {selectedMonth && (
+                        <button
+                            onClick={() => setSelectedMonth("")}
+                            style={{ padding: "8px 12px", borderRadius: 10, border: "none", background: "var(--bg-app-alt)", color: "var(--text-tertiary)", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+                        >
+                            ✕
+                        </button>
+                    )}
                 </div>
 
                 <div className="filter-scroll">

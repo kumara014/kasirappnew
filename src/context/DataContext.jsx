@@ -85,11 +85,13 @@ export const DataProvider = ({ children, user }) => {
         }
     }, [productsPagination, loadingProducts]);
 
-    const refreshOrders = useCallback(async (silent = false) => {
+    const refreshOrders = useCallback(async (silent = false, filters = {}) => {
         if (!localStorage.getItem('pos_token')) return;
         if (!silent) setLoadingOrders(true);
         try {
-            const res = await apiFetch('/transaksi');
+            const queryParams = new URLSearchParams(filters).toString();
+            const url = `/transaksi${queryParams ? `?${queryParams}` : ''}`;
+            const res = await apiFetch(url);
             if (res.status === 401 || res.status === 403) { handleUnauthorized(); return; }
             const data = await res.json();
             setOrdersData(Array.isArray(data.data) ? data.data : []);

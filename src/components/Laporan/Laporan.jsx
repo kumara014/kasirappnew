@@ -88,24 +88,29 @@ function DonutChart({ data }) {
 // ── MAIN ───────────────────────────────────────────────────────────────────────
 export default function Laporan() {
     const [period, setPeriod] = useState("Minggu Ini");
+    const [selectedMonth, setSelectedMonth] = useState("");
     const [activeBar, setActiveBar] = useState(null);
     const [reportData, setReportData] = useState(null);
     const [loading, setLoading] = useState(true);
 
     const PERIOD_MAP = {
         "Minggu Ini": 7,
-        "Bulan Ini": 30,
-        "3 Bulan": 90
+        "Bulan Ini": 30
     };
 
     useEffect(() => {
+        if (period === "Pilih Bulan" && !selectedMonth) return; // Don't fetch if specific month is not yet selected
         fetchReport();
-    }, [period]);
+    }, [period, selectedMonth]);
 
     const fetchReport = async () => {
         setLoading(true);
         try {
-            const response = await apiFetch(`/reports/sales?range=${PERIOD_MAP[period]}`);
+            let url = `/reports/sales?range=${PERIOD_MAP[period]}`;
+            if (period === "Pilih Bulan" && selectedMonth) {
+                url = `/reports/sales?month=${selectedMonth}`;
+            }
+            const response = await apiFetch(url);
             const data = await response.json();
             setReportData(data);
         } catch (error) {
@@ -155,13 +160,24 @@ export default function Laporan() {
 
                 {/* Period tabs */}
                 <div style={{ display: "flex", gap: 0, borderBottom: "2px solid #F0F2F4" }}>
-                    {["Minggu Ini", "Bulan Ini", "3 Bulan"].map((t) => (
+                    {["Minggu Ini", "Bulan Ini", "Pilih Bulan"].map((t) => (
                         <button key={t} onClick={() => { haptic.tap(); setPeriod(t); setActiveBar(null); }}
                             style={{ flex: 1, padding: "10px 4px", fontSize: 13, fontWeight: 600, cursor: "pointer", border: "none", background: "none", color: period === t ? "var(--primary-brand)" : "var(--text-tertiary)", borderBottom: `2.5px solid ${period === t ? "var(--primary-brand)" : "transparent"}`, fontFamily: "'Plus Jakarta Sans', sans-serif", marginBottom: -2, transition: "all 0.15s" }}>
                             {t}
                         </button>
                     ))}
                 </div>
+                {period === "Pilih Bulan" && (
+                    <div style={{ padding: "14px 0 0", display: "flex", gap: 10, alignItems: "center", animation: "fadeIn 0.2s ease" }}>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)" }}>Pilih Bulan:</span>
+                        <input
+                            type="month"
+                            style={{ padding: "8px 12px", border: "1.5px solid var(--border-strong)", borderRadius: 10, outline: "none", fontFamily: "inherit", fontSize: 14, color: "var(--text-primary)", background: "var(--bg-surface-alt)", cursor: "pointer" }}
+                            value={selectedMonth}
+                            onChange={(e) => setSelectedMonth(e.target.value)}
+                        />
+                    </div>
+                )}
             </div>
 
             <div className="content">

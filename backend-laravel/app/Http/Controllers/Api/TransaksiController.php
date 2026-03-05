@@ -95,9 +95,22 @@ class TransaksiController extends Controller
         }
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return Transaksi::with('details.barang')->latest()->paginate(15);
+        $query = Transaksi::with('details.barang')->latest();
+        
+        $monthStr = $request->get('month'); // YYYY-MM format
+        if ($monthStr) {
+            try {
+                $startDate = \Carbon\Carbon::createFromFormat('Y-m-d', $monthStr . '-01')->startOfMonth();
+                $endDate = \Carbon\Carbon::createFromFormat('Y-m-d', $monthStr . '-01')->endOfMonth();
+                $query->whereBetween('tanggal_transaksi', [$startDate, $endDate]);
+            } catch (\Exception $e) {
+                // Invalid format, skip
+            }
+        }
+        
+        return $query->paginate(15)->appends($request->all());
     }
 
     public function show($id)
