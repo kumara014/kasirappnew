@@ -144,17 +144,15 @@ const DetailScreen = ({ trx, onBack, user }) => {
 
             {/* Hidden Receipt for Printing */}
             <div className="print-receipt-only">
-                <div className="r-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div className="r-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', borderBottom: '1px dashed #000', paddingBottom: 10, marginBottom: 10 }}>
                     {user?.logo_usaha && (
-                        <SafeImage src={user.logo_usaha} alt="Logo" style={{ maxWidth: "100%", maxHeight: 60, marginBottom: 8, objectFit: "contain" }} />
+                        <SafeImage src={user.logo_usaha} alt="Logo" style={{ maxWidth: "100%", maxHeight: 50, marginBottom: 5, objectFit: "contain", filter: "grayscale(100%)" }} />
                     )}
-                    <div className="r-brand" style={{ fontSize: 16, fontWeight: 800 }}>{user?.nama_usaha || "Toko Kamu"}</div>
-                    {user?.alamat_usaha && <div className="r-sub" style={{ fontSize: 11, marginTop: 2 }}>{user.alamat_usaha}</div>}
-                    {user?.no_telepon_usaha && <div className="r-sub" style={{ fontSize: 11, marginTop: 2 }}>{user.no_telepon_usaha}</div>}
-
-                    <div className="r-line" style={{ width: '100%' }} />
-                    <div style={{ fontSize: 11 }}>{formatDate(trx.tanggal_transaksi)} • {formatTime(trx.tanggal_transaksi)}</div>
-                    <div style={{ fontSize: 11, marginTop: 4 }}>No: {trx.id_transaksi}</div>
+                    <div className="r-brand" style={{ fontSize: 15, fontWeight: 800, color: "#000" }}>{user?.nama_usaha || "Toko Kamu"}</div>
+                    {user?.alamat_usaha && <div className="r-sub" style={{ fontSize: 11, marginTop: 2, color: "#000" }}>{user.alamat_usaha}</div>}
+                    {user?.no_telepon_usaha && <div className="r-sub" style={{ fontSize: 11, marginTop: 2, color: "#000" }}>{user.no_telepon_usaha}</div>}
+                    <div style={{ fontSize: 11, marginTop: 5, color: "#000" }}>{formatDate(trx.tanggal_transaksi)} • {formatTime(trx.tanggal_transaksi)}</div>
+                    <div style={{ fontSize: 11, marginTop: 2, color: "#000" }}>No: {trx.id_transaksi}</div>
                 </div>
                 <div className="r-line" />
                 {trx.details?.map((item, i) => (
@@ -404,13 +402,13 @@ const globalCSS = `
   }
 
   .print-receipt-only { display: none; font-family: 'Plus Jakarta Sans', sans-serif; }
-  .r-header { text-align: center; margin-bottom: 15px; }
-  .r-brand { font-size: 20px; font-weight: 800; }
-  .r-sub { font-size: 12px; opacity: 0.7; }
-  .r-line { border-bottom: 1px dashed #000; margin: 10px 0; }
-  .r-item { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
-  .r-total-section { margin-top: 10px; font-weight: 700; border-top: 1px dashed #000; padding-top: 10px; }
-  .r-footer { text-align: center; margin-top: 20px; font-size: 11px; opacity: 0.6; }
+  .r-header { text-align: center; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
+  .r-brand { font-size: 18px; font-weight: 800; color: #000; }
+  .r-sub { font-size: 11px; color: #000; }
+  .r-line { border-bottom: 1px dashed #000; margin: 8px 0; }
+  .r-item { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; color: #000; }
+  .r-total-section { margin-top: 10px; font-weight: 700; border-top: 1px dashed #000; padding-top: 8px; color: #000; }
+  .r-footer { text-align: center; margin-top: 15px; font-size: 10px; color: #000; }
 
   .history-teal { 
     font-family: 'Plus Jakarta Sans', sans-serif; 
