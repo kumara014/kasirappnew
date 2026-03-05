@@ -11,6 +11,7 @@ import {
     Gem
 } from "lucide-react";
 import { haptic } from "../../utils/haptics";
+import MonthPicker from "../Common/MonthPicker";
 
 const TEAL = "var(--primary-brand)";
 const TEAL_LIGHT = "var(--primary-light)";
@@ -170,11 +171,9 @@ export default function Laporan() {
                 {period === "Pilih Bulan" && (
                     <div style={{ padding: "14px 0 0", display: "flex", gap: 10, alignItems: "center", animation: "fadeIn 0.2s ease" }}>
                         <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)" }}>Pilih Bulan:</span>
-                        <input
-                            type="month"
-                            style={{ padding: "8px 12px", border: "1.5px solid var(--border-strong)", borderRadius: 10, outline: "none", fontFamily: "inherit", fontSize: 14, color: "var(--text-primary)", background: "var(--bg-surface-alt)", cursor: "pointer" }}
+                        <MonthPicker
                             value={selectedMonth}
-                            onChange={(e) => setSelectedMonth(e.target.value)}
+                            onChange={(val) => setSelectedMonth(val)}
                         />
                     </div>
                 )}

@@ -4,6 +4,7 @@ import { useData } from '../../context/DataContext';
 import { apiFetch } from '../../config';
 import { haptic } from '../../utils/haptics';
 import SafeImage from '../Common/SafeImage';
+import MonthPicker from '../Common/MonthPicker';
 
 const TEAL = "var(--primary-brand)";
 const TEAL_LIGHT = "var(--primary-light)";
@@ -46,8 +47,15 @@ const FILTER_METHODS = ["Semua", "Tunai", "QRIS", "Transfer"];
 
 // ── DETAIL SCREEN ─────────────────────────────────────────────────────────────
 const DetailScreen = ({ trx, onBack, user }) => {
+    const [logoLoaded, setLogoLoaded] = useState(false);
     const methodFormatted = trx.metode_pembayaran || 'Tunai';
     const mc = METHOD_COLOR[methodFormatted] || { bg: TEAL_LIGHT, color: TEAL };
+
+    useEffect(() => {
+        if (!user?.logo_usaha) {
+            setLogoLoaded(true);
+        }
+    }, [user]);
 
     return (
         <div className="history-teal">
@@ -134,8 +142,13 @@ const DetailScreen = ({ trx, onBack, user }) => {
             </div>
 
             <div className="bottom-bar">
-                <button className="btn-print" onClick={() => window.print()}>
-                    <Printer size={18} /> Cetak Struk
+                <button
+                    className="btn-print"
+                    onClick={() => window.print()}
+                    disabled={!logoLoaded}
+                    style={{ opacity: logoLoaded ? 1 : 0.7 }}
+                >
+                    <Printer size={18} /> {logoLoaded ? 'Cetak Struk' : 'Menyiapkan...'}
                 </button>
                 <button className="btn-share">
                     <Send size={18} /> Kirim
@@ -146,7 +159,7 @@ const DetailScreen = ({ trx, onBack, user }) => {
             <div className="print-receipt-only">
                 <div className="r-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#fff', padding: '10px 0', borderBottom: '1px dashed #eee', marginBottom: 15, color: '#111' }}>
                     {user?.logo_usaha && (
-                        <SafeImage src={user.logo_usaha} alt="Logo" style={{ maxWidth: "100%", maxHeight: 60, marginBottom: 8, objectFit: "contain" }} />
+                        <SafeImage src={user.logo_usaha} alt="Logo" style={{ maxWidth: "100%", maxHeight: 60, marginBottom: 8, objectFit: "contain" }} onLoad={() => setLogoLoaded(true)} />
                     )}
                     <div className="r-brand" style={{ fontSize: 16, fontWeight: 800, color: "#111" }}>{user?.nama_usaha || "Toko Kamu"}</div>
                     {user?.alamat_usaha && <div className="r-sub" style={{ fontSize: 11, marginTop: 2, color: "#666" }}>{user.alamat_usaha}</div>}
@@ -271,11 +284,9 @@ const History = () => {
 
                 <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 14 }}>
                     <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)" }}>Bulan:</span>
-                    <input
-                        type="month"
-                        style={{ padding: "8px 12px", border: "1.5px solid var(--border-strong)", borderRadius: 10, outline: "none", fontFamily: "inherit", fontSize: 13, color: "var(--text-primary)", background: "var(--bg-surface-alt)", cursor: "pointer" }}
+                    <MonthPicker
                         value={selectedMonth}
-                        onChange={(e) => setSelectedMonth(e.target.value)}
+                        onChange={(val) => setSelectedMonth(val)}
                     />
                     {selectedMonth && (
                         <button

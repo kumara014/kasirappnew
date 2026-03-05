@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../../config';
 
-const SafeImage = ({ src, alt, className, style, fallback = '🍽️' }) => {
+const SafeImage = ({ src, alt, className, style, fallback = '🍽️', onLoad }) => {
     const [imageUrl, setImageUrl] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (!src) {
             setLoading(false);
+            if (onLoad) onLoad(); // Trigger onLoad if no src
             return;
         }
 
@@ -47,10 +48,12 @@ const SafeImage = ({ src, alt, className, style, fallback = '🍽️' }) => {
                 if (isMounted) {
                     setImageUrl(internalUrl);
                     setLoading(false);
+                    // onLoad will be triggered by img tag
                 }
             } catch (error) {
                 if (isMounted) {
                     setLoading(false);
+                    if (onLoad) onLoad(); // Trigger even on error so it's not stuck
                 }
             }
         };
@@ -63,7 +66,7 @@ const SafeImage = ({ src, alt, className, style, fallback = '🍽️' }) => {
                 URL.revokeObjectURL(internalUrl);
             }
         };
-    }, [src]);
+    }, [src, onLoad]);
 
     if (loading) {
         return <div className={`${className} loading-shimmer`} style={style}></div>;
@@ -73,7 +76,7 @@ const SafeImage = ({ src, alt, className, style, fallback = '🍽️' }) => {
         return <div className={className} style={style}>{fallback}</div>;
     }
 
-    return <img src={imageUrl} alt={alt} className={className} style={style} />;
+    return <img src={imageUrl} alt={alt} className={className} style={style} onLoad={onLoad} />;
 };
 
 export default SafeImage;

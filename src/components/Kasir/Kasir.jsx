@@ -6,6 +6,7 @@ import { useData } from '../../context/DataContext';
 import { apiFetch, STORAGE_URL } from '../../config';
 import { useNotification } from '../../context/NotificationContext';
 import SafeImage from '../Common/SafeImage';
+import CategoryDropdown from '../Common/CategoryDropdown';
 import { haptic } from '../../utils/haptics';
 
 const formatRp = (n) =>
@@ -48,7 +49,7 @@ function CashierScreen({ onCheckout, products, categories, catFilter, setCatFilt
     const filtered = products.filter(p => {
         const name = p.nama_barang || '';
         const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = catFilter === 'All' || String(p.id_kategori) === String(catFilter);
+        const matchesCategory = !catFilter || catFilter === 'All' || String(p.id_kategori) === String(catFilter);
         return matchesSearch && matchesCategory;
     });
 
@@ -126,22 +127,12 @@ function CashierScreen({ onCheckout, products, categories, catFilter, setCatFilt
 
             <div className="content">
                 <>
-                    <div className="pos-categories" style={{ marginBottom: 14 }}>
-                        <select
+                    <div className="pos-category-wrapper" style={{ marginBottom: 14, position: 'relative', zIndex: 1000 }}>
+                        <CategoryDropdown
+                            categories={categories}
                             value={catFilter}
-                            onChange={(e) => {
-                                haptic.select();
-                                setCatFilter(e.target.value);
-                            }}
-                            className="category-select-teal"
-                        >
-                            <option value="All">Semua Kategori</option>
-                            {categories.map(cat => (
-                                <option key={cat.id_kategori} value={cat.id_kategori}>
-                                    {cat.nama_kategori}
-                                </option>
-                            ))}
-                        </select>
+                            onChange={(val) => setCatFilter(val)}
+                        />
                     </div>
 
                     <div className="search-wrap">
@@ -408,16 +399,23 @@ function PaymentScreen({ cart, total, onBack, onPay, isProcessing, user }) {
 
 // ─── SCREEN: SUCCESS ──────────────────────────────────────────────────────────
 function SuccessScreen({ cart, total, payInfo, onNew, transactionResult, user }) {
-    const [showReceipt, setShowReceipt] = useState(false);
+    const [logoLoaded, setLogoLoaded] = useState(false);
     const now = new Date();
     const dateStr = now.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
     const timeStr = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+
+    useEffect(() => {
+        // If no logo, consider it loaded immediately
+        if (!user?.logo_usaha) {
+            setLogoLoaded(true);
+        }
+    }, [user]);
 
     const ReceiptContent = () => (
         <div className="receipt-paper-teal">
             <div className="receipt-header-teal" style={{ textAlign: "center", marginBottom: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#fff', padding: '10px 0', borderBottom: '1px dashed #eee' }}>
                 {user?.logo_usaha && (
-                    <SafeImage src={user.logo_usaha} alt="Logo" style={{ maxWidth: "100%", maxHeight: 60, marginBottom: 5, objectFit: "contain" }} />
+                    <SafeImage src={user.logo_usaha} alt="Logo" style={{ maxWidth: "100%", maxHeight: 60, marginBottom: 5, objectFit: "contain" }} onLoad={() => setLogoLoaded(true)} />
                 )}
                 <div className="receipt-brand" style={{ fontSize: 18, fontWeight: 800, marginBottom: 2, color: "#111" }}>{user?.nama_usaha || "Toko Kamu"}</div>
                 {user?.alamat_usaha && <div className="receipt-sub" style={{ fontSize: 12, marginBottom: 2, color: "#666" }}>{user.alamat_usaha}</div>}
@@ -425,7 +423,7 @@ function SuccessScreen({ cart, total, payInfo, onNew, transactionResult, user })
                 <div className="receipt-line" style={{ width: '100%', borderBottom: '1.5px dashed #eee', margin: '10px 0' }} />
                 <div className="receipt-time" style={{ color: "#888", fontSize: '12px' }}>{dateStr} • {timeStr}</div>
             </div>
-
+            {/* ... rest of the content ... */}
             <div className="receipt-inv">
                 <span>No. Invoice</span>
                 <span className="inv-num">{transactionResult?.id_pesanan || 'TRAN-AUTO'}</span>
@@ -526,13 +524,21 @@ function SuccessScreen({ cart, total, payInfo, onNew, transactionResult, user })
                     ))}
                 </div>
 
-                <div className="print-receipt-only" style={{ display: 'none' }}>
-                    <ReceiptContent />
-                </div>
+            </div>
+
+            <div className="print-receipt-only" style={{ display: 'none' }}>
+                <ReceiptContent />
             </div>
 
             <div className="success-bottom-bar">
-                <button className="secondary-action" style={{ width: '100%', marginBottom: 12 }} onClick={() => window.print()}>🖨️ Cetak Struk</button>
+                <button
+                    className="secondary-action"
+                    style={{ width: '100%', marginBottom: 12, opacity: logoLoaded ? 1 : 0.7 }}
+                    disabled={!logoLoaded}
+                    onClick={() => window.print()}
+                >
+                    {logoLoaded ? '🖨️ Cetak Struk' : '⌛ Menyiapkan Struk...'}
+                </button>
                 <button className="primary-action" onClick={onNew}>🛒 Transaksi Baru</button>
             </div>
         </>

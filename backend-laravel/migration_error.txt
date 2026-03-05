@@ -1,0 +1,21 @@
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it (SQL: select * from information_schema.tables where table_schema = restaurant_api and table_name = migrations and table_type = 'BASE TABLE')
+
+  at D:\restaurant-pos-dashboard\Pointly\backend-laravel\vendor\laravel\framework\src\Illuminate\Database\Connection.php:712
+    708▕         // If an exception occurs when attempting to run a query, we'll format the error
+    709▕         // message to include the bindings with SQL, which will make this exception a
+    710▕         // lot more helpful to the developer instead of just the database's errors.
+    711▕         catch (Exception $e) {
+  ➜ 712▕             throw new QueryException(
+    713▕                 $query, $this->prepareBindings($bindings), $e
+    714▕             );
+    715▕         }
+    716▕     }
+
+  1   D:\restaurant-pos-dashboard\Pointly\backend-laravel\vendor\laravel\framework\src\Illuminate\Database\Connectors\Connector.php:70
+      PDOException::("SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it")
+
+  2   D:\restaurant-pos-dashboard\Pointly\backend-laravel\vendor\laravel\framework\src\Illuminate\Database\Connectors\Connector.php:70
+      PDO::__construct("mysql:host=127.0.0.1;port=3306;dbname=restaurant_api", "root", Object(SensitiveParameterValue), [])

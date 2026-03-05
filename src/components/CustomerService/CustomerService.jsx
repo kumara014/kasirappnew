@@ -12,24 +12,28 @@ const FAQ_DATA = [
         a: "Buka menu Kelola Produk → klik tombol + di pojok kanan atas → isi nama, harga, stok → klik Tambah Produk.",
     },
     {
+        q: "Bagaimana cara mengatur pembayaran QRIS & Bank?",
+        a: "Buka menu Pengaturan → pilih tab Rekening/QRIS. Di sana kamu bisa upload gambar QRIS dan mengisi detail nomor rekening bank kamu.",
+    },
+    {
+        q: "Kenapa logo usaha tidak muncul di struk?",
+        a: "Pastikan kamu sudah mengupload logo di Pengaturan → Profil Bisnis. Tombol 'Cetak Struk' sekarang akan menunggu logo terload sempurna sebelum bisa diklik agar hasil cetak maksimal.",
+    },
+    {
+        q: "Bagaimana cara melihat laporan berdasarkan bulan?",
+        a: "Di menu Laporan atau Riwayat, pilih tab 'Pilih Bulan'. Klik pada kotak bulan untuk memunculkan pemilih bulan (Month Picker) yang memudahkan kamu navigasi antar tahun dan bulan.",
+    },
+    {
         q: "Kenapa stok produk tidak berkurang otomatis?",
         a: "Stok berkurang otomatis saat transaksi selesai di kasir. Pastikan produk dipilih dari menu Produk, bukan input manual.",
     },
     {
         q: "Bagaimana cara mencetak struk?",
-        a: "Setelah transaksi berhasil, klik tombol Lihat Struk → lalu klik Cetak Struk. Pastikan printer sudah terhubung.",
+        a: "Setelah transaksi berhasil, klik tombol Cetak Struk. Pastikan printer thermal kamu sudah terhubung dan terdeteksi oleh browser/HP.",
     },
     {
         q: "Apakah data saya aman jika ganti HP?",
         a: "Data tersimpan di server kami. Cukup login dengan akun yang sama di HP baru, semua data akan kembali.",
-    },
-    {
-        q: "Bagaimana cara reset password?",
-        a: "Di halaman Login → klik Lupa Password → masukkan email → cek inbox kamu untuk link reset.",
-    },
-    {
-        q: "Apakah Pointly bisa dipakai offline?",
-        a: "Saat ini Pointly membutuhkan koneksi internet. Mode offline sedang dalam pengembangan.",
     },
 ];
 

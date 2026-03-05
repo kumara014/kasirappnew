@@ -23,8 +23,7 @@ const formatTime = (d) => {
 const MUTATION_TYPES = {
     masuk: { label: "Stok Masuk", color: "var(--status-green)", bg: "var(--status-green-light)", icon: "📥" },
     keluar: { label: "Stok Keluar", color: "var(--status-red)", bg: "var(--status-red-light)", icon: "📤" },
-    penjualan: { label: "Penjualan", color: "var(--primary-brand)", bg: "var(--primary-light)", icon: "🛒" },
-    koreksi: { label: "Koreksi", color: "var(--status-orange)", bg: "var(--status-orange-light)", icon: "✏️" },
+    penjualan: { label: "Update Stok Manual", color: "var(--status-orange)", bg: "var(--status-orange-light)", icon: "✏️" },
     rusak: { label: "Barang Rusak", color: "var(--status-blue)", bg: "var(--status-blue-light)", icon: "🗑️" },
 };
 
@@ -41,7 +40,7 @@ function dayLabel(d) {
     return formatDate(d);
 }
 
-const FILTER_TYPES = ["Semua", "masuk", "keluar", "penjualan", "koreksi", "rusak"];
+const FILTER_TYPES = ["Semua", "masuk", "keluar", "penjualan", "rusak"];
 
 // ── SEARCHABLE PICKER ────────────────────────────────────────────────────────
 const SearchableProductPicker = ({ products, value, onChange }) => {
@@ -151,7 +150,6 @@ const AddMutationForm = ({ products, onBack, onSave, isProcessing }) => {
                     <div className="input-label" style={{ color: "var(--text-secondary)" }}>Jenis Mutasi</div>
                     <div className="mutation-type-grid">
                         {Object.entries(MUTATION_TYPES).map(([key, val]) => {
-                            if (key === "penjualan") return null; // Penjualan usually automatic
                             const isActive = form.jenis === key;
                             return (
                                 <button key={key} onClick={() => setForm({ ...form, jenis: key })}
@@ -373,8 +371,15 @@ const StokMutasi = () => {
                         </div>
 
                         {list.map((m) => {
-                            const mt = MUTATION_TYPES[m.jenis] || { label: m.jenis, color: '#333', bg: '#eee', icon: '📦' };
-                            const isPositive = m.jenis === 'masuk';
+                            let type = m.jenis;
+                            let ket = m.keterangan || "";
+                            if (ket.includes("[RUSAK]")) type = "rusak";
+                            if (ket.includes("[PENJUALAN]")) type = "penjualan";
+
+                            const mt = MUTATION_TYPES[type] || { label: type, color: '#333', bg: '#eee', icon: '📦' };
+                            const isPositive = type === 'masuk';
+                            const cleanKeterangan = ket.replace(/\[(RUSAK|PENJUALAN|KOREKSI)\]\s*/, "");
+
                             return (
                                 <div key={m.id_mutasi} className="mutation-card">
                                     <div className="mut-ico-box" style={{ background: mt.bg, color: mt.color }}>
@@ -391,8 +396,8 @@ const StokMutasi = () => {
                                             <span className="mut-badge" style={{ background: mt.bg, color: mt.color }}>{mt.label}</span>
                                             <span className="mut-time">• {formatTime(m.created_at)}</span>
                                         </div>
-                                        {m.keterangan && m.keterangan !== "-" && (
-                                            <div className="mut-note">📝 {m.keterangan}</div>
+                                        {cleanKeterangan && cleanKeterangan !== "-" && (
+                                            <div className="mut-note">📝 {cleanKeterangan}</div>
                                         )}
                                     </div>
                                 </div>

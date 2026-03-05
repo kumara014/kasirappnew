@@ -7,6 +7,7 @@ import {
 import './Sidebar.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { haptic } from '../utils/haptics';
+import SafeImage from './Common/SafeImage';
 
 const TEAL = "#4A9BAD";
 const TEAL_LIGHT = "#EAF5F7";
@@ -46,9 +47,9 @@ const Sidebar = ({
   ];
 
   const otherItems = [
-    { id: 'cs', icon: <MessageCircleMore size={20} />, label: 'Bantuan', permission: null },
     { id: 'employee', icon: <Users size={20} />, label: 'Tim Karyawan', permission: 'Karyawan' },
     { id: 'settings', icon: <User size={20} />, label: 'Pengaturan', permission: null },
+    { id: 'cs', icon: <MessageCircleMore size={20} />, label: 'Bantuan', permission: null },
   ];
 
   /* ── Nav item renderer (shared between mobile & desktop) ── */
@@ -158,14 +159,15 @@ const Sidebar = ({
             width: collapsed ? '36px' : '44px',
             height: collapsed ? '36px' : '44px',
             borderRadius: collapsed ? '12px' : '14px',
-            background: 'rgba(255,255,255,0.25)',
+            background: user?.logo_usaha ? '#fff' : 'rgba(255,255,255,0.25)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: collapsed ? '16px' : '18px', fontWeight: '800', color: '#fff',
             marginBottom: collapsed ? 0 : '8px',
             transition: 'all 0.28s',
             flexShrink: 0,
+            overflow: 'hidden'
           }}>
-            {user?.name?.substring(0, 1).toUpperCase() || 'U'}
+            {user?.logo_usaha ? <SafeImage src={user.logo_usaha} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4 }} /> : (user?.nama_usaha?.substring(0, 1).toUpperCase() || 'U')}
           </div>
 
           {!collapsed && (
@@ -281,8 +283,19 @@ const Sidebar = ({
               </button>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', position: 'relative', zIndex: 2 }}>
-                <div style={{ width: '52px', height: '52px', borderRadius: '16px', background: 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: '800' }}>
-                  {user?.name?.substring(0, 1).toUpperCase() || 'U'}
+                <div style={{
+                  width: '52px',
+                  height: '52px',
+                  borderRadius: '16px',
+                  background: user?.logo_usaha ? '#fff' : 'rgba(255,255,255,0.25)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '20px',
+                  fontWeight: '800',
+                  overflow: 'hidden'
+                }}>
+                  {user?.logo_usaha ? <SafeImage src={user.logo_usaha} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4 }} /> : (user?.nama_usaha?.substring(0, 1).toUpperCase() || 'U')}
                 </div>
                 <div>
                   <div style={{ fontSize: '16px', fontWeight: '800', letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>

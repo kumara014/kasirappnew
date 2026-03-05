@@ -140,11 +140,18 @@ class BarangController extends Controller
 
         $barang->save();
 
+        // Map types to DB enum ['masuk', 'keluar']
+        $dbJenis = in_array($request->jenis, ['masuk', 'koreksi']) ? 'masuk' : 'keluar';
+        
+        // If it's a correction, and the new stock is LOWER than old stock, it's actually 'keluar'
+        // but for simplicity, we map it to 'masuk' or 'keluar' based on the diff?
+        // Actually, the most important is to fix 'rusak' and 'penjualan' which are definitely 'keluar'.
+        
         $mutation = StokMutasi::create([
             'id_barang' => $request->id_barang,
-            'jenis' => $request->jenis,
+            'jenis' => $dbJenis,
             'jumlah' => $jumlah,
-            'keterangan' => $request->keterangan ?? '-'
+            'keterangan' => ($request->jenis !== $dbJenis ? "[" . strtoupper($request->jenis) . "] " : "") . ($request->keterangan ?? '-')
         ]);
 
         return response()->json([

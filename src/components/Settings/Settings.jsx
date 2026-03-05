@@ -117,8 +117,24 @@ function ProfilUsaha({ onBack, user, onUpdateUser }) {
             <div className="content">
                 {/* Avatar / logo placeholder */}
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 22 }}>
-                    <div style={{ position: "relative", width: 80, height: 80, borderRadius: 24, background: `linear-gradient(135deg, ${TEAL}, ${TEAL_DARK})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 800, color: "#fff", marginBottom: 10, boxShadow: `0 8px 24px ${TEAL}44`, overflow: "hidden" }}>
-                        {logoImage ? <SafeImage src={logoImage} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials}
+                    <div style={{
+                        position: "relative",
+                        width: 80,
+                        height: 80,
+                        borderRadius: 24,
+                        background: logoImage ? "#fff" : `linear-gradient(135deg, ${TEAL}, ${TEAL_DARK})`,
+                        border: logoImage ? "1.5px solid #ECEEF0" : "none",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 28,
+                        fontWeight: 800,
+                        color: "#fff",
+                        marginBottom: 10,
+                        boxShadow: `0 8px 24px ${logoImage ? "rgba(0,0,0,0.05)" : TEAL + "44"}`,
+                        overflow: "hidden"
+                    }}>
+                        {logoImage ? <SafeImage src={logoImage} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 8 }} /> : initials}
                         <input type="file" accept="image/*" onChange={handleLogoUpload} style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer", zIndex: 10 }} />
                         <div style={{ position: "absolute", bottom: 0, width: "100%", height: "30%", background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, cursor: "pointer" }}>
                             📷
@@ -179,7 +195,23 @@ function ProfilUsaha({ onBack, user, onUpdateUser }) {
                 <div style={{ background: "#fff", borderRadius: 16, border: "1.5px solid #ECEEF0", padding: 16, marginBottom: 14 }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: "#aaa", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 12 }}>Preview Identitas</div>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <div style={{ width: 46, height: 46, borderRadius: 14, background: `linear-gradient(135deg, ${TEAL}, ${TEAL_DARK})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, fontWeight: 800, color: "#fff", flexShrink: 0 }}>{initials}</div>
+                        <div style={{
+                            width: 46,
+                            height: 46,
+                            borderRadius: 14,
+                            background: logoImage ? "#fff" : `linear-gradient(135deg, ${TEAL}, ${TEAL_DARK})`,
+                            border: logoImage ? "1px solid #ECEEF0" : "none",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: 17,
+                            fontWeight: 800,
+                            color: "#fff",
+                            flexShrink: 0,
+                            overflow: 'hidden'
+                        }}>
+                            {logoImage ? <SafeImage src={logoImage} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4 }} /> : initials}
+                        </div>
                         <div>
                             <div style={{ fontSize: 15, fontWeight: 800, color: "#111" }}>{form.businessName || "Nama Usaha"}</div>
                             <div style={{ fontSize: 12, color: TEAL, fontWeight: 600, marginTop: 2 }}>{btype?.icon} {btype?.label}</div>
@@ -339,8 +371,20 @@ function AkunPassword({ onBack, user, onUpdateUser, onLogout }) {
                     <div style={{ background: `linear-gradient(135deg, ${TEAL}, ${TEAL_DARK})`, borderRadius: 18, padding: "20px", marginBottom: 16, position: "relative", overflow: "hidden" }}>
                         <div style={{ position: "absolute", top: -30, right: -30, width: 110, height: 110, borderRadius: "50%", background: "rgba(255,255,255,0.08)" }} />
                         <div style={{ display: "flex", alignItems: "center", gap: 14, position: "relative", zIndex: 2 }}>
-                            <div style={{ width: 52, height: 52, borderRadius: 16, background: "rgba(255,255,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 800, color: "#fff" }}>
-                                {user?.nama_usaha?.slice(0, 2).toUpperCase() || "MM"}
+                            <div style={{
+                                width: 52,
+                                height: 52,
+                                borderRadius: 16,
+                                background: user?.logo_usaha ? "#fff" : "rgba(255,255,255,0.25)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: 22,
+                                fontWeight: 800,
+                                color: "#fff",
+                                overflow: 'hidden'
+                            }}>
+                                {user?.logo_usaha ? <SafeImage src={user.logo_usaha} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4 }} /> : user?.nama_usaha?.slice(0, 2).toUpperCase() || "MM"}
                             </div>
                             <div>
                                 <div style={{ fontSize: 15, fontWeight: 800, color: "#fff" }}>{user?.nama_usaha || "MiniMart Sejahtera"}</div>
@@ -674,8 +718,20 @@ export default function Settings({ user, onUpdateUser, onLogout }) {
                 >
                     <div style={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", background: "rgba(255,255,255,0.08)" }} />
                     <div style={{ display: "flex", alignItems: "center", gap: 14, position: "relative", zIndex: 2 }}>
-                        <div style={{ width: 52, height: 52, borderRadius: 16, background: "rgba(255,255,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 800, color: "#fff" }}>
-                            {user?.nama_usaha?.slice(0, 2).toUpperCase() || "MM"}
+                        <div style={{
+                            width: 52,
+                            height: 52,
+                            borderRadius: 16,
+                            background: user?.logo_usaha ? "#fff" : "rgba(255,255,255,0.25)",
+                            display: "flex",
+                            alignItems: 'center',
+                            justifyContent: "center",
+                            fontSize: 22,
+                            fontWeight: 800,
+                            color: "#fff",
+                            overflow: 'hidden'
+                        }}>
+                            {user?.logo_usaha ? <SafeImage src={user.logo_usaha} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4 }} /> : user?.nama_usaha?.slice(0, 2).toUpperCase() || "MM"}
                         </div>
                         <div style={{ flex: 1 }}>
                             <div style={{ fontSize: 15, fontWeight: 800, color: "#fff" }}>{user?.nama_usaha || "MiniMart Sejahtera"}</div>
