@@ -413,91 +413,74 @@ function SuccessScreen({ cart, total, payInfo, onNew, transactionResult, user })
     const dateStr = now.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
     const timeStr = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
 
-    if (showReceipt) {
-        return (
-            <>
-                <div className="topbar">
-                    <div className="topbar-row">
-                        <span className="topbar-title">Struk <span style={{ color: "var(--primary-brand)" }}>Transaksi</span></span>
-                        <button className="print-btn-receipt" onClick={() => window.print()}>🖨️ Cetak</button>
+    const ReceiptContent = () => (
+        <div className="receipt-paper-teal">
+            <div className="receipt-header-teal" style={{ textAlign: "center", marginBottom: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#fff', padding: '10px 0', borderBottom: '1px dashed #eee' }}>
+                {user?.logo_usaha && (
+                    <SafeImage src={user.logo_usaha} alt="Logo" style={{ maxWidth: "100%", maxHeight: 60, marginBottom: 5, objectFit: "contain" }} />
+                )}
+                <div className="receipt-brand" style={{ fontSize: 18, fontWeight: 800, marginBottom: 2, color: "#111" }}>{user?.nama_usaha || "Toko Kamu"}</div>
+                {user?.alamat_usaha && <div className="receipt-sub" style={{ fontSize: 12, marginBottom: 2, color: "#666" }}>{user.alamat_usaha}</div>}
+                {user?.no_telepon_usaha && <div className="receipt-sub" style={{ fontSize: 12, marginBottom: 5, color: "#666" }}>{user.no_telepon_usaha}</div>}
+                <div className="receipt-line" style={{ width: '100%', borderBottom: '1.5px dashed #eee', margin: '10px 0' }} />
+                <div className="receipt-time" style={{ color: "#888", fontSize: '12px' }}>{dateStr} • {timeStr}</div>
+            </div>
+
+            <div className="receipt-inv">
+                <span>No. Invoice</span>
+                <span className="inv-num">{transactionResult?.id_pesanan || 'TRAN-AUTO'}</span>
+            </div>
+
+            <div className="receipt-items">
+                {cart.map((c) => (
+                    <div key={c.id_barang} className="r-item-row">
+                        <div className="r-item-info">
+                            <div className="r-item-name">{c.nama_barang}</div>
+                            <div className="r-item-price">{formatRp(c.harga)} × {c.qty}</div>
+                        </div>
+                        <div className="r-item-total">{formatRp(Number(c.harga) * c.qty)}</div>
                     </div>
+                ))}
+            </div>
+
+            <div className="r-divider" />
+
+            <div className="receipt-totals">
+                <div className="r-total-row">
+                    <span>Subtotal</span>
+                    <span>{formatRp(total)}</span>
                 </div>
-                <div className="content">
-                    <div className="receipt-paper-teal">
-                        <div className="receipt-header-teal" style={{ textAlign: "center", marginBottom: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#fff', padding: '10px 0', borderBottom: '1px dashed #eee' }}>
-                            {user?.logo_usaha && (
-                                <SafeImage src={user.logo_usaha} alt="Logo" style={{ maxWidth: "100%", maxHeight: 60, marginBottom: 5, objectFit: "contain" }} />
-                            )}
-                            <div className="receipt-brand" style={{ fontSize: 18, fontWeight: 800, marginBottom: 2, color: "#111" }}>{user?.nama_usaha || "Toko Kamu"}</div>
-                            {user?.alamat_usaha && <div className="receipt-sub" style={{ fontSize: 12, marginBottom: 2, color: "#666" }}>{user.alamat_usaha}</div>}
-                            {user?.no_telepon_usaha && <div className="receipt-sub" style={{ fontSize: 12, marginBottom: 5, color: "#666" }}>{user.no_telepon_usaha}</div>}
-                            <div className="receipt-line" style={{ width: '100%', borderBottom: '1.5px dashed #eee', margin: '10px 0' }} />
-                            <div className="receipt-time" style={{ color: "#888", fontSize: '12px' }}>{dateStr} • {timeStr}</div>
-                        </div>
-
-                        <div className="receipt-inv">
-                            <span>No. Invoice</span>
-                            <span className="inv-num">{transactionResult?.id_pesanan || 'TRAN-AUTO'}</span>
-                        </div>
-
-                        <div className="receipt-items">
-                            {cart.map((c) => (
-                                <div key={c.id_barang} className="r-item-row">
-                                    <div className="r-item-info">
-                                        <div className="r-item-name">{c.nama_barang}</div>
-                                        <div className="r-item-price">{formatRp(c.harga)} × {c.qty}</div>
-                                    </div>
-                                    <div className="r-item-total">{formatRp(Number(c.harga) * c.qty)}</div>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="r-divider" />
-
-                        <div className="receipt-totals">
-                            <div className="r-total-row">
-                                <span>Subtotal</span>
-                                <span>{formatRp(total)}</span>
-                            </div>
-                            <div className="r-total-row">
-                                <span>Metode</span>
-                                <span>{payInfo.method}</span>
-                            </div>
-                            {payInfo.method === "Cash" && (
-                                <>
-                                    <div className="r-total-row">
-                                        <span>Bayar</span>
-                                        <span>{formatRp(payInfo.cashGiven)}</span>
-                                    </div>
-                                    <div className="r-total-row highlight">
-                                        <span>Kembalian</span>
-                                        <span>{formatRp(payInfo.kembalian)}</span>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-
-                        <div className="r-divider" />
-
-                        <div className="receipt-final">
-                            <span>TOTAL</span>
-                            <span className="final-val">{formatRp(total)}</span>
-                        </div>
-
-                        <div className="receipt-footer-msg">
-                            <div>Terima kasih telah berbelanja!</div>
-                            <div style={{ marginTop: 4, opacity: 0.6 }}>Simpan struk ini sebagai bukti pembayaran</div>
-                        </div>
-                    </div>
+                <div className="r-total-row">
+                    <span>Metode</span>
+                    <span>{payInfo.method}</span>
                 </div>
-                <div className="success-bottom-bar">
-                    <button className="new-trans-btn-big" onClick={onNew}>
-                        🛒 Transaksi Baru
-                    </button>
-                </div>
-            </>
-        );
-    }
+                {payInfo.method === "Cash" && (
+                    <>
+                        <div className="r-total-row">
+                            <span>Bayar</span>
+                            <span>{formatRp(payInfo.cashGiven)}</span>
+                        </div>
+                        <div className="r-total-row highlight">
+                            <span>Kembalian</span>
+                            <span>{formatRp(payInfo.kembalian)}</span>
+                        </div>
+                    </>
+                )}
+            </div>
+
+            <div className="r-divider" />
+
+            <div className="receipt-final">
+                <span>TOTAL</span>
+                <span className="final-val">{formatRp(total)}</span>
+            </div>
+
+            <div className="receipt-footer-msg">
+                <div>Terima kasih telah berbelanja!</div>
+                <div style={{ marginTop: 4, opacity: 0.6 }}>Simpan struk ini sebagai bukti pembayaran</div>
+            </div>
+        </div>
+    );
 
     return (
         <>
@@ -542,10 +525,14 @@ function SuccessScreen({ cart, total, payInfo, onNew, transactionResult, user })
                         </div>
                     ))}
                 </div>
+
+                <div className="print-receipt-only" style={{ display: 'none' }}>
+                    <ReceiptContent />
+                </div>
             </div>
 
             <div className="success-bottom-bar">
-                <button className="secondary-action" style={{ width: '100%', marginBottom: 12 }} onClick={() => setShowReceipt(true)}>📄 Lihat Struk</button>
+                <button className="secondary-action" style={{ width: '100%', marginBottom: 12 }} onClick={() => window.print()}>🖨️ Cetak Struk</button>
                 <button className="primary-action" onClick={onNew}>🛒 Transaksi Baru</button>
             </div>
         </>
@@ -664,7 +651,8 @@ const Kasir = ({ onToggleSidebar }) => {
             margin: 0 !important;
             overflow: visible !important;
           }
-          .desktop-sidebar, .sidebar-teal, .sidebar-overlay, .mobile-top-bar-teal, .topbar, .bottom-bar, .success-bottom-bar, .overlay, .cart-sheet { display: none !important; }
+          .desktop-sidebar, .sidebar-teal, .sidebar-overlay, .mobile-top-bar-teal, .topbar, .bottom-bar, .success-bottom-bar, .overlay, .cart-sheet, .success-container { display: none !important; }
+          .print-receipt-only { display: block !important; }
           .receipt-paper-teal { 
             position: relative !important; 
             display: block !important;
