@@ -144,17 +144,17 @@ const DetailScreen = ({ trx, onBack, user }) => {
 
             {/* Hidden Receipt for Printing */}
             <div className="print-receipt-only">
-                <div className="r-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'var(--primary-brand)', padding: '24px 16px', borderRadius: '16px 16px 0 0', marginBottom: 15, color: '#fff' }}>
+                <div className="r-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#fff', padding: '10px 0', borderBottom: '1px dashed #eee', marginBottom: 15, color: '#111' }}>
                     {user?.logo_usaha && (
                         <SafeImage src={user.logo_usaha} alt="Logo" style={{ maxWidth: "100%", maxHeight: 60, marginBottom: 8, objectFit: "contain" }} />
                     )}
-                    <div className="r-brand" style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>{user?.nama_usaha || "Toko Kamu"}</div>
-                    {user?.alamat_usaha && <div className="r-sub" style={{ fontSize: 13, marginTop: 2, color: "rgba(255,255,255,0.85)" }}>{user.alamat_usaha}</div>}
-                    {user?.no_telepon_usaha && <div className="r-sub" style={{ fontSize: 13, marginTop: 2, color: "rgba(255,255,255,0.85)" }}>{user.no_telepon_usaha}</div>}
+                    <div className="r-brand" style={{ fontSize: 16, fontWeight: 800, color: "#111" }}>{user?.nama_usaha || "Toko Kamu"}</div>
+                    {user?.alamat_usaha && <div className="r-sub" style={{ fontSize: 11, marginTop: 2, color: "#666" }}>{user.alamat_usaha}</div>}
+                    {user?.no_telepon_usaha && <div className="r-sub" style={{ fontSize: 11, marginTop: 2, color: "#666" }}>{user.no_telepon_usaha}</div>}
 
-                    <div className="r-line" style={{ width: '40px', height: '2px', background: 'rgba(255,255,255,0.3)', margin: '12px auto', borderRadius: '4px' }} />
-                    <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>{formatDate(trx.tanggal_transaksi)} • {formatTime(trx.tanggal_transaksi)}</div>
-                    <div style={{ fontSize: 12, marginTop: 4, color: "rgba(255,255,255,0.7)" }}>No: {trx.id_transaksi}</div>
+                    <div className="r-line" style={{ width: '100%', borderBottom: '1.5px dashed #eee', margin: '10px 0' }} />
+                    <div style={{ fontSize: 11, color: "#888" }}>{formatDate(trx.tanggal_transaksi)} • {formatTime(trx.tanggal_transaksi)}</div>
+                    <div style={{ fontSize: 11, marginTop: 4, color: "#888" }}>No: {trx.id_transaksi}</div>
                 </div>
                 <div className="r-line" />
                 {trx.details?.map((item, i) => (
@@ -401,10 +401,10 @@ const globalCSS = `
       background: #fff !important;
       color: #000 !important;
     }
-    .r-header { background: var(--primary-brand) !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .r-brand { color: #fff !important; }
-    .r-sub { color: rgba(255,255,255,0.85) !important; }
-    .r-line { background: rgba(255,255,255,0.3) !important; }
+    .r-header { background: #fff !important; color: #000 !important; border-bottom: 1px dashed #000 !important; padding-bottom: 10px !important; }
+    .r-brand { color: #000 !important; }
+    .r-sub { color: #000 !important; }
+    .r-line { border-bottom: 1px dashed #000 !important; height: 1px !important; background: transparent !important; }
   }
 
   .print-receipt-only { display: none; font-family: 'Plus Jakarta Sans', sans-serif; }
