@@ -659,7 +659,7 @@ const Kasir = ({ onToggleSidebar }) => {
           body * { visibility: hidden; }
           .receipt-paper-teal, .receipt-paper-teal * { visibility: visible; }
           .receipt-paper-teal { 
-            position: fixed; 
+            position: absolute; 
             left: 0; 
             top: 0; 
             width: 58mm; 
@@ -670,7 +670,7 @@ const Kasir = ({ onToggleSidebar }) => {
             background: #fff !important;
             color: #000 !important;
           }
-          .kasir-teal-root, .topbar, .bottom-bar, .success-bottom-bar, .overlay, .cart-sheet { display: none !important; }
+          .topbar, .bottom-bar, .success-bottom-bar, .overlay, .cart-sheet { display: none !important; }
           .receipt-brand { color: #000 !important; }
           .final-val { color: #000 !important; }
           .receipt-line, .r-divider { border-bottom: 1px dashed #000 !important; }
@@ -952,9 +952,8 @@ const Kasir = ({ onToggleSidebar }) => {
         @keyframes slideUp { from { transform: translate(-50%, 100%); } to { transform: translate(-50%, 0); } }
 
         @media print {
-          .kasir-teal-root > *:not(.content) { display: none !important; }
           .content { padding: 0 !important; overflow: visible !important; }
-          .receipt-paper-teal { box-shadow: none !important; border: 1px solid #eee !important; }
+          .receipt-paper-teal { box-shadow: none !important; border: 1px solid #eee !important; margin: 0 auto; }
         }
       `}</style>
 

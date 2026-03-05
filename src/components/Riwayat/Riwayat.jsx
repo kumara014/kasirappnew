@@ -386,7 +386,7 @@ const globalCSS = `
     body * { visibility: hidden; }
     .print-receipt-only, .print-receipt-only * { visibility: visible; }
     .print-receipt-only { 
-      position: fixed; 
+      position: absolute; 
       left: 0; 
       top: 0; 
       width: 58mm; 
@@ -396,7 +396,7 @@ const globalCSS = `
       background: #fff !important;
       color: #000 !important;
     }
-    .history-teal { display: none !important; }
+    .topbar, .content, .bottom-bar { display: none !important; }
   }
 
   .print-receipt-only { display: none; font-family: 'Plus Jakarta Sans', sans-serif; }
