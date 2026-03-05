@@ -3,6 +3,7 @@ import { Search, Calendar as CalendarIcon, ArrowLeft, Printer, Send } from 'luci
 import { useData } from '../../context/DataContext';
 import { apiFetch } from '../../config';
 import { haptic } from '../../utils/haptics';
+import SafeImage from '../Common/SafeImage';
 
 const TEAL = "var(--primary-brand)";
 const TEAL_LIGHT = "var(--primary-light)";
@@ -44,7 +45,7 @@ function dayLabel(key) {
 const FILTER_METHODS = ["Semua", "Tunai", "QRIS", "Transfer"];
 
 // ── DETAIL SCREEN ─────────────────────────────────────────────────────────────
-const DetailScreen = ({ trx, onBack }) => {
+const DetailScreen = ({ trx, onBack, user }) => {
     const methodFormatted = trx.metode_pembayaran || 'Tunai';
     const mc = METHOD_COLOR[methodFormatted] || { bg: TEAL_LIGHT, color: TEAL };
 
@@ -143,10 +144,15 @@ const DetailScreen = ({ trx, onBack }) => {
 
             {/* Hidden Receipt for Printing */}
             <div className="print-receipt-only">
-                <div className="r-header">
-                    <div className="r-brand">Pointly</div>
-                    <div className="r-sub">Digital POS System</div>
-                    <div className="r-line" />
+                <div className="r-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    {user?.logo_usaha && (
+                        <SafeImage src={user.logo_usaha} alt="Logo" style={{ maxWidth: "100%", maxHeight: 60, marginBottom: 8, objectFit: "contain" }} />
+                    )}
+                    <div className="r-brand" style={{ fontSize: 16, fontWeight: 800 }}>{user?.nama_usaha || "Toko Kamu"}</div>
+                    {user?.alamat_usaha && <div className="r-sub" style={{ fontSize: 11, marginTop: 2 }}>{user.alamat_usaha}</div>}
+                    {user?.no_telepon_usaha && <div className="r-sub" style={{ fontSize: 11, marginTop: 2 }}>{user.no_telepon_usaha}</div>}
+
+                    <div className="r-line" style={{ width: '100%' }} />
                     <div style={{ fontSize: 11 }}>{formatDate(trx.tanggal_transaksi)} • {formatTime(trx.tanggal_transaksi)}</div>
                     <div style={{ fontSize: 11, marginTop: 4 }}>No: {trx.id_transaksi}</div>
                 </div>
@@ -182,6 +188,7 @@ const DetailScreen = ({ trx, onBack }) => {
 // ── MAIN LIST SCREEN ──────────────────────────────────────────────────────────
 const History = () => {
     const {
+        user,
         ordersData,
         loadingOrders,
         refreshOrders,
@@ -223,7 +230,7 @@ const History = () => {
         }
     };
 
-    if (selected) return <DetailScreen trx={selected} onBack={() => setSelected(null)} />;
+    if (selected) return <DetailScreen trx={selected} user={user} onBack={() => setSelected(null)} />;
 
     const orders = ordersData || [];
     const filtered = orders.filter((t) => {
@@ -382,7 +389,7 @@ const globalCSS = `
       position: fixed; 
       left: 0; 
       top: 0; 
-      width: 80mm; 
+      width: 58mm; 
       margin: 0; 
       padding: 10px; 
       display: block !important;

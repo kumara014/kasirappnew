@@ -46,6 +46,9 @@ class AuthController extends Controller
                 'permissions' => $user->permissions ?? ['dashboard', 'menu', 'order', 'history', 'report', 'stok-mutasi', 'settings'],
                 'qris_image' => $user->qris_image,
                 'bank_info' => $user->bank_info,
+                'alamat_usaha' => $user->alamat_usaha,
+                'no_telepon_usaha' => $user->no_telepon_usaha,
+                'logo_usaha' => $user->logo_usaha,
             ]
         ]);
     }
@@ -89,8 +92,11 @@ class AuthController extends Controller
             'email' => 'nullable|email|unique:users,email,' . $user->id_user . ',id_user',
             'nama_usaha' => 'nullable|string|max:255',
             'tipe_bisnis' => 'nullable|string|max:255',
+            'alamat_usaha' => 'nullable|string|max:255',
+            'no_telepon_usaha' => 'nullable|string|max:50',
             'bank_info' => 'nullable', // Expected to be array or JSON
-            'qris_image' => 'nullable' // Could be file or base64
+            'qris_image' => 'nullable', // Could be file or base64
+            'logo_usaha' => 'nullable' // Could be file or base64
         ]);
 
         $updateData = [];
@@ -98,6 +104,8 @@ class AuthController extends Controller
         if ($request->has('email')) $updateData['email'] = $request->email;
         if ($request->has('nama_usaha')) $updateData['nama_usaha'] = $request->nama_usaha;
         if ($request->has('tipe_bisnis')) $updateData['tipe_bisnis'] = $request->tipe_bisnis;
+        if ($request->has('alamat_usaha')) $updateData['alamat_usaha'] = $request->alamat_usaha;
+        if ($request->has('no_telepon_usaha')) $updateData['no_telepon_usaha'] = $request->no_telepon_usaha;
         
         if ($request->has('bank_info')) {
             $bankData = $request->bank_info;
@@ -146,6 +154,27 @@ class AuthController extends Controller
             }
         }
 
+        if ($request->has('logo_usaha') && !empty($request->logo_usaha)) {
+            if ($request->hasFile('logo_usaha')) {
+                $path = $request->file('logo_usaha')->store('logos', 'public');
+                $updateData['logo_usaha'] = $path;
+            } else if (preg_match('/^data:image\/(\w+);base64,/', $request->logo_usaha, $type)) {
+                $image_data = substr($request->logo_usaha, strpos($request->logo_usaha, ',') + 1);
+                $type = strtolower($type[1]);
+                if (in_array($type, ['jpg', 'jpeg', 'gif', 'png']) && ($image_data = base64_decode($image_data)) !== false) {
+                    $fileName = 'logo_' . time() . '.' . $type;
+                    $path = 'logos/' . $fileName;
+                    if (!\Illuminate\Support\Facades\Storage::disk('public')->exists('logos')) {
+                        \Illuminate\Support\Facades\Storage::disk('public')->makeDirectory('logos');
+                    }
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($path, $image_data);
+                    $updateData['logo_usaha'] = $path;
+                }
+            } else {
+                $updateData['logo_usaha'] = $request->logo_usaha;
+            }
+        }
+
         \Log::info('Final Update Data:', $updateData);
 
         if (!empty($updateData)) {
@@ -168,6 +197,9 @@ class AuthController extends Controller
                 'permissions' => $user->permissions,
                 'qris_image' => $user->qris_image,
                 'bank_info' => $user->bank_info,
+                'alamat_usaha' => $user->alamat_usaha,
+                'no_telepon_usaha' => $user->no_telepon_usaha,
+                'logo_usaha' => $user->logo_usaha,
             ]
         ]);
     }

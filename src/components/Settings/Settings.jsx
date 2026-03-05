@@ -30,8 +30,20 @@ function ProfilUsaha({ onBack, user, onUpdateUser }) {
         businessName: user?.nama_usaha || "",
         businessType: user?.tipe_bisnis || "minimarket",
         email: user?.email || "",
+        address: user?.alamat_usaha || "",
+        phone: user?.no_telepon_usaha || "",
     });
+    const [logoImage, setLogoImage] = useState(user?.logo_usaha || null);
     const [errors, setErrors] = useState({});
+
+    const handleLogoUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => setLogoImage(reader.result);
+            reader.readAsDataURL(file);
+        }
+    };
     const [toast, setToast] = useState(null);
     const [loading, setLoading] = useState(false);
     const { notify } = useNotification();
@@ -59,6 +71,9 @@ function ProfilUsaha({ onBack, user, onUpdateUser }) {
                     email: form.email,
                     nama_usaha: form.businessName,
                     tipe_bisnis: form.businessType,
+                    alamat_usaha: form.address,
+                    no_telepon_usaha: form.phone,
+                    logo_usaha: logoImage
                 })
             });
             const data = await res.json();
@@ -102,13 +117,14 @@ function ProfilUsaha({ onBack, user, onUpdateUser }) {
             <div className="content">
                 {/* Avatar / logo placeholder */}
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 22 }}>
-                    <div style={{ width: 80, height: 80, borderRadius: 24, background: `linear-gradient(135deg, ${TEAL}, ${TEAL_DARK})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 800, color: "#fff", marginBottom: 10, boxShadow: `0 8px 24px ${TEAL}44`, position: "relative" }}>
-                        {initials}
-                        <div style={{ position: "absolute", bottom: -4, right: -4, width: 26, height: 26, borderRadius: 8, background: "#fff", border: `2px solid ${TEAL}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, cursor: "pointer" }}>
+                    <div style={{ position: "relative", width: 80, height: 80, borderRadius: 24, background: `linear-gradient(135deg, ${TEAL}, ${TEAL_DARK})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 800, color: "#fff", marginBottom: 10, boxShadow: `0 8px 24px ${TEAL}44`, overflow: "hidden" }}>
+                        {logoImage ? <SafeImage src={logoImage} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials}
+                        <input type="file" accept="image/*" onChange={handleLogoUpload} style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer", zIndex: 10 }} />
+                        <div style={{ position: "absolute", bottom: 0, width: "100%", height: "30%", background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, cursor: "pointer" }}>
                             📷
                         </div>
                     </div>
-                    <div style={{ fontSize: 12, color: "#aaa", fontWeight: 500 }}>Ketuk ikon kamera untuk ganti foto</div>
+                    <div style={{ fontSize: 12, color: "#aaa", fontWeight: 500 }}>Ketuk logo untuk ganti foto struk</div>
                 </div>
 
                 {/* Info usaha */}
@@ -140,11 +156,23 @@ function ProfilUsaha({ onBack, user, onUpdateUser }) {
                     </div>
 
                     <div className="input-label">Email Usaha</div>
-                    <div style={{ position: "relative" }}>
+                    <div style={{ position: "relative", marginBottom: 16 }}>
                         <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16, pointerEvents: "none" }}>📧</span>
                         <input className={`form-input${errors.email ? " input-error" : ""}`} style={{ paddingLeft: 44, marginBottom: 0 }} placeholder="email@toko.com" type="email" value={form.email} onChange={e => { setForm({ ...form, email: e.target.value }); setErrors({ ...errors, email: "" }); }} />
                     </div>
-                    {errors.email && <div className="error-msg" style={{ marginTop: 4 }}>⚠ {errors.email}</div>}
+                    {errors.email && <div className="error-msg" style={{ marginTop: -12, marginBottom: 16 }}>⚠ {errors.email}</div>}
+
+                    <div className="input-label">Nomor Telepon Toko</div>
+                    <div style={{ position: "relative", marginBottom: 16 }}>
+                        <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16, pointerEvents: "none" }}>📞</span>
+                        <input className="form-input" style={{ paddingLeft: 44, marginBottom: 0 }} placeholder="08123456789" type="tel" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
+                    </div>
+
+                    <div className="input-label">Alamat Usaha (Untuk Struk)</div>
+                    <div style={{ position: "relative" }}>
+                        <span style={{ position: "absolute", left: 14, top: 14, fontSize: 16, pointerEvents: "none" }}>📍</span>
+                        <textarea className="form-input" style={{ paddingLeft: 44, marginBottom: 0, minHeight: 80, resize: "vertical" }} placeholder="Jl. Raya Kemerdekaan No. 1..." value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} />
+                    </div>
                 </div>
 
                 {/* Preview card */}

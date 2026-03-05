@@ -407,7 +407,7 @@ function PaymentScreen({ cart, total, onBack, onPay, isProcessing, user }) {
 }
 
 // ─── SCREEN: SUCCESS ──────────────────────────────────────────────────────────
-function SuccessScreen({ cart, total, payInfo, onNew, transactionResult }) {
+function SuccessScreen({ cart, total, payInfo, onNew, transactionResult, user }) {
     const [showReceipt, setShowReceipt] = useState(false);
     const now = new Date();
     const dateStr = now.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
@@ -424,10 +424,14 @@ function SuccessScreen({ cart, total, payInfo, onNew, transactionResult }) {
                 </div>
                 <div className="content">
                     <div className="receipt-paper-teal">
-                        <div className="receipt-header-teal">
-                            <div className="receipt-brand">Pointly</div>
-                            <div className="receipt-sub">Digital POS System</div>
-                            <div className="receipt-line" />
+                        <div className="receipt-header-teal" style={{ textAlign: "center", marginBottom: 16, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            {user?.logo_usaha && (
+                                <SafeImage src={user.logo_usaha} alt="Logo" style={{ maxWidth: "100%", maxHeight: 80, marginBottom: 8, objectFit: "contain" }} />
+                            )}
+                            <div className="receipt-brand" style={{ fontSize: 16, fontWeight: 800, marginBottom: 4 }}>{user?.nama_usaha || "Toko Kamu"}</div>
+                            {user?.alamat_usaha && <div className="receipt-sub" style={{ fontSize: 13, marginBottom: 2 }}>{user.alamat_usaha}</div>}
+                            {user?.no_telepon_usaha && <div className="receipt-sub" style={{ fontSize: 13, marginBottom: 8 }}>{user.no_telepon_usaha}</div>}
+                            <div className="receipt-line" style={{ width: '100%', height: 2, background: "rgba(255,255,255,0.3)", margin: "12px auto", borderRadius: 4 }} />
                             <div className="receipt-time">{dateStr} • {timeStr}</div>
                         </div>
 
@@ -624,7 +628,6 @@ const Kasir = ({ onToggleSidebar }) => {
                     refreshDashboard(true);
                     refreshOrders(true);
                     haptic.success();
-                    notify("Transaksi Berhasil!", "success");
                     setScreen("success");
                 } else {
                     haptic.error();
@@ -659,7 +662,7 @@ const Kasir = ({ onToggleSidebar }) => {
             position: fixed; 
             left: 0; 
             top: 0; 
-            width: 80mm; 
+            width: 58mm; 
             margin: 0; 
             padding: 10px; 
             box-shadow: none; 
@@ -988,6 +991,7 @@ const Kasir = ({ onToggleSidebar }) => {
                     total={total}
                     payInfo={payInfo}
                     transactionResult={transactionResult}
+                    user={user}
                     onNew={resetAll}
                 />
             )}

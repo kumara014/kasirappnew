@@ -31,6 +31,9 @@ class User extends Authenticatable
         'owner_id',
         'qris_image',
         'bank_info',
+        'alamat_usaha',
+        'no_telepon_usaha',
+        'logo_usaha',
     ];
 
     /**
