@@ -656,21 +656,24 @@ const Kasir = ({ onToggleSidebar }) => {
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
         @media print {
-          body * { visibility: hidden; }
-          .receipt-paper-teal, .receipt-paper-teal * { visibility: visible; }
-          .receipt-paper-teal { 
-            position: absolute; 
-            left: 0; 
-            top: 0; 
-            width: 58mm; 
-            margin: 0; 
-            padding: 10px; 
-            box-shadow: none; 
-            border: none;
-            background: #fff !important;
-            color: #000 !important;
+          body, html, #root, .app-main-wrapper, .app-layout, .main-content, .view-wrapper, .kasir-teal-root, .content {
+            display: block !important;
+            height: auto !important;
+            min-height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            overflow: visible !important;
           }
-          .topbar, .bottom-bar, .success-bottom-bar, .overlay, .cart-sheet { display: none !important; }
+          .sidebar, .mobile-top-bar-teal, .topbar, .bottom-bar, .success-bottom-bar, .overlay, .cart-sheet { display: none !important; }
+          .receipt-paper-teal { 
+            position: relative !important; 
+            display: block !important;
+            width: 58mm !important; 
+            margin: 0 !important; 
+            padding: 10px !important; 
+            box-shadow: none !important; 
+            border: none !important;
+          }
           .receipt-brand { color: #000 !important; }
           .final-val { color: #000 !important; }
           .receipt-line, .r-divider { border-bottom: 1px dashed #000 !important; }
@@ -926,7 +929,7 @@ const Kasir = ({ onToggleSidebar }) => {
         
         /* Receipt Paper Styles */
         .receipt-paper-teal { background: #fff; border-radius: 20px; border: 1.5px solid #ECEEF0; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); width: 100%; }
-        .receipt-header-teal { background: var(--primary-brand); color: #fff; padding: 32px 24px; text-align: center; }
+        .receipt-header-teal { background: var(--primary-brand); color: #fff; padding: 20px 16px; text-align: center; }
         .receipt-brand { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
         .receipt-sub { font-size: 13px; opacity: 0.8; margin-top: 4px; }
         .receipt-line { width: 40px; height: 2px; background: rgba(255,255,255,0.3); margin: 16px auto; border-radius: 4px; }
@@ -951,10 +954,6 @@ const Kasir = ({ onToggleSidebar }) => {
         @keyframes popIn { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes slideUp { from { transform: translate(-50%, 100%); } to { transform: translate(-50%, 0); } }
 
-        @media print {
-          .content { padding: 0 !important; overflow: visible !important; }
-          .receipt-paper-teal { box-shadow: none !important; border: 1px solid #eee !important; margin: 0 auto; }
-        }
       `}</style>
 
             {screen === "cashier" && (

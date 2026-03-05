@@ -383,20 +383,24 @@ const globalCSS = `
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
   
   @media print {
-    body * { visibility: hidden; }
-    .print-receipt-only, .print-receipt-only * { visibility: visible; }
-    .print-receipt-only { 
-      position: absolute; 
-      left: 0; 
-      top: 0; 
-      width: 58mm; 
-      margin: 0; 
-      padding: 10px; 
+    body, html, #root, .app-main-wrapper, .app-layout, .main-content, .view-wrapper, .history-teal {
       display: block !important;
+      height: auto !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      overflow: visible !important;
+    }
+    .sidebar, .mobile-top-bar-teal, .topbar, .content, .bottom-bar { display: none !important; }
+    .print-receipt-only { 
+      position: relative !important; 
+      display: block !important;
+      width: 58mm !important; 
+      margin: 0 !important; 
+      padding: 10px !important; 
       background: #fff !important;
       color: #000 !important;
     }
-    .topbar, .content, .bottom-bar { display: none !important; }
   }
 
   .print-receipt-only { display: none; font-family: 'Plus Jakarta Sans', sans-serif; }
