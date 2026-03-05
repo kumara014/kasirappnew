@@ -144,15 +144,17 @@ const DetailScreen = ({ trx, onBack, user }) => {
 
             {/* Hidden Receipt for Printing */}
             <div className="print-receipt-only">
-                <div className="r-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', borderBottom: '1px dashed #000', paddingBottom: 10, marginBottom: 10 }}>
+                <div className="r-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'var(--primary-brand)', padding: '24px 16px', borderRadius: '16px 16px 0 0', marginBottom: 15, color: '#fff' }}>
                     {user?.logo_usaha && (
-                        <SafeImage src={user.logo_usaha} alt="Logo" style={{ maxWidth: "100%", maxHeight: 50, marginBottom: 5, objectFit: "contain", filter: "grayscale(100%)" }} />
+                        <SafeImage src={user.logo_usaha} alt="Logo" style={{ maxWidth: "100%", maxHeight: 60, marginBottom: 8, objectFit: "contain" }} />
                     )}
-                    <div className="r-brand" style={{ fontSize: 15, fontWeight: 800, color: "#000" }}>{user?.nama_usaha || "Toko Kamu"}</div>
-                    {user?.alamat_usaha && <div className="r-sub" style={{ fontSize: 11, marginTop: 2, color: "#000" }}>{user.alamat_usaha}</div>}
-                    {user?.no_telepon_usaha && <div className="r-sub" style={{ fontSize: 11, marginTop: 2, color: "#000" }}>{user.no_telepon_usaha}</div>}
-                    <div style={{ fontSize: 11, marginTop: 5, color: "#000" }}>{formatDate(trx.tanggal_transaksi)} • {formatTime(trx.tanggal_transaksi)}</div>
-                    <div style={{ fontSize: 11, marginTop: 2, color: "#000" }}>No: {trx.id_transaksi}</div>
+                    <div className="r-brand" style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>{user?.nama_usaha || "Toko Kamu"}</div>
+                    {user?.alamat_usaha && <div className="r-sub" style={{ fontSize: 13, marginTop: 2, color: "rgba(255,255,255,0.85)" }}>{user.alamat_usaha}</div>}
+                    {user?.no_telepon_usaha && <div className="r-sub" style={{ fontSize: 13, marginTop: 2, color: "rgba(255,255,255,0.85)" }}>{user.no_telepon_usaha}</div>}
+
+                    <div className="r-line" style={{ width: '40px', height: '2px', background: 'rgba(255,255,255,0.3)', margin: '12px auto', borderRadius: '4px' }} />
+                    <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>{formatDate(trx.tanggal_transaksi)} • {formatTime(trx.tanggal_transaksi)}</div>
+                    <div style={{ fontSize: 12, marginTop: 4, color: "rgba(255,255,255,0.7)" }}>No: {trx.id_transaksi}</div>
                 </div>
                 <div className="r-line" />
                 {trx.details?.map((item, i) => (
@@ -389,26 +391,30 @@ const globalCSS = `
       margin: 0 !important;
       overflow: visible !important;
     }
-    .sidebar, .mobile-top-bar-teal, .topbar, .content, .bottom-bar { display: none !important; }
+    .desktop-sidebar, .sidebar-teal, .sidebar-overlay, .mobile-top-bar-teal, .topbar, .content, .bottom-bar { display: none !important; }
     .print-receipt-only { 
       position: relative !important; 
       display: block !important;
       width: 58mm !important; 
-      margin: 0 !important; 
-      padding: 10px !important; 
+      margin: 0 auto !important; 
+      padding: 0 !important; 
       background: #fff !important;
       color: #000 !important;
     }
+    .r-header { background: var(--primary-brand) !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .r-brand { color: #fff !important; }
+    .r-sub { color: rgba(255,255,255,0.85) !important; }
+    .r-line { background: rgba(255,255,255,0.3) !important; }
   }
 
   .print-receipt-only { display: none; font-family: 'Plus Jakarta Sans', sans-serif; }
-  .r-header { text-align: center; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
-  .r-brand { font-size: 18px; font-weight: 800; color: #000; }
-  .r-sub { font-size: 11px; color: #000; }
-  .r-line { border-bottom: 1px dashed #000; margin: 8px 0; }
-  .r-item { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; color: #000; }
-  .r-total-section { margin-top: 10px; font-weight: 700; border-top: 1px dashed #000; padding-top: 8px; color: #000; }
-  .r-footer { text-align: center; margin-top: 15px; font-size: 10px; color: #000; }
+  .r-header { text-align: center; margin-bottom: 15px; }
+  .r-brand { font-size: 20px; font-weight: 800; }
+  .r-sub { font-size: 12px; opacity: 0.7; }
+  .r-line { width: 40px; height: 2px; background: rgba(255,255,255,0.3); margin: 16px auto; border-radius: 4px; }
+  .r-item { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+  .r-total-section { margin-top: 10px; font-weight: 700; border-top: 1px dashed #000; padding-top: 10px; }
+  .r-footer { text-align: center; margin-top: 20px; font-size: 11px; opacity: 0.6; }
 
   .history-teal { 
     font-family: 'Plus Jakarta Sans', sans-serif; 

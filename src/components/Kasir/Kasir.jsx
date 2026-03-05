@@ -424,15 +424,15 @@ function SuccessScreen({ cart, total, payInfo, onNew, transactionResult, user })
                 </div>
                 <div className="content">
                     <div className="receipt-paper-teal">
-                        <div className="receipt-header-teal" style={{ textAlign: "center", marginBottom: 10, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <div className="receipt-header-teal" style={{ textAlign: "center", marginBottom: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'var(--primary-brand)', padding: '24px 16px', borderRadius: '16px 16px 0 0' }}>
                             {user?.logo_usaha && (
-                                <SafeImage src={user.logo_usaha} alt="Logo" style={{ maxWidth: "100%", maxHeight: 60, marginBottom: 5, objectFit: "contain", filter: "grayscale(100%)" }} />
+                                <SafeImage src={user.logo_usaha} alt="Logo" style={{ maxWidth: "100%", maxHeight: 70, marginBottom: 10, objectFit: "contain" }} />
                             )}
-                            <div className="receipt-brand" style={{ fontSize: 16, fontWeight: 800, marginBottom: 2, color: "#000" }}>{user?.nama_usaha || "Toko Kamu"}</div>
-                            {user?.alamat_usaha && <div className="receipt-sub" style={{ fontSize: 12, marginBottom: 2, color: "#000" }}>{user.alamat_usaha}</div>}
-                            {user?.no_telepon_usaha && <div className="receipt-sub" style={{ fontSize: 12, marginBottom: 5, color: "#000" }}>{user.no_telepon_usaha}</div>}
-                            <div className="receipt-line" />
-                            <div className="receipt-time" style={{ color: "#000" }}>{dateStr} • {timeStr}</div>
+                            <div className="receipt-brand" style={{ fontSize: 18, fontWeight: 800, marginBottom: 4, color: "#fff" }}>{user?.nama_usaha || "Toko Kamu"}</div>
+                            {user?.alamat_usaha && <div className="receipt-sub" style={{ fontSize: 13, marginBottom: 2, color: "rgba(255,255,255,0.85)" }}>{user.alamat_usaha}</div>}
+                            {user?.no_telepon_usaha && <div className="receipt-sub" style={{ fontSize: 13, marginBottom: 8, color: "rgba(255,255,255,0.85)" }}>{user.no_telepon_usaha}</div>}
+                            <div className="receipt-line" style={{ width: '40px', height: '2px', background: 'rgba(255,255,255,0.3)', margin: '12px auto', borderRadius: '4px' }} />
+                            <div className="receipt-time" style={{ color: "rgba(255,255,255,0.7)", fontSize: '12px' }}>{dateStr} • {timeStr}</div>
                         </div>
 
                         <div className="receipt-inv">
@@ -664,16 +664,22 @@ const Kasir = ({ onToggleSidebar }) => {
             margin: 0 !important;
             overflow: visible !important;
           }
-          .sidebar, .mobile-top-bar-teal, .topbar, .bottom-bar, .success-bottom-bar, .overlay, .cart-sheet { display: none !important; }
+          .desktop-sidebar, .sidebar-teal, .sidebar-overlay, .mobile-top-bar-teal, .topbar, .bottom-bar, .success-bottom-bar, .overlay, .cart-sheet { display: none !important; }
           .receipt-paper-teal { 
             position: relative !important; 
             display: block !important;
             width: 58mm !important; 
-            margin: 0 !important; 
-            padding: 10px !important; 
+            margin: 0 auto !important; 
+            padding: 0 !important; 
             box-shadow: none !important; 
             border: none !important;
+            background: #fff !important;
           }
+          .receipt-header-teal { background: var(--primary-brand) !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          .receipt-brand { color: #fff !important; }
+          .receipt-sub { color: rgba(255,255,255,0.85) !important; }
+          .receipt-line { background: rgba(255,255,255,0.3) !important; }
+          .receipt-time { color: rgba(255,255,255,0.7) !important; }
           .receipt-brand { color: #000 !important; }
           .final-val { color: #000 !important; }
           .receipt-line, .r-divider { border-bottom: 1px dashed #000 !important; }
@@ -928,11 +934,11 @@ const Kasir = ({ onToggleSidebar }) => {
         .bayar-btn { width: 100%; padding: 18px; border-radius: 18px; background: var(--primary-brand); color: #fff; border: none; font-size: 17px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 20px rgba(74, 155, 173, 0.3); }
         
         /* Receipt Paper Styles */
-        .receipt-paper-teal { background: #fff; border-radius: 0; border: none; overflow: hidden; box-shadow: none; width: 100%; color: #000; }
-        .receipt-header-teal { background: #fff; color: #000; padding: 10px 0; text-align: center; border-bottom: 1px dashed #000; }
+        .receipt-paper-teal { background: #fff; border-radius: 20px; border: 1.5px solid #ECEEF0; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); width: 100%; }
+        .receipt-header-teal { background: var(--primary-brand); color: #fff; padding: 32px 24px; text-align: center; }
         .receipt-brand { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
         .receipt-sub { font-size: 13px; opacity: 0.8; margin-top: 4px; }
-        .receipt-line { width: 100%; height: 1px; border-bottom: 1px dashed #000; margin: 10px 0; }
+        .receipt-line { width: 40px; height: 2px; background: rgba(255,255,255,0.3); margin: 16px auto; border-radius: 4px; }
         .receipt-time { font-size: 12px; opacity: 0.7; }
         .receipt-inv { padding: 16px 24px; background: #FAFBFC; border-bottom: 1.5px dashed #ECEEF0; display: flex; justify-content: space-between; align-items: center; }
         .inv-num { font-weight: 700; color: var(--primary-brand); font-family: monospace; }
