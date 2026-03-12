@@ -76,8 +76,12 @@ const Sidebar = ({
           background: active ? 'var(--primary-light)' : 'transparent',
           color: active ? 'var(--primary-brand)' : 'var(--text-secondary)',
           position: 'relative',
-          transition: 'all 0.2s',
+          transition: 'all 0.2s cubic-bezier(0.2, 0, 0, 1)',
+          willChange: 'transform, background',
+          userSelect: 'none',
+          WebkitTapHighlightColor: 'transparent',
         }}
+        onPointerDown={() => haptic.impact('light')}
       >
         <div style={{
           width: '38px', height: '38px', borderRadius: '11px',

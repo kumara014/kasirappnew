@@ -122,7 +122,10 @@ class AuthController extends Controller
         if ($request->has('qris_image') && !empty($request->qris_image)) {
             // Handle image upload if it's a file or base64
             if ($request->hasFile('qris_image')) {
-                $path = $request->file('qris_image')->store('qris', 'public');
+                $file = $request->file('qris_image');
+                $resized = $this->resizeImage($file, 400); // 400px for QRIS is enough
+                $path = 'qris/qris_' . time() . '.' . $file->getClientOriginalExtension();
+                \Illuminate\Support\Facades\Storage::disk('public')->put($path, $resized);
                 $updateData['qris_image'] = $path;
             } else if (preg_match('/^data:image\/(\w+);base64,/', $request->qris_image, $type)) {
                 // Base64 logic
@@ -138,7 +141,14 @@ class AuthController extends Controller
                     return response()->json(['status' => 'error', 'message' => 'Base64 decode failed'], 422);
                 }
 
-                $fileName = 'qris_' . time() . '.' . $type;
+                // Temporary file to use GD functions
+                $tmpFile = tempnam(sys_get_temp_dir(), 'qris');
+                file_put_contents($tmpFile, $image_data);
+                
+                $resized = $this->resizeImage($tmpFile, 400);
+                unlink($tmpFile);
+
+                $fileName = 'qris_' . time() . '.jpg'; // Store as jpg
                 $path = 'qris/' . $fileName;
                 
                 // Ensure directory exists
@@ -146,7 +156,7 @@ class AuthController extends Controller
                     \Illuminate\Support\Facades\Storage::disk('public')->makeDirectory('qris');
                 }
 
-                \Illuminate\Support\Facades\Storage::disk('public')->put($path, $image_data);
+                \Illuminate\Support\Facades\Storage::disk('public')->put($path, $resized);
                 $updateData['qris_image'] = $path;
             } else {
                 // If it's just a string path (not a new upload), keep it as is
@@ -156,18 +166,26 @@ class AuthController extends Controller
 
         if ($request->has('logo_usaha') && !empty($request->logo_usaha)) {
             if ($request->hasFile('logo_usaha')) {
-                $path = $request->file('logo_usaha')->store('logos', 'public');
+                $file = $request->file('logo_usaha');
+                $resized = $this->resizeImage($file, 400); 
+                $path = 'logos/logo_' . time() . '.' . $file->getClientOriginalExtension();
+                \Illuminate\Support\Facades\Storage::disk('public')->put($path, $resized);
                 $updateData['logo_usaha'] = $path;
             } else if (preg_match('/^data:image\/(\w+);base64,/', $request->logo_usaha, $type)) {
                 $image_data = substr($request->logo_usaha, strpos($request->logo_usaha, ',') + 1);
                 $type = strtolower($type[1]);
                 if (in_array($type, ['jpg', 'jpeg', 'gif', 'png']) && ($image_data = base64_decode($image_data)) !== false) {
-                    $fileName = 'logo_' . time() . '.' . $type;
+                    $tmpFile = tempnam(sys_get_temp_dir(), 'logo');
+                    file_put_contents($tmpFile, $image_data);
+                    $resized = $this->resizeImage($tmpFile, 400);
+                    unlink($tmpFile);
+
+                    $fileName = 'logo_' . time() . '.jpg';
                     $path = 'logos/' . $fileName;
                     if (!\Illuminate\Support\Facades\Storage::disk('public')->exists('logos')) {
                         \Illuminate\Support\Facades\Storage::disk('public')->makeDirectory('logos');
                     }
-                    \Illuminate\Support\Facades\Storage::disk('public')->put($path, $image_data);
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($path, $resized);
                     $updateData['logo_usaha'] = $path;
                 }
             } else {
@@ -238,5 +256,61 @@ class AuthController extends Controller
             'status' => 'success',
             'message' => 'Berhasil keluar'
         ]);
+    }
+
+    private function resizeImage($file, $maxWidth = 800)
+    {
+        $imageInfo = getimagesize($file);
+        if (!$imageInfo) return file_get_contents($file);
+
+        $width = $imageInfo[0];
+        $height = $imageInfo[1];
+        $type = $imageInfo[2];
+
+        switch ($type) {
+            case IMAGETYPE_JPEG:
+                $src = imagecreatefromjpeg($file);
+                break;
+            case IMAGETYPE_PNG:
+                $src = imagecreatefrompng($file);
+                break;
+            case IMAGETYPE_GIF:
+                $src = imagecreatefromgif($file);
+                break;
+            case IMAGETYPE_WEBP:
+                $src = imagecreatefromwebp($file);
+                break;
+            default:
+                return file_get_contents($file);
+        }
+
+        if ($width <= $maxWidth) {
+            ob_start();
+            imagejpeg($src, null, 85);
+            $data = ob_get_clean();
+            imagedestroy($src);
+            return $data;
+        }
+
+        $newWidth = $maxWidth;
+        $newHeight = floor($height * ($maxWidth / $width));
+
+        $tmp = imagecreatetruecolor($newWidth, $newHeight);
+        
+        if ($type == IMAGETYPE_PNG || $type == IMAGETYPE_WEBP) {
+            imagealphablending($tmp, false);
+            imagesavealpha($tmp, true);
+        }
+
+        imagecopyresampled($tmp, $src, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+        ob_start();
+        imagejpeg($tmp, null, 85);
+        $data = ob_get_clean();
+
+        imagedestroy($src);
+        imagedestroy($tmp);
+
+        return $data;
     }
 }

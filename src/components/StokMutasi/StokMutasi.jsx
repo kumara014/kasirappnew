@@ -23,7 +23,6 @@ const formatTime = (d) => {
 const MUTATION_TYPES = {
     masuk: { label: "Stok Masuk", color: "var(--status-green)", bg: "var(--status-green-light)", icon: "📥" },
     keluar: { label: "Stok Keluar", color: "var(--status-red)", bg: "var(--status-red-light)", icon: "📤" },
-    penjualan: { label: "Update Stok Manual", color: "var(--status-orange)", bg: "var(--status-orange-light)", icon: "✏️" },
     rusak: { label: "Barang Rusak", color: "var(--status-blue)", bg: "var(--status-blue-light)", icon: "🗑️" },
 };
 
@@ -40,7 +39,7 @@ function dayLabel(d) {
     return formatDate(d);
 }
 
-const FILTER_TYPES = ["Semua", "masuk", "keluar", "penjualan", "rusak"];
+const FILTER_TYPES = ["Semua", "masuk", "keluar", "rusak"];
 
 // ── SEARCHABLE PICKER ────────────────────────────────────────────────────────
 const SearchableProductPicker = ({ products, value, onChange }) => {
@@ -288,15 +287,23 @@ const StokMutasi = () => {
         return <AddMutationForm products={productsData} onBack={() => setScreen("list")} onSave={handleSaveMutation} isProcessing={isProcessing} />;
     }
 
-    const filtered = mutations.filter((m) => {
-        const matchType = filterType === "Semua" || m.jenis === filterType;
+    const processedMutations = mutations.map(m => {
+        let realType = m.jenis;
+        const ket = m.keterangan || "";
+        if (ket.includes("[RUSAK]")) realType = "rusak";
+        if (ket.includes("[PENJUALAN]")) realType = "penjualan";
+        return { ...m, realType };
+    });
+
+    const filtered = processedMutations.filter((m) => {
+        const matchType = filterType === "Semua" || m.realType === filterType;
         const productName = m.barang?.nama_barang || "";
         const matchSearch = productName.toLowerCase().includes(search.toLowerCase()) || (m.keterangan || "").toLowerCase().includes(search.toLowerCase());
         return matchType && matchSearch;
     });
 
-    const totalMasuk = filtered.filter((m) => m.jenis === 'masuk').reduce((s, m) => s + Number(m.jumlah), 0);
-    const totalKeluar = filtered.filter((m) => ['keluar', 'rusak', 'penjualan'].includes(m.jenis)).reduce((s, m) => s + Math.abs(Number(m.jumlah)), 0);
+    const totalMasuk = filtered.filter((m) => m.realType === 'masuk').reduce((s, m) => s + Number(m.jumlah), 0);
+    const totalKeluar = filtered.filter((m) => ['keluar', 'rusak', 'penjualan'].includes(m.realType)).reduce((s, m) => s + Math.abs(Number(m.jumlah)), 0);
 
     // Grouping
     const grouped = {};
@@ -371,11 +378,8 @@ const StokMutasi = () => {
                         </div>
 
                         {list.map((m) => {
-                            let type = m.jenis;
-                            let ket = m.keterangan || "";
-                            if (ket.includes("[RUSAK]")) type = "rusak";
-                            if (ket.includes("[PENJUALAN]")) type = "penjualan";
-
+                            const type = m.realType;
+                            const ket = m.keterangan || "";
                             const mt = MUTATION_TYPES[type] || { label: type, color: '#333', bg: '#eee', icon: '📦' };
                             const isPositive = type === 'masuk';
                             const cleanKeterangan = ket.replace(/\[(RUSAK|PENJUALAN|KOREKSI)\]\s*/, "");

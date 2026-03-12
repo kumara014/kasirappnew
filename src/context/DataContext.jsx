@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { apiFetch } from '../config';
+import { preloadImage } from '../components/Common/SafeImage';
 
 const DataContext = createContext();
 
@@ -50,7 +51,14 @@ export const DataProvider = ({ children, user }) => {
             if (res.status === 401 || res.status === 403) { handleUnauthorized(); return; }
             const data = await res.json();
             // Laravel pagination returns data in .data
-            setProductsData(Array.isArray(data.data) ? data.data : []);
+            const pData = Array.isArray(data.data) ? data.data : [];
+            setProductsData(pData);
+
+            // Pre-fetch images
+            pData.forEach(p => {
+                if (p.gambar) preloadImage(p.gambar);
+            });
+
             setProductsPagination({
                 current_page: data.current_page,
                 last_page: data.last_page,
@@ -72,7 +80,14 @@ export const DataProvider = ({ children, user }) => {
             const res = await apiFetch(url);
             if (res.status === 401 || res.status === 403) { handleUnauthorized(); return; }
             const data = await res.json();
-            setProductsData(prev => [...prev, ...(data.data || [])]);
+            const newItems = data.data || [];
+            setProductsData(prev => [...prev, ...newItems]);
+
+            // Pre-fetch new images
+            newItems.forEach(p => {
+                if (p.gambar) preloadImage(p.gambar);
+            });
+
             setProductsPagination({
                 current_page: data.current_page,
                 last_page: data.last_page,

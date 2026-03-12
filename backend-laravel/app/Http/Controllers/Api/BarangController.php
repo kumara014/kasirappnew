@@ -34,8 +34,12 @@ class BarangController extends Controller
         $data['user_id'] = auth()->user()->getOwnerId();
 
         if ($request->hasFile('gambar')) {
-            $path = $request->file('gambar')->store('barang', 'public');
-            $data['gambar'] = $path;
+            $file = $request->file('gambar');
+            $resizedImage = $this->resizeImage($file, 800);
+            
+            $filename = 'barang/' . time() . '_' . $file->getClientOriginalName();
+            \Storage::disk('public')->put($filename, $resizedImage);
+            $data['gambar'] = $filename;
         }
 
         $barang = Barang::create($data);
@@ -80,8 +84,12 @@ class BarangController extends Controller
             if ($barang->gambar) {
                 \Storage::disk('public')->delete($barang->gambar);
             }
-            $path = $request->file('gambar')->store('barang', 'public');
-            $data['gambar'] = $path;
+            $file = $request->file('gambar');
+            $resizedImage = $this->resizeImage($file, 800);
+            
+            $filename = 'barang/' . time() . '_' . $file->getClientOriginalName();
+            \Storage::disk('public')->put($filename, $resizedImage);
+            $data['gambar'] = $filename;
         }
 
         $barang->update($data);
@@ -170,5 +178,60 @@ class BarangController extends Controller
         }
 
         return response()->file($fullPath);
+    }
+
+    private function resizeImage($file, $maxWidth = 800)
+    {
+        $imageInfo = getimagesize($file);
+        $width = $imageInfo[0];
+        $height = $imageInfo[1];
+        $type = $imageInfo[2];
+
+        switch ($type) {
+            case IMAGETYPE_JPEG:
+                $src = imagecreatefromjpeg($file);
+                break;
+            case IMAGETYPE_PNG:
+                $src = imagecreatefrompng($file);
+                break;
+            case IMAGETYPE_GIF:
+                $src = imagecreatefromgif($file);
+                break;
+            case IMAGETYPE_WEBP:
+                $src = imagecreatefromwebp($file);
+                break;
+            default:
+                return file_get_contents($file);
+        }
+
+        if ($width <= $maxWidth) {
+            ob_start();
+            imagejpeg($src, null, 85);
+            $data = ob_get_clean();
+            imagedestroy($src);
+            return $data;
+        }
+
+        $newWidth = $maxWidth;
+        $newHeight = floor($height * ($maxWidth / $width));
+
+        $tmp = imagecreatetruecolor($newWidth, $newHeight);
+        
+        // Handle transparency for PNG
+        if ($type == IMAGETYPE_PNG || $type == IMAGETYPE_WEBP) {
+            imagealphablending($tmp, false);
+            imagesavealpha($tmp, true);
+        }
+
+        imagecopyresampled($tmp, $src, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+        ob_start();
+        imagejpeg($tmp, null, 85); // Convert to high quality JPG
+        $data = ob_get_clean();
+
+        imagedestroy($src);
+        imagedestroy($tmp);
+
+        return $data;
     }
 }

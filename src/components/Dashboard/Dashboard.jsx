@@ -154,10 +154,13 @@ export default function Dashboard({ onNavigate }) {
         .fab:active { transform: scale(0.9); box-shadow: 0 4px 10px rgba(74, 155, 173, 0.2); }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .dashboard-content > * { animation: fadeIn 0.4s ease-out both; }
-        .dashboard-content > *:nth-child(2) { animation-delay: 0.1s; }
-        .dashboard-content > *:nth-child(3) { animation-delay: 0.2s; }
-        .dashboard-content > *:nth-child(4) { animation-delay: 0.3s; }
+        .dashboard-content > * { 
+          animation: fadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both; 
+          will-change: transform, opacity;
+        }
+        .dashboard-content > *:nth-child(2) { animation-delay: 0.05s; }
+        .dashboard-content > *:nth-child(3) { animation-delay: 0.1s; }
+        .dashboard-content > *:nth-child(4) { animation-delay: 0.15s; }
 
         /* ── RESPONSIVE ── */
         @media (min-width: 768px) {

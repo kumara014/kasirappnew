@@ -5,6 +5,7 @@ import { apiFetch } from '../../config';
 import { useNotification } from '../../context/NotificationContext';
 import SafeImage from '../Common/SafeImage';
 import { haptic } from '../../utils/haptics';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const TEAL = "#4A9BAD";
 const TEAL_LIGHT = "#EAF5F7";
@@ -539,38 +540,56 @@ const Menu = () => {
                     </div>
                 ) : (
                     <>
-                        {filtered.map((p) => {
-                            const category = categories.find(c => String(c.id_kategori) === String(p.id_kategori));
-                            const catName = p.nama_kategori || category?.nama_kategori || "";
-                            const col = getColor(catName);
-                            const isLow = Number(p.stok) <= (p.stok_minimum || 5);
-                            return (
-                                <div key={p.id_barang} className="product-card">
-                                    {isLow && <div className="low-stock-badge">STOK TIPIS</div>}
-                                    <div className="product-card-main">
-                                        <div className="product-img-box" style={{ background: col.bg }}>
-                                            {p.gambar ? <SafeImage src={p.gambar} className="img-full" /> : <span>{getIcon(catName)}</span>}
-                                        </div>
-                                        <div className="product-details">
-                                            <div className="p-name">{p.nama_barang}</div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
-                                                <div className="p-cat" style={{ background: col.bg, color: col.color, border: `1px solid ${col.color}44`, marginBottom: 0 }}>
-                                                    {getIcon(catName)} {catName || "Tanpa Kategori"}
+                        <motion.div
+                            layout
+                            className="product-list-container"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <AnimatePresence mode='popLayout'>
+                                {filtered.map((p, index) => {
+                                    const category = categories.find(c => String(c.id_kategori) === String(p.id_kategori));
+                                    const catName = p.nama_kategori || category?.nama_kategori || "";
+                                    const col = getColor(catName);
+                                    const isLow = Number(p.stok) <= (p.stok_minimum || 5);
+                                    return (
+                                        <motion.div
+                                            key={p.id_barang}
+                                            layout
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            transition={{ duration: 0.2, delay: Math.min(index * 0.03, 0.3) }}
+                                            className="product-card"
+                                        >
+                                            {isLow && <div className="low-stock-badge">STOK TIPIS</div>}
+                                            <div className="product-card-main">
+                                                <div className="product-img-box" style={{ background: col.bg }}>
+                                                    {p.gambar ? <SafeImage src={p.gambar} className="img-full" /> : <span>{getIcon(catName)}</span>}
                                                 </div>
-                                                <div className="stock-tag" style={{ color: stockColor(p), background: stockBg(p) }}>
-                                                    📦 {p.stok}
+                                                <div className="product-details">
+                                                    <div className="p-name">{p.nama_barang}</div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
+                                                        <div className="p-cat" style={{ background: col.bg, color: col.color, border: `1px solid ${col.color}44`, marginBottom: 0 }}>
+                                                            {getIcon(catName)} {catName || "Tanpa Kategori"}
+                                                        </div>
+                                                        <div className="stock-tag" style={{ color: stockColor(p), background: stockBg(p) }}>
+                                                            📦 {p.stok}
+                                                        </div>
+                                                    </div>
+                                                    <div className="p-price">{formatRp(p.harga)}</div>
+                                                </div>
+                                                <div className="p-actions">
+                                                    <button onClick={() => openEdit(p)} className="p-action-btn edit"><Edit2 size={16} /></button>
+                                                    <button onClick={() => confirmDelete(p)} className="p-action-btn delete"><Trash2 size={16} /></button>
                                                 </div>
                                             </div>
-                                            <div className="p-price">{formatRp(p.harga)}</div>
-                                        </div>
-                                        <div className="p-actions">
-                                            <button onClick={() => openEdit(p)} className="p-action-btn edit"><Edit2 size={16} /></button>
-                                            <button onClick={() => confirmDelete(p)} className="p-action-btn delete"><Trash2 size={16} /></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
+                                        </motion.div>
+                                    );
+                                })}
+                            </AnimatePresence>
+                        </motion.div>
                         {productsPagination?.next_page_url && (
                             <div style={{ marginTop: '24px', textAlign: 'center', gridColumn: '1 / -1' }}>
                                 <button

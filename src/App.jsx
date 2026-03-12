@@ -19,6 +19,7 @@ import { NotificationDropdown, RestokModal } from './components/Notifications/No
 import { BellButton } from './components/Notifications/BellButton';
 import ErrorBoundary from './components/Common/ErrorBoundary';
 import { Bell, X, Menu as MenuIcon, RefreshCcw } from 'lucide-react';
+import { preloadImage } from './components/Common/SafeImage';
 
 const TEAL = "var(--primary-brand)";
 
@@ -105,9 +106,9 @@ const AppContent = ({
     const y = e.touches[0].pageY;
     const diff = y - startY;
     if (diff > 0) {
-      // Apply resistance
-      const pull = Math.min(diff * 0.4, PULL_THRESHOLD + 20);
-      setPullY(pull);
+      // Apply quadratic resistance for a "bouncy" native feel
+      const pull = Math.pow(diff, 0.85);
+      setPullY(Math.min(pull, PULL_THRESHOLD + 40));
     }
   };
 
@@ -307,8 +308,8 @@ const AppContent = ({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2, ease: "easeOut" }}
-                  style={{ height: '100%' }}
+                  transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+                  style={{ height: '100%', willChange: 'transform, opacity' }}
                 >
                   <Suspense fallback={
                     <div className="view-loading-skeleton" style={{ padding: '40px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -466,6 +467,7 @@ const App = () => {
     localStorage.setItem('pos_user', JSON.stringify(userData));
     if (token) {
       localStorage.setItem('pos_token', token);
+      if (userData.logo_usaha) preloadImage(userData.logo_usaha);
       setCurrentView('dashboard');
     }
   };
