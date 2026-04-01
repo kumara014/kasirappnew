@@ -487,7 +487,7 @@ const Menu = () => {
                         onClick={() => setActiveCategory("Semua")}
                         className={`cat-pill ${activeCategory === "Semua" ? 'active all' : ''}`}
                     >
-                        Semua ({(productsData || []).length})
+                        Semua ({productsPagination?.total ?? (productsData || []).length})
                     </button>
                     {categories.map((c) => {
                         const isActive = String(activeCategory) === String(c.id_kategori);
@@ -520,7 +520,7 @@ const Menu = () => {
                 <div className="stats-grid">
                     <div className="stat-card">
                         <div className="stat-label">Total Produk</div>
-                        <div className="stat-val">{(productsData || []).length}</div>
+                        <div className="stat-val">{productsPagination?.total ?? (productsData || []).length}</div>
                     </div>
                     <div className="stat-card">
                         <div className="stat-label">Stok Menipis</div>
@@ -562,6 +562,8 @@ const Menu = () => {
                                             exit={{ opacity: 0, scale: 0.95 }}
                                             transition={{ duration: 0.2, delay: Math.min(index * 0.03, 0.3) }}
                                             className="product-card"
+                                            onClick={() => openEdit(p)}
+                                            style={{ cursor: "pointer" }}
                                         >
                                             {isLow && <div className="low-stock-badge">STOK TIPIS</div>}
                                             <div className="product-card-main">
@@ -581,8 +583,7 @@ const Menu = () => {
                                                     <div className="p-price">{formatRp(p.harga)}</div>
                                                 </div>
                                                 <div className="p-actions">
-                                                    <button onClick={() => openEdit(p)} className="p-action-btn edit"><Edit2 size={16} /></button>
-                                                    <button onClick={() => confirmDelete(p)} className="p-action-btn delete"><Trash2 size={16} /></button>
+                                                    <button onClick={(e) => { e.stopPropagation(); confirmDelete(p); }} className="p-action-btn delete"><Trash2 size={16} /></button>
                                                 </div>
                                             </div>
                                         </motion.div>
@@ -590,18 +591,7 @@ const Menu = () => {
                                 })}
                             </AnimatePresence>
                         </motion.div>
-                        {productsPagination?.next_page_url && (
-                            <div style={{ marginTop: '24px', textAlign: 'center', gridColumn: '1 / -1' }}>
-                                <button
-                                    onClick={fetchMoreProducts}
-                                    disabled={loadingProducts}
-                                    className="btn-secondary"
-                                    style={{ width: 'auto', padding: '10px 24px' }}
-                                >
-                                    {loadingProducts ? 'Memuat...' : 'Muat Lebih Banyak'}
-                                </button>
-                            </div>
-                        )}
+
                     </>
                 )}
             </div>
@@ -678,7 +668,7 @@ const globalCSS = `
 
   .stock-tag { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 8px; flex-shrink: 0; }
 
-  .fab-btn { position: fixed; bottom: 24px; right: 24px; width: 60px; height: 60px; border-radius: 20px; background: var(--primary-brand); border: none; color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 30px rgba(74, 155, 173, 0.3); cursor: pointer; z-index: 100; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  .fab-btn { position: fixed; bottom: calc(24px + env(safe-area-inset-bottom, 20px)); right: 24px; width: 60px; height: 60px; border-radius: 20px; background: var(--primary-brand); border: none; color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 30px rgba(74, 155, 173, 0.3); cursor: pointer; z-index: 100; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
   .fab-btn:active { transform: scale(0.85); box-shadow: 0 4px 10px rgba(74, 155, 173, 0.2); }
 
   /* Form Styles */
@@ -701,7 +691,7 @@ const globalCSS = `
 
   .stock-tip { margin-top: 10px; padding: 8px 12px; background: var(--status-orange-light); border-radius: 10px; font-size: 11px; color: var(--status-orange); font-weight: 600; display: flex; align-items: center; gap: 8px; }
 
-  .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-surface); border-top: 1px solid var(--border-light); padding: 12px 20px 32px; display: flex; gap: 12px; z-index: 100; }
+  .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-surface); border-top: 1px solid var(--border-light); padding: 12px 20px calc(24px + env(safe-area-inset-bottom, 20px)); display: flex; gap: 12px; z-index: 100; }
   .btn-secondary { flex: 1; padding: 14px; border-radius: 14px; border: 1.5px solid var(--border-light); background: var(--bg-app-alt); color: var(--text-secondary); font-size: 14px; font-weight: 700; cursor: pointer; }
   .btn-primary { flex: 2; padding: 14px; border-radius: 14px; border: none; background: var(--primary-brand); color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; }
   .btn-primary:disabled { background: var(--text-tertiary); opacity: 0.5; cursor: not-allowed; }

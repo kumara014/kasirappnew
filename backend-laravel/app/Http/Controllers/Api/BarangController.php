@@ -11,7 +11,14 @@ class BarangController extends Controller
 {
     public function index()
     {
-        return Barang::with('kategori')->latest()->paginate(15);
+        $items = Barang::with('kategori')->latest()->get();
+        return response()->json([
+            'data'          => $items,
+            'total'         => $items->count(),
+            'current_page'  => 1,
+            'last_page'     => 1,
+            'next_page_url' => null,
+        ]);
     }
 
     public function store(Request $request)
@@ -128,7 +135,7 @@ class BarangController extends Controller
     {
         $request->validate([
             'id_barang' => 'required|exists:barang,id_barang',
-            'jenis' => 'required|in:masuk,keluar,rusak,koreksi,penjualan',
+            'jenis' => 'required|in:masuk,keluar,rusak',
             'jumlah' => 'required|numeric',
             'keterangan' => 'nullable|string'
         ]);

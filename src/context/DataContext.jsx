@@ -62,7 +62,8 @@ export const DataProvider = ({ children, user }) => {
             setProductsPagination({
                 current_page: data.current_page,
                 last_page: data.last_page,
-                next_page_url: data.next_page_url
+                next_page_url: data.next_page_url,
+                total: data.total ?? null
             });
         } catch (err) {
             console.error("Error fetching products:", err);
@@ -91,7 +92,8 @@ export const DataProvider = ({ children, user }) => {
             setProductsPagination({
                 current_page: data.current_page,
                 last_page: data.last_page,
-                next_page_url: data.next_page_url
+                next_page_url: data.next_page_url,
+                total: data.total ?? null
             });
         } catch (err) {
             console.error("Error fetching more products:", err);

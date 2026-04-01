@@ -804,6 +804,6 @@ const globalCSS = `
   .input-error { border-color: #FF4757 !important; background: #FFF5F5 !important; }
   .input-success { border-color: #27AE60 !important; background: #F0FFF4 !important; }
   .error-msg { font-size: 11px; color: #FF4757; font-weight: 600; padding-left: 2px; }
-  .bottom-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 430px; max-width: 100%; background: #fff; border-top: 1px solid #ECEEF0; padding: 12px 20px 24px; display: flex; align-items: center; gap: 10px; }
+  .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 1px solid #ECEEF0; padding: 12px 20px calc(24px + env(safe-area-inset-bottom, 20px)); display: flex; align-items: center; gap: 10px; z-index: 100; }
   .spin { width: 16px; height: 16px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; flex-shrink: 0; }
 `;

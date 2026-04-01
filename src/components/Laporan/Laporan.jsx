@@ -169,12 +169,14 @@ export default function Laporan() {
                     ))}
                 </div>
                 {period === "Pilih Bulan" && (
-                    <div style={{ padding: "14px 0 0", display: "flex", gap: 10, alignItems: "center", animation: "fadeIn 0.2s ease" }}>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)" }}>Pilih Bulan:</span>
-                        <MonthPicker
-                            value={selectedMonth}
-                            onChange={(val) => setSelectedMonth(val)}
-                        />
+                    <div style={{ padding: "14px 0 0", display: "flex", gap: 10, alignItems: "center", justifyContent: "space-between", animation: "fadeIn 0.2s ease" }}>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", flexShrink: 0 }}>Pilih Bulan:</span>
+                        <div style={{ flex: 1 }}>
+                            <MonthPicker
+                                value={selectedMonth}
+                                onChange={(val) => setSelectedMonth(val)}
+                            />
+                        </div>
                     </div>
                 )}
             </div>

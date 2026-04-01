@@ -48,8 +48,8 @@ const Sidebar = ({
 
   const otherItems = [
     { id: 'employee', icon: <Users size={20} />, label: 'Tim Karyawan', permission: 'Karyawan' },
-    { id: 'settings', icon: <User size={20} />, label: 'Pengaturan', permission: null },
     { id: 'cs', icon: <MessageCircleMore size={20} />, label: 'Bantuan', permission: null },
+    { id: 'settings', icon: <User size={20} />, label: 'Pengaturan', permission: null },
   ];
 
   /* ── Nav item renderer (shared between mobile & desktop) ── */
@@ -136,8 +136,7 @@ const Sidebar = ({
           borderRight: '1px solid var(--border-light)',
           display: 'flex',
           flexDirection: 'column',
-          overflowX: 'hidden',
-          overflowY: 'auto',
+          overflow: 'hidden',
           position: 'relative',
           zIndex: 100,
           boxShadow: '2px 0 8px rgba(0,0,0,0.04)',
@@ -273,8 +272,7 @@ const Sidebar = ({
               width: '280px', background: 'var(--bg-surface)',
               zIndex: 2001, display: 'flex', flexDirection: 'column',
               boxShadow: 'var(--shadow-lg)',
-              overflowY: 'auto',
-              borderRight: '1px solid var(--border-light)'
+              overflow: 'hidden'
             }}
           >
             <div style={{ background: 'var(--primary-brand)', padding: '56px 20px 24px', position: 'relative', overflow: 'hidden', color: '#fff', flexShrink: 0 }}>
@@ -312,7 +310,7 @@ const Sidebar = ({
               </div>
             </div>
 
-            <nav style={{ flex: 1, padding: '12px' }}>
+            <nav style={{ flex: 1, padding: '12px', overflowY: 'auto' }}>
               <SectionLabel label="Menu Utama" isCollapsed={false} />
               {navItems.map(n => hasPermission(n.permission) && (
                 <NavItem key={n.id} item={n} isCollapsed={false} />

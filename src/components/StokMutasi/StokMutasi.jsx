@@ -483,7 +483,7 @@ const globalCSS = `
   .mut-time { font-size: 11px; color: var(--text-tertiary); font-weight: 500; }
   .mut-note { font-size: 11px; color: var(--text-tertiary); font-style: italic; opacity: 0.8; }
 
-  .fab-btn { position: fixed; bottom: 24px; right: 26px; width: 62px; height: 62px; border-radius: 20px; background: var(--primary-brand); border: none; color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 30px rgba(74, 155, 173, 0.4); cursor: pointer; z-index: 100; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  .fab-btn { position: fixed; bottom: calc(24px + env(safe-area-inset-bottom, 20px)); right: 26px; width: 62px; height: 62px; border-radius: 20px; background: var(--primary-brand); border: none; color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 30px rgba(74, 155, 173, 0.4); cursor: pointer; z-index: 100; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
   .fab-btn:active { transform: scale(0.85); box-shadow: 0 4px 12px rgba(74, 155, 173, 0.3); }
 
   /* Form Styles */
@@ -515,7 +515,7 @@ const globalCSS = `
   .p-val.red { color: var(--status-red); }
   .preview-arrow { padding: 0 10px; }
 
-  .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-surface); border-top: 1px solid var(--border-light); padding: 12px 20px 32px; display: flex; gap: 12px; z-index: 100; box-shadow: var(--shadow-lg); }
+  .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-surface); border-top: 1px solid var(--border-light); padding: 12px 20px calc(24px + env(safe-area-inset-bottom, 20px)); display: flex; gap: 12px; z-index: 100; box-shadow: var(--shadow-lg); }
   .btn-secondary { flex: 1; padding: 14px; border-radius: 14px; border: 1.5px solid var(--border-light); background: var(--bg-app-alt); color: var(--text-secondary); font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
   .btn-primary { flex: 2; padding: 14px; border-radius: 14px; border: none; background: var(--primary-brand); color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
   .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }

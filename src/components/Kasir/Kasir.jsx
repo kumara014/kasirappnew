@@ -127,7 +127,7 @@ function CashierScreen({ onCheckout, products, categories, catFilter, setCatFilt
 
             <div className="content">
                 <>
-                    <div className="pos-category-wrapper" style={{ marginBottom: 14, position: 'relative', zIndex: 1000 }}>
+                    <div className="pos-category-wrapper" style={{ marginBottom: 14, position: 'relative', zIndex: 10 }}>
                         <CategoryDropdown
                             categories={categories}
                             value={catFilter}
@@ -151,13 +151,16 @@ function CashierScreen({ onCheckout, products, categories, catFilter, setCatFilt
 
                                 return (
                                     <div key={p.id_barang} className={`product-item${qty > 0 ? " in-cart" : ""}`} onClick={() => qty === 0 && Number(p.stok) > 0 && addToCart(p)}>
-                                        <div className="product-icon">
-                                            <SafeImage
-                                                src={p.gambar}
-                                                alt={p.nama_barang}
-                                                fallback={<div>🍽️</div>}
-                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                            />
+                                        <div className="product-icon" style={{ background: getColor(catName).bg }}>
+                                            {p.gambar ? (
+                                                <SafeImage
+                                                    src={p.gambar}
+                                                    alt={p.nama_barang}
+                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                />
+                                            ) : (
+                                                <span style={{ fontSize: '24px' }}>{getIcon(catName)}</span>
+                                            )}
                                         </div>
                                         <div className="product-info">
                                             <div className="product-info-name">{p.nama_barang}</div>
@@ -797,8 +800,7 @@ const Kasir = ({ onToggleSidebar }) => {
         .bottom-bar { 
           position: fixed; 
           bottom: 0; 
-          left: 50%; 
-          transform: translateX(-50%); 
+          left: 0; 
           width: 100%; 
           background: var(--bg-surface); 
           border-top: 1px solid var(--border-light); 

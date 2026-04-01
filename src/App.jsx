@@ -309,7 +309,7 @@ const AppContent = ({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
-                  style={{ height: '100%', willChange: 'transform, opacity' }}
+                  style={{ height: '100%' }}
                 >
                   <Suspense fallback={
                     <div className="view-loading-skeleton" style={{ padding: '40px', display: 'flex', flexDirection: 'column', gap: '20px' }}>

@@ -57,7 +57,7 @@ const MonthPicker = ({ value, onChange, placeholder = "Pilih Bulan" }) => {
     })() : placeholder;
 
     return (
-        <div style={{ position: 'relative', width: '100%', maxWidth: '200px' }} ref={containerRef}>
+        <div style={{ position: 'relative', width: '100%', maxWidth: '100%' }} ref={containerRef}>
             <div
                 onClick={toggleOpen}
                 style={{

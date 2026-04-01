@@ -338,7 +338,7 @@ function FormKaryawan({ employee, onBack, onSave }) {
             </div>
 
             {/* Bottom bar */}
-            <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: "#fff", borderTop: "1px solid #ECEEF0", padding: "12px 16px 28px", display: "flex", gap: 10, zIndex: 30 }}>
+            <div style={{ position: "fixed", bottom: 0, left: 0, width: "100%", background: "#fff", borderTop: "1px solid #ECEEF0", padding: "12px 16px calc(28px + env(safe-area-inset-bottom, 20px))", display: "flex", gap: 10, zIndex: 30 }}>
                 <button onClick={onBack}
                     style={{ flex: 1, padding: "14px", borderRadius: 13, border: "1.5px solid #ECEEF0", background: "#F5F7F8", color: "#555", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                     Batal
@@ -627,6 +627,6 @@ const globalCSS = `
 .error-msg { font-size: 11px; color: #FF4757; font-weight: 600; padding-left: 2px; display: block; }
 .bottom-bar { position: sticky; bottom: 0; left: 0; right: 0; width: 100%; background: #fff; border-top: 1px solid #ECEEF0; padding: 12px 20px 24px; display: flex; align-items: center; gap: 10px; z-index: 20; }
 .spin { width: 16px; height: 16px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; flex-shrink: 0; }
-.fab { position: fixed; bottom: 24px; right: 24px; width: 54px; height: 54px; border-radius: 18px; background: ${TEAL}; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 26px; color: #fff; box-shadow: 0 6px 20px ${TEAL}66; z-index: 35; }
+.fab { position: fixed; bottom: calc(24px + env(safe-area-inset-bottom, 20px)); right: 24px; width: 54px; height: 54px; border-radius: 18px; background: ${TEAL}; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 26px; color: #fff; box-shadow: 0 6px 20px ${TEAL}66; z-index: 35; }
 `;
 
